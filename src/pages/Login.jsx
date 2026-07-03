@@ -52,9 +52,8 @@ export default function Login() {
         return;
       }
 
-      
       navigate('/verify-otp', {
-        state: { email: data.email, type: 'login' }
+        state: { email: data.email || email, type: 'login' }
       });
 
     } catch {

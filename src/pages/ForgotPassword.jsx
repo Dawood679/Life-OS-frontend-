@@ -23,8 +23,13 @@ export default function ForgotPassword() {
       const data = await res.json();
       if (!res.ok) { setError(data.message); return; }
       setSuccess('OTP sent to your email');
-      sessionStorage.setItem('forgotEmail', email);
-      setTimeout(() => navigate('/verify-forgot-otp'), 2000);
+      //use only verify-otp for both login, forget password and reset password
+      navigate('/verify-otp', {
+      state: { 
+        email: data.email || email,
+        type: 'forgotPassword'
+      }
+    });
     } catch {
       setError('Unable to connect to server. Please try again.');
     }
