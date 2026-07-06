@@ -6,6 +6,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
+import Profile from './pages/Profile';
 
 function Dashboard() {
   return <h1 className="text-2xl p-6">Welcome to Dashboard!</h1>;
@@ -23,6 +24,8 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      {/* add profile route */}
+        <Route path="/profile" element={<ProtectedRoute><Profile/></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );
