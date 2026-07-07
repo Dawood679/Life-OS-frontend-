@@ -7,10 +7,10 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import Profile from './pages/Profile';
+import Dashboard from './pages/Dashboard';
+import CreateTodo from './pages/CreateTodo';
 
-function Dashboard() {
-  return <h1 className="text-2xl p-6">Welcome to Dashboard!</h1>;
-}
+
 
 export default function App() {
   return (
@@ -26,6 +26,10 @@ export default function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       {/* add profile route */}
         <Route path="/profile" element={<ProtectedRoute><Profile/></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/create-todo" element={<ProtectedRoute><CreateTodo /></ProtectedRoute>} />
+
+        
       </Routes>
     </BrowserRouter>
   );
