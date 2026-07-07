@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import Button from '../components/Button';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -83,8 +84,6 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
@@ -99,7 +98,6 @@ export default function Login() {
             )}
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
             <input
@@ -114,26 +112,15 @@ export default function Login() {
             )}
           </div>
 
-          {/* Forgot Password */}
           <div className="text-right">
-            <Link
-              to="/forgot-password"
-              className="text-sm text-indigo-600 hover:underline"
-            >
+            <Link to="/forgot-password" className="text-sm text-indigo-600 hover:underline">
               Forgot password?
             </Link>
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700"
-          
-          >
+          <Button type="submit" fullWidth disabled={loading}>
             {loading ? 'Sending OTP...' : 'Login'}
-          </button>
-
+          </Button>
         </form>
 
         <p className="text-center text-sm mt-4">

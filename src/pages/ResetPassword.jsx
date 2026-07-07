@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import Button from "../components/Button";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
-  //email comes from location.state
   const location = useLocation();
   const email = location.state?.email || "";
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  //add loading
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -20,12 +19,10 @@ export default function ResetPassword() {
       setError("Password is required");
       return;
     }
-    //password length 8
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
       return;
     }
-    //check number in password
     if (!/\d/.test(password)) {
       setError("Password must contain at least one number");
       return;
@@ -48,7 +45,6 @@ export default function ResetPassword() {
         return;
       }
       setSuccess("Password reset successful! Redirecting to login...");
-      //remove session storage
       setTimeout(
         () =>
           navigate("/login", {
@@ -102,14 +98,9 @@ export default function ResetPassword() {
             />
           </div>
 
-          {/* use loading state in button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-          >
+          <Button type="submit" fullWidth disabled={loading}>
             {loading ? "Resetting..." : "Reset Password"}
-          </button>
+          </Button>
         </form>
       </div>
     </div>

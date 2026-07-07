@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Button from '../components/Button';
 
 export default function ForgotPassword() {
   const navigate = useNavigate();
@@ -23,13 +24,12 @@ export default function ForgotPassword() {
       const data = await res.json();
       if (!res.ok) { setError(data.message); return; }
       setSuccess('OTP sent to your email');
-      //use only verify-otp for both login, forget password and reset password
       navigate('/verify-otp', {
-      state: { 
-        email: data.email || email,
-        type: 'forgotPassword'
-      }
-    });
+        state: {
+          email: data.email || email,
+          type: 'forgotPassword'
+        }
+      });
     } catch {
       setError('Unable to connect to server. Please try again.');
     }
@@ -56,9 +56,9 @@ export default function ForgotPassword() {
             />
           </div>
 
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+          <Button type="submit" fullWidth>
             Send OTP
-          </button>
+          </Button>
         </form>
 
         <p className="text-center text-sm mt-4">

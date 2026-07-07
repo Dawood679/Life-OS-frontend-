@@ -1,6 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import Button from '../components/Button';
 
 export default function Dashboard() {
   const [todos, setTodos] = useState([]);
@@ -115,12 +115,8 @@ export default function Dashboard() {
                       className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <div className="flex gap-2">
-                      <button type="submit" className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
-                        Save
-                      </button>
-                      <button type="button" onClick={() => setEditTodo(null)} className="px-4 py-2 bg-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-300">
-                        Cancel
-                      </button>
+                      <Button type="submit">Save</Button>
+                      <Button variant="secondary" onClick={() => setEditTodo(null)}>Cancel</Button>
                     </div>
                   </form>
                 ) : (
@@ -140,18 +136,8 @@ export default function Dashboard() {
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${priorityColor(todo.priority)}`}>
                         {todo.priority}
                       </span>
-                      <button
-                        onClick={() => handleEditOpen(todo)}
-                        className="text-xs px-3 py-1 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDelete(todo._id)}
-                        className="text-xs px-3 py-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100"
-                      >
-                        Delete
-                      </button>
+                      <Button variant="outline" onClick={() => handleEditOpen(todo)}>Edit</Button>
+                      <Button variant="danger" onClick={() => handleDelete(todo._id)}>Delete</Button>
                     </div>
                   </div>
                 )}

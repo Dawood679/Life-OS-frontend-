@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Button from '../components/Button';
 
 export default function VerifyForgotOtp() {
   const navigate = useNavigate();
@@ -47,9 +48,9 @@ export default function VerifyForgotOtp() {
             />
           </div>
 
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
+          <Button type="submit" fullWidth>
             Verify OTP
-          </button>
+          </Button>
         </form>
       </div>
     </div>
