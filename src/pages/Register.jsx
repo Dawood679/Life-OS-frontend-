@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import Button from '../components/Button';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -89,8 +90,6 @@ export default function Register() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-
-          {/* Name */}
           <div>
             <label className="block text-sm font-medium mb-1">Full Name</label>
             <input
@@ -100,12 +99,9 @@ export default function Register() {
               placeholder="John Doe"
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            {errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-            )}
+            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
-          {/* Email */}
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
@@ -115,12 +111,9 @@ export default function Register() {
               placeholder="john@gmail.com"
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-            )}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-sm font-medium mb-1">Password</label>
             <input
@@ -130,16 +123,11 @@ export default function Register() {
               placeholder="Min 8 chars, at least 1 number"
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            {errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
-            )}
+            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
           </div>
 
-          {/* Confirm Password */}
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Confirm Password
-            </label>
+            <label className="block text-sm font-medium mb-1">Confirm Password</label>
             <input
               type="password"
               value={confirmPassword}
@@ -147,27 +135,17 @@ export default function Register() {
               placeholder="Re-enter your password"
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
-            )}
+            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-          >
+          <Button type="submit" fullWidth disabled={loading}>
             {loading ? 'Creating account...' : 'Register'}
-          </button>
-
+          </Button>
         </form>
 
         <p className="text-center text-sm mt-4">
           Already have an account?{' '}
-          <Link to="/login" className="text-indigo-600 hover:underline">
-            Login
-          </Link>
+          <Link to="/login" className="text-indigo-600 hover:underline">Login</Link>
         </p>
       </div>
     </div>

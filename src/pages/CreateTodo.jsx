@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
+import Button from '../components/Button';
 
 export default function CreateTodo() {
   const navigate = useNavigate();
@@ -108,12 +109,9 @@ export default function CreateTodo() {
               {errors.dueDate && <p className="text-red-500 text-xs mt-1">{errors.dueDate}</p>}
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-            >
+            <Button type="submit" fullWidth>
               Create To-Do
-            </button>
+            </Button>
           </form>
         </div>
       </div>

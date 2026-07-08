@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import useAuthStore from "../lib/authStore";
+import Button from "../components/Button";
 
 export default function VerifyOtp() {
   const navigate = useNavigate();
-  //added location and type
   const location = useLocation();
 
   const email = location.state?.email || "";
@@ -12,15 +12,12 @@ export default function VerifyOtp() {
 
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
-  //added loading
   const [loading, setLoading] = useState(false);
-  //for authorization
   const setUser = useAuthStore((state) => state.setUser);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    //add otp length
     if (!otp.trim() || otp.length !== 6) {
       setError("OTP is required");
       return;
@@ -29,10 +26,9 @@ export default function VerifyOtp() {
     console.log("email:", email);
     console.log("otp:", otp);
     console.log("type:", type);
-    //add loading
+
     setLoading(true);
     try {
-      //make it usable to verify login and forget password
       const url =
         type === "login"
           ? "http://localhost:5000/api/auth/verify-login-otp"
@@ -84,16 +80,10 @@ export default function VerifyOtp() {
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-center tracking-widest text-lg"
             />
           </div>
-          {/* use loading here */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-          >
+          <Button type="submit" fullWidth disabled={loading}>
             {loading ? "Verifying..." : "Verify OTP"}
-          </button>
+          </Button>
         </form>
-        {/* add resent otp */}
         <p className="text-center text-sm mt-4 text-gray-500">
           Didn't receive OTP?{" "}
           <button
