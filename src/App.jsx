@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import VerifyOtp from './pages/VerifyOtp';
-import VerifyEmail from './pages/VerifyEmail';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
+import Register from './auth/Register';
+import Login from './auth/Login';
+import VerifyOtp from './auth/VerifyOtp';
+import VerifyEmail from './auth/VerifyEmail';
+import ForgotPassword from './auth/ForgotPassword';
+import ResetPassword from './auth/ResetPassword';
 import ProtectedRoute from './components/ProtectedRoute';
 import Profile from './pages/Profile';
 import Dashboard from './pages/Dashboard';
