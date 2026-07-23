@@ -10,6 +10,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CreateTodo from "./pages/CreateTodo";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import StudyPlanDetail from "../features/studyPlan/StudyPlanDetails";
+// import StudyPlanList from "../features/studyPlan/StudyPlanList";
+import StudyPlan from "../features/studyPlan/StudyPlan";
 
 export default function App() {
   return (
@@ -52,6 +55,24 @@ export default function App() {
           element={
             <ProtectedRoute>
               <RoadmapGenerator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/study-plan"
+          element={
+            <ProtectedRoute>
+              <StudyPlan />
+              {/* <StudyPlanList /> */}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/learning/study-plan/:id"
+          element={
+            <ProtectedRoute>
+              <StudyPlanDetail />
             </ProtectedRoute>
           }
         />
