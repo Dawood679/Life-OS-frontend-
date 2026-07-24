@@ -91,11 +91,11 @@ export default function RoadmapGenerator() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-orange-50/30 p-4 md:p-8 font-sans text-slate-800">
+    <div className="min-h-screen w-full bg-surface-pink/30 p-4 md:p-8 font-sans text-slate-800">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* TOP HEADER SECTION */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-xs">
+        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-sky-50/30 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-xs">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>

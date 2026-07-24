@@ -13,6 +13,9 @@ import Profile from "./pages/Profile";
 import StudyPlanDetail from "../features/studyPlan/StudyPlanDetails";
 // import StudyPlanList from "../features/studyPlan/StudyPlanList";
 import StudyPlan from "../features/studyPlan/StudyPlan";
+import ProjectGenerator from "../features/projectGenerator/ProjectGenerator";
+import NotesSummarizer from "../features/notesSummerizer/NotesSummarizer";
+import CodeReviewer from "../features/codeReviewer/CodeReviewer";
 
 export default function App() {
   return (
@@ -55,6 +58,30 @@ export default function App() {
           element={
             <ProtectedRoute>
               <RoadmapGenerator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/project-generator"
+          element={
+            <ProtectedRoute>
+              <ProjectGenerator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/notes-summarizer"
+          element={
+            <ProtectedRoute>
+              <NotesSummarizer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/code-review"
+          element={
+            <ProtectedRoute>
+              <CodeReviewer />
             </ProtectedRoute>
           }
         />

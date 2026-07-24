@@ -234,7 +234,7 @@ export default function VerifyOtp() {
         </div>
 
         {/* RIGHT SECTION: Verification Form */}
-        <div className="bg-surface-pink flex flex-col justify-center p-6 md:p-12 overflow-y-auto">
+        <div className="bg-surface-pink/30 flex flex-col justify-center p-6 md:p-12 overflow-y-auto">
           <div className="max-w-md mx-auto w-full">
             {/* Header / Security Badge */}
             <div className="text-center mb-8">
