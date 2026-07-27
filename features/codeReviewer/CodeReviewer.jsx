@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
 
 // Define tab keys as constants for better maintainability and to prevent typos

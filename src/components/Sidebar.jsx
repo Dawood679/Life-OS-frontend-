@@ -40,6 +40,7 @@ export default function Sidebar() {
     { path: '/learning/code-review', label: 'Code Reviewer' },
     { path: '/learning/project-generator', label: 'Project Generator' },
     { path: '/learning/notes-summarizer', label: 'Notes Summarizer' },
+    { path: '/learning/job-match', label: 'Job Matcher' },
   ];
 
   // Placeholder sub-routes
