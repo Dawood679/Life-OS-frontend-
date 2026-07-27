@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import Button from '../components/Button';
+import Button from '../components/ui/Button';
 
 export default function Dashboard() {
   const [todos, setTodos] = useState([]);

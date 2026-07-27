@@ -7,7 +7,7 @@ const useAuthStore = create((set) => ({
 
   checkAuth: async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/auth/me', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
         method: 'GET',
         credentials: 'include',
       });
@@ -43,7 +43,7 @@ const useAuthStore = create((set) => ({
 
   logout: async () => {
     try {
-      await fetch('http://localhost:5000/api/auth/logout', {
+      await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       });
