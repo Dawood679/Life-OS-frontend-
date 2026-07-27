@@ -16,6 +16,7 @@ import StudyPlan from "../features/studyPlan/StudyPlan";
 import ProjectGenerator from "../features/projectGenerator/ProjectGenerator";
 import NotesSummarizer from "../features/notesSummerizer/NotesSummarizer";
 import CodeReviewer from "../features/codeReviewer/CodeReviewer";
+import JobMatch from "../features/jobMatch/JobMatch";
 
 export default function App() {
   return (
@@ -82,6 +83,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <CodeReviewer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/job-match"
+          element={
+            <ProtectedRoute>
+              <JobMatch />
             </ProtectedRoute>
           }
         />
