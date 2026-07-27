@@ -67,12 +67,12 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-100 via-slate-200 to-slate-400 p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-page-gradient p-4">
       <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden w-[80vw] max-w-6xl min-h-[80vh] grid grid-cols-1 md:grid-cols-[50%_50%] border border-white/60">
-        
+
         {/* Left Section - Hero / Illustration */}
-        <div className="bg-pink-50/30 p-6 md:p-8 hidden md:flex md:flex-col md:justify-between md:items-center text-center border-r border-slate-100">
-          <div className="bg-blue-50 w-full h-full mx-auto rounded-xl p-4 md:p-5 shadow-md border border-blue-100 flex flex-col justify-between">
+        <div className="bg-surface-pink/30 p-6 md:p-8 hidden md:flex md:flex-col md:justify-between md:items-center text-center border-r border-ink-100">
+          <div className="bg-surface-blue w-full h-full mx-auto rounded-xl p-4 md:p-5 shadow-md border border-surface-blue-border flex flex-col justify-between">
             <div className="w-full flex-1 flex items-center justify-center py-8">
               <img
                 src={loginHeroImg}
@@ -82,10 +82,10 @@ export default function Login() {
             </div>
 
             <div className="text-left w-full my-2">
-              <h3 className="text-xl text-center font-bold text-slate-800 leading-tight">
+              <h3 className="text-xl text-center font-bold text-ink-900 leading-tight">
                 Welcome Back!
               </h3>
-              <p className="text-xs text-slate-500 text-center mt-2 leading-relaxed">
+              <p className="text-xs text-ink-500 text-center mt-2 leading-relaxed">
                 Sign in to manage your health insights and stay on track with your goals.
               </p>
             </div>
@@ -93,19 +93,19 @@ export default function Login() {
         </div>
 
         {/* Right Section - Form */}
-        <div className="bg-pink-50/30 flex flex-col justify-center p-6 md:p-10 overflow-y-auto">
-          <h2 className="text-4xl font-serif font-bold text-slate-800 text-center mb-8">
+        <div className="bg-surface-pink/30 flex flex-col justify-center p-6 md:p-10 overflow-y-auto">
+          <h2 className="text-4xl font-serif font-bold text-ink-900 text-center mb-8">
             Welcome Home
           </h2>
 
           {successMessage && (
-            <p className="text-green-600 text-xs mb-4 text-center bg-green-50 p-2.5 rounded-lg border border-green-200 max-w-md mx-auto w-full">
+            <p className="text-success-text text-xs mb-4 text-center bg-success-bg p-2.5 rounded-lg border border-success-border max-w-md mx-auto w-full">
               {successMessage}
             </p>
           )}
 
           {serverError && (
-            <p className="text-red-500 text-xs mb-4 text-center bg-red-50 p-2.5 rounded-lg border border-red-200 max-w-md mx-auto w-full">
+            <p className="text-danger-text text-xs mb-4 text-center bg-danger-bg p-2.5 rounded-lg border border-danger-border max-w-md mx-auto w-full">
               {serverError}
             </p>
           )}
@@ -141,7 +141,7 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="text-slate-400 hover:text-slate-600 focus:outline-none"
+                  className="text-ink-400 hover:text-ink-600 focus:outline-none"
                 >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     {showPassword ? (
@@ -156,7 +156,10 @@ export default function Login() {
 
             {/* Forgot Password Link */}
             <div className="text-right">
-              <Link to="/forgot-password" className="text-xs text-indigo-600 font-medium hover:underline">
+              <Link
+                to="/forgot-password"
+                className="text-xs text-brand-link font-medium hover:text-brand-link-hover hover:underline"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -180,10 +183,10 @@ export default function Login() {
           {/* Divider */}
           <div className="relative my-4 max-w-md mx-auto w-full">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-200"></div>
+              <div className="w-full border-t border-ink-200"></div>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-pink-50/30 px-3 text-slate-400 font-medium">OR</span>
+              <span className="bg-surface-pink/30 px-3 text-ink-400 font-medium">OR</span>
             </div>
           </div>
 
@@ -206,9 +209,9 @@ export default function Login() {
           </div>
 
           {/* Footer Link */}
-          <p className="text-center text-sm text-slate-500 mt-5">
+          <p className="text-center text-sm text-ink-500 mt-5">
             Don't have an account?{' '}
-            <Link to="/register" className="text-indigo-600 font-medium hover:underline">
+            <Link to="/register" className="text-brand-link font-medium hover:text-brand-link-hover hover:underline">
               Register
             </Link>
           </p>

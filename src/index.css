@@ -1,1 +1,47 @@
 @import "tailwindcss";
+
+@theme {
+  /* Brand colors -> text-brand-indigo, bg-brand-sky, etc. */
+  --color-brand-indigo: #6366f1;
+  --color-brand-sky: #0ea5e9;
+  --color-brand-sky-light: #38bdf8;
+  --color-brand-link: #4f46e5;
+  --color-brand-link-hover: #4338ca;
+
+  /* Neutrals */
+  --color-ink-900: #1e293b;
+  --color-ink-700: #334155;
+  --color-ink-600: #475569; /* guaranteed-AA body text on white (7.5:1) */
+  --color-ink-500: #64748b; /* secondary/muted text only (4.76:1) */
+  --color-ink-400: #94a3b8; /* decorative/icon use only */
+  --color-ink-200: #e2e8f0;
+  --color-ink-100: #f1f5f9;
+  --color-ink-50:  #f8fafc; /* subtle page wash, near-white */
+
+  /* Surfaces */
+  --color-surface-pink: #fdf2f8;        /* default app/page canvas background */
+  --color-surface-orange: #fff7ed;      /* interactive input / form field backgrounds */
+  --color-surface-blue: #eff6ff;        /* informational panels, hero/aside callouts */
+  --color-surface-blue-border: #dbeafe; /* pairs with surface-blue only */
+
+  /* Feedback */
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #bbf7d0;
+  --color-success-text: #15803d; /* 5.0:1 contrast */
+
+  --color-danger-bg: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-danger-text: #dc2626; /* 4.8:1 contrast */
+
+  /* Interaction states */
+  --color-focus-ring: #818cf8;
+  --color-focus-ring-offset: #ffffff;
+
+  --color-disabled-bg: var(--color-ink-100);
+  --color-disabled-border: var(--color-ink-200);
+  --color-disabled-text: var(--color-ink-400);
+
+  /* Gradients -> bg-brand-gradient, bg-page-gradient */
+  --background-image-brand-gradient: linear-gradient(to right, #6366f1, #0ea5e9, #38bdf8);
+  --background-image-page-gradient: linear-gradient(to bottom right, #f1f5f9, #e2e8f0, #94a3b8);
+}
