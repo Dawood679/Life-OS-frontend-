@@ -17,6 +17,7 @@ import ProjectGenerator from "../features/projectGenerator/ProjectGenerator";
 import NotesSummarizer from "../features/notesSummerizer/NotesSummarizer";
 import CodeReviewer from "../features/codeReviewer/CodeReviewer";
 import JobMatch from "../features/jobMatch/JobMatch";
+import Quiz from "../features/quiz/Quiz";
 
 export default function App() {
   return (
@@ -83,6 +84,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <CodeReviewer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/quiz"
+          element={
+            <ProtectedRoute>
+              <Quiz />
             </ProtectedRoute>
           }
         />
