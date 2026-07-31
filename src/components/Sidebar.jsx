@@ -41,6 +41,8 @@ export default function Sidebar() {
     { path: '/learning/project-generator', label: 'Project Generator' },
     { path: '/learning/notes-summarizer', label: 'Notes Summarizer' },
     { path: '/learning/job-match', label: 'Job Matcher' },
+    { path: '/todos', label: 'Todo List' },
+
   ];
 
   // Placeholder sub-routes
