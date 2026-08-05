@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function Todos() {
+  const navigate = useNavigate();
   const [todos, setTodos] = useState([]);
   const [selectedTodo, setSelectedTodo] = useState(null);
   
@@ -508,6 +510,7 @@ export default function Todos() {
       badgeText="TaskOS Hub"
       title="To-Do & Workflow Manager"
       subtitle="Organize, prioritize, and track target deadlines seamlessly"
+      onBack={() => navigate("/dashboard")}
       loading={loading}
       initialFetching={initialFetching}
       error={error}

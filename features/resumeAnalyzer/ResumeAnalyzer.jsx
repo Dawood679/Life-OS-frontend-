@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function ResumeAnalyzer() {
+  const navigate = useNavigate();
   const [resumeFile, setResumeFile] = useState(null);
   const [jobDescription, setJobDescription] = useState(""); // optional
   const [analyses, setAnalyses] = useState([]);
@@ -622,6 +624,7 @@ export default function ResumeAnalyzer() {
       badgeText="CareerOS Hub"
       title="AI Resume Analyzer"
       subtitle="Powered by Gemini 2.5 Flash • ATS Scoring, Skill Gaps & Improvement Suggestions"
+      onBack={() => navigate("/dashboard")}
       loading={loading}
       initialFetching={initialFetching}
       error={error}

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useNavigate } from "react-router-dom";
 
 // Define tab keys as constants for better maintainability and to prevent typos
 const TAB_KEYS = {
@@ -12,6 +13,7 @@ const TAB_KEYS = {
 };
 
 export default function CodeReviewer() {
+  const navigate = useNavigate();
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
   const [reviews, setReviews] = useState([]);
@@ -485,6 +487,7 @@ export default function CodeReviewer() {
       badgeText="Developer Tooling"
       title="AI Code Reviewer & Auditor"
       subtitle="Powered by Gemini 2.5 Flash • Catch Bugs, Security Hazards & Performance Bottlenecks"
+      onBack={() => navigate("/dashboard")}
       loading={loading}
       initialFetching={initialFetching}
       error={error}
