@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function NotesSummarizer() {
+  const navigate = useNavigate();
   const [lectureText, setLectureText] = useState("");
   const [summaries, setSummaries] = useState([]);
   const [selectedSummary, setSelectedSummary] = useState(null);
@@ -422,6 +424,7 @@ export default function NotesSummarizer() {
       badgeText="LearningOS Hub"
       title="AI Notes & Lecture Summarizer"
       subtitle="Powered by Gemini 2.5 Flash • Smart Summaries, Key Points & Study Flashcards"
+      onBack={() => navigate("/dashboard")}
       loading={loading}
       initialFetching={initialFetching}
       error={error}
