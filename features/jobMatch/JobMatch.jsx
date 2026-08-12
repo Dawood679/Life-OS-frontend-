@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function JobMatch() {
+  const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
   const [jobMatches, setJobMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -493,6 +495,7 @@ export default function JobMatch() {
       badgeText="CareerOS Hub"
       title="AI Job Match & Gap Analyzer"
       subtitle="Powered by Gemini 2.5 Flash • Intelligent Profile-to-Job Qualification Scoring"
+      onBack={() => navigate("/dashboard")}
       loading={loading}
       initialFetching={initialFetching}
       error={error}

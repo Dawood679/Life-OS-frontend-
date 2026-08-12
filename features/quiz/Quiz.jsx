@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useNavigate } from "react-router-dom";
 
 export default function Quiz() {
+  const navigate = useNavigate();
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -650,6 +652,7 @@ export default function Quiz() {
         badgeText="LearningOS Hub"
         title="AI Quiz & Knowledge Assessment"
         subtitle="Powered by Gemini 2.5 Flash • Custom MCQ Generation & Detailed Explanations"
+        onBack={() => navigate("/dashboard")}
         loading={loading}
         initialFetching={initialFetching}
         error={error}
