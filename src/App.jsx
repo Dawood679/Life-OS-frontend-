@@ -20,6 +20,7 @@ import JobMatch from "../features/jobMatch/JobMatch";
 import Quiz from "../features/quiz/Quiz";
 import Todos from "../features/todos/Todos";
 import ResumeAnalyzer from "../features/resumeAnalyzer/ResumeAnalyzer";
+import Chat from "../features/chats/Chat";
 
 export default function App() {
   return (
@@ -118,6 +119,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ResumeAnalyzer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/chat"
+          element={
+            <ProtectedRoute>
+              <Chat />
             </ProtectedRoute>
           }
         />

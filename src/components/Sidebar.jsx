@@ -38,7 +38,6 @@ export default function Sidebar() {
     { path: '/learning/quiz', label: 'Quiz Center' },
     { path: '/learning/chat', label: 'AI Study Chat' },
     { path: '/learning/code-review', label: 'Code Reviewer' },
-    { path: '/learning/project-generator', label: 'Project Generator' },
     { path: '/learning/notes-summarizer', label: 'Notes Summarizer' },
     { path: '/learning/job-match', label: 'Job Matcher' },
     { path: '/todos', label: 'Todo List' },
@@ -54,6 +53,7 @@ export default function Sidebar() {
   const careerSubLinks = [
     { path: '/career/job-match', label: 'Job Matcher' },
     { path: '/career/resume', label: 'Resume Optimizer' },
+    { path: '/learning/project-generator', label: 'Project Generator' },
   ];
 
   const financeSubLinks = [
