@@ -21,6 +21,8 @@ import Quiz from "../features/quiz/Quiz";
 import Todos from "../features/todos/Todos";
 import ResumeAnalyzer from "../features/resumeAnalyzer/ResumeAnalyzer";
 import Chat from "../features/chats/Chat";
+import WellnessTracker from "../features/wellness/WellnessTracker";
+import ScreenTimeTracker from "../features/wellness/ScreenTimeTracker";
 
 export default function App() {
   return (
@@ -153,6 +155,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <CreateTodo />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/health/water"
+          element={
+            <ProtectedRoute>
+              <WellnessTracker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/health/screen-time"
+          element={
+            <ProtectedRoute>
+              <ScreenTimeTracker />
             </ProtectedRoute>
           }
         />

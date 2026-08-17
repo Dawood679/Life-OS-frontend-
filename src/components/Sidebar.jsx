@@ -46,7 +46,8 @@ export default function Sidebar() {
 
   // Placeholder sub-routes
   const healthSubLinks = [
-    { path: '/health/overview', label: 'Health Tracker' },
+    { path: '/health/water', label: 'Water Intake Tracker' },
+    { path: '/health/screen-time', label: 'Screen Time Tracker' },
     { path: '/health/diet', label: 'Diet & Nutrition' },
   ];
 

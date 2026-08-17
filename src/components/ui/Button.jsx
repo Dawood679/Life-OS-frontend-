@@ -16,7 +16,7 @@ export default function Button({
 
   const variants = {
     primary:
-      'bg-brand-gradient text-white py-2.5 px-4 shadow-md hover:opacity-95 active:opacity-90 disabled:bg-disabled-bg disabled:text-disabled-text disabled:border-disabled-border disabled:shadow-none disabled:cursor-not-allowed disabled:opacity-100',
+      'bg-brand-gradient text-white! py-2.5 px-4 shadow-md hover:opacity-95 active:opacity-90 disabled:bg-disabled-bg disabled:text-disabled-text disabled:border-disabled-border disabled:shadow-none disabled:cursor-not-allowed disabled:opacity-100',
     outline:
       'border border-ink-200 bg-surface-orange/30 text-ink-600 py-2 px-4 hover:bg-brand-gradient hover:text-white hover:border-transparent active:opacity-90 disabled:bg-disabled-bg disabled:text-disabled-text disabled:border-disabled-border disabled:cursor-not-allowed',
   };
