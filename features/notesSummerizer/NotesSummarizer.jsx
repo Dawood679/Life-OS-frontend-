@@ -13,29 +13,36 @@ export default function NotesSummarizer() {
   const [activeTab, setActiveTab] = useState("overview"); // "overview" | "keypoints" | "flashcards"
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
+
   // Interactive Flashcards State
   const [flippedCards, setFlippedCards] = useState({});
 
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
 
-  // Fetch all user summaries on initial mount
+  // Fetch summaries whenever page changes
   useEffect(() => {
-    fetchSummaries();
-  }, []);
+    fetchSummaries(page);
+  }, [page]);
 
-  const fetchSummaries = async () => {
+  const fetchSummaries = async (currentPage = 1) => {
     try {
       setInitialFetching(true);
-      const res = await fetch(`${BACKEND_URL}/notes-summarizer`, {
+      const res = await fetch(`${BACKEND_URL}/notes-summarizer?page=${currentPage}&limit=10`, {
         credentials: "include",
       });
       const data = await res.json();
 
       if (res.ok && data.summaries) {
         setSummaries(data.summaries);
+        setPagination(data.pagination || null);
         if (data.summaries.length > 0) {
           setSelectedSummary(data.summaries[0]);
+        } else {
+          setSelectedSummary(null);
         }
       }
     } catch {
@@ -68,7 +75,13 @@ export default function NotesSummarizer() {
       }
 
       const newSummary = data.data;
-      setSummaries((prev) => [newSummary, ...prev]);
+      // Reset to page 1 to see the newly created item
+      if (page !== 1) {
+        setPage(1);
+      } else {
+        await fetchSummaries(1);
+      }
+      
       setSelectedSummary(newSummary);
       setIsCreatingNew(false);
       setLectureText("");
@@ -86,17 +99,14 @@ export default function NotesSummarizer() {
     if (!window.confirm("Are you sure you want to delete this summary?")) return;
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/notes-summarizer/${id}`, {
+      const res = await fetch(`${BACKEND_URL}/notes-summarizer/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
 
       if (res.ok) {
-        const updated = summaries.filter((s) => s._id !== id);
-        setSummaries(updated);
-        if (selectedSummary?._id === id) {
-          setSelectedSummary(updated[0] || null);
-        }
+        // Refresh current page after deletion
+        fetchSummaries(page);
       } else {
         const data = await res.json();
         setError(data.message || "Failed to delete summary.");
@@ -234,7 +244,7 @@ export default function NotesSummarizer() {
   const renderSidebar = () => (
     <>
       <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider px-2">
-        Saved Summaries ({summaries.length})
+        Saved Summaries ({pagination?.total ?? summaries.length})
       </h3>
 
       <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
@@ -432,6 +442,8 @@ export default function NotesSummarizer() {
       isCreatingNew={isCreatingNew}
       setIsCreatingNew={setIsCreatingNew}
       hasItems={summaries.length > 0}
+      pagination={pagination}
+      onPageChange={(newPage) => setPage(newPage)}
       renderForm={renderForm}
       renderHero={renderHero}
       renderSidebar={renderSidebar}

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
 import { useNavigate } from "react-router-dom";
 
-// Define tab keys as constants for better maintainability and to prevent typos
 const TAB_KEYS = {
   OVERVIEW: "overview",
   BUGS: "bugs",
@@ -21,37 +20,46 @@ export default function CodeReviewer() {
   const [loading, setLoading] = useState(false);
   const [initialFetching, setInitialFetching] = useState(true);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState(TAB_KEYS.OVERVIEW); // Use constants
+  const [activeTab, setActiveTab] = useState(TAB_KEYS.OVERVIEW);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [pagination, setPagination] = useState(null);
 
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
 
-  // Fetch all user code reviews on initial mount
+  // Re-fetch when page changes
   useEffect(() => {
-    fetchReviews();
-  }, []);
+    fetchReviews(page);
+  }, [page]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = async (pageNum = 1) => {
     try {
       setInitialFetching(true);
-      const res = await fetch(`${BACKEND_URL}/code-review`, {
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/code-review?page=${pageNum}&limit=${limit}`,
+        { credentials: "include" }
+      );
       const data = await res.json();
 
       if (res.ok && data.reviews) {
         setReviews(data.reviews);
+        setPagination(data.pagination);
+
         if (data.reviews.length > 0) {
-          // Fetch full single review detail for the first item
+          // Load full detail for first item in current page
           await fetchReviewDetail(data.reviews[0]._id);
+        } else {
+          setSelectedReview(null);
         }
       } else {
-        // Handle non-OK responses for review list
         setError(data.message || "Failed to load code reviews.");
       }
-    } catch (error) {
-      console.error("Error fetching reviews:", error); // Log error
+    } catch (err) {
+      console.error("Error fetching reviews:", err);
       setError("Unable to connect to server to load code reviews.");
     } finally {
       setInitialFetching(false);
@@ -69,8 +77,8 @@ export default function CodeReviewer() {
       } else {
         setError(data.message || "Failed to fetch complete review details.");
       }
-    } catch (error) {
-      console.error(`Error fetching review detail for ID ${id}:`, error); // Log error
+    } catch (err) {
+      console.error(`Error fetching review detail for ID ${id}:`, err);
       setError("Failed to fetch complete review details.");
     }
   };
@@ -97,14 +105,18 @@ export default function CodeReviewer() {
         return;
       }
 
-      const newReview = data.codeReview;
-      setReviews((prev) => [newReview, ...prev]);
-      setSelectedReview(newReview);
+      // Reset back to page 1 to show newly submitted review
+      if (page !== 1) {
+        setPage(1);
+      } else {
+        await fetchReviews(1);
+      }
+
       setIsCreatingNew(false);
       setCode("");
-      setActiveTab(TAB_KEYS.OVERVIEW); // Use constant
-    } catch (error) {
-      console.error("Error reviewing code:", error); // Log error
+      setActiveTab(TAB_KEYS.OVERVIEW);
+    } catch (err) {
+      console.error("Error reviewing code:", err);
       setError("Unable to connect to AI review engine. Please try again.");
     } finally {
       setLoading(false);
@@ -122,58 +134,42 @@ export default function CodeReviewer() {
       });
 
       if (res.ok) {
-        const updated = reviews.filter((r) => r._id !== id);
-        setReviews(updated);
-        if (selectedReview?._id === id) {
-          if (updated.length > 0) {
-            fetchReviewDetail(updated[0]._id);
-          } else {
-            setSelectedReview(null);
-          }
-        }
+        // Re-fetch current page after deletion
+        fetchReviews(page);
       } else {
         const data = await res.json();
         setError(data.message || "Failed to delete review.");
       }
-    } catch (error) {
-      console.error(`Error deleting review with ID ${id}:`, error); // Log error
+    } catch (err) {
+      console.error(`Error deleting review with ID ${id}:`, err);
       setError("Error attempting to delete review.");
     }
   };
 
-  // Dynamic Tabs definition
   const tabs = [
     { key: TAB_KEYS.OVERVIEW, label: "Overview" },
     {
       key: TAB_KEYS.BUGS,
-      label: `Bugs (${selectedReview?.bugs?.length || 0})`, // Use direct length check
+      label: `Bugs (${selectedReview?.bugs?.length || 0})`,
     },
     {
       key: TAB_KEYS.PERFORMANCE,
-      label: `Performance (${selectedReview?.performanceIssues?.length || 0})`, // Use direct length check
+      label: `Performance (${selectedReview?.performanceIssues?.length || 0})`,
     },
     {
       key: TAB_KEYS.SECURITY,
-      label: `Security (${selectedReview?.securityIssues?.length || 0})`, // Use direct length check
+      label: `Security (${selectedReview?.securityIssues?.length || 0})`,
     },
-    {
-      key: TAB_KEYS.BEST_PRACTICES,
-      label: "Best Practices",
-    },
-    {
-      key: TAB_KEYS.IMPROVED_CODE,
-      label: "Improved Code",
-    },
+    { key: TAB_KEYS.BEST_PRACTICES, label: "Best Practices" },
+    { key: TAB_KEYS.IMPROVED_CODE, label: "Improved Code" },
   ];
 
-  // Helper to color-code overall score
   const getScoreBadge = (score) => {
     if (score >= 80) return "bg-emerald-500/20 text-emerald-300 border-emerald-400/30";
     if (score >= 60) return "bg-amber-500/20 text-amber-300 border-amber-400/30";
     return "bg-rose-500/20 text-rose-300 border-rose-400/30";
   };
 
-  // Section 1: Code Submission Form
   const renderForm = () => (
     <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-3xl p-6 md:p-10 shadow-xl relative overflow-hidden transition-all">
       <div className="absolute top-10 right-10 w-48 h-48 bg-indigo-100/40 rounded-full blur-3xl pointer-events-none"></div>
@@ -258,7 +254,6 @@ export default function CodeReviewer() {
     </div>
   );
 
-  // Section 2: Hero Banner Render
   const renderHero = () => {
     if (!selectedReview) return null;
     const score = selectedReview.overallScore ?? "--";
@@ -299,14 +294,13 @@ export default function CodeReviewer() {
     );
   };
 
-  // Section 3: Sidebar Render
   const renderSidebar = () => (
     <>
       <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider px-2">
-        Recent Audits ({reviews.length})
+        Recent Audits ({pagination?.total || reviews.length})
       </h3>
 
-      <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
+      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
         {reviews.map((rev) => {
           const isSelected = selectedReview?._id === rev._id;
 
@@ -359,7 +353,6 @@ export default function CodeReviewer() {
     </>
   );
 
-  // Helper to render lists of review findings
   const renderIssuesList = (items, emptyMessage, badgeColor) => {
     if (!Array.isArray(items) || items.length === 0) {
       return <p className="text-sm text-slate-500 italic p-4">{emptyMessage}</p>;
@@ -369,14 +362,13 @@ export default function CodeReviewer() {
       <div className="space-y-3">
         {items.map((item, idx) => (
           <div
-            key={item.id || idx} // Use a unique ID if available, otherwise fallback to index
+            key={item.id || idx}
             className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-3"
           >
             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase shrink-0 mt-0.5 ${badgeColor}`}>
               #{idx + 1}
             </span>
             <div className="space-y-1 text-xs text-slate-700 leading-relaxed">
-              {/* Updated to match the schema: line, issue, suggestion */}
               {item.line && <p className="font-bold text-slate-900">Line: {item.line}</p>}
               {item.issue && <p>{item.issue}</p>}
               {item.suggestion && (
@@ -389,7 +381,6 @@ export default function CodeReviewer() {
     );
   };
 
-  // Section 4: Active Tab Content Render
   const renderTabContent = () => {
     if (!selectedReview) return null;
 
@@ -495,6 +486,8 @@ export default function CodeReviewer() {
       isCreatingNew={isCreatingNew}
       setIsCreatingNew={setIsCreatingNew}
       hasItems={reviews.length > 0}
+      pagination={pagination}
+      onPageChange={(newPage) => setPage(newPage)}
       renderForm={renderForm}
       renderHero={renderHero}
       renderSidebar={renderSidebar}

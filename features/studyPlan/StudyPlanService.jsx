@@ -1,4 +1,4 @@
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
 
 const BASE = `${BACKEND_URL}/study-plan`;
 
@@ -27,8 +27,9 @@ export async function generateStudyPlan({ currentLevel, subject }) {
   return handleResponse(res);
 }
 
-export async function getStudyPlans() {
-  const res = await fetch(`${BASE}/`, {
+// FIX: Added page and limit arguments and passed them in the query string
+export async function getStudyPlans(page = 1, limit = 10) {
+  const res = await fetch(`${BASE}/?page=${page}&limit=${limit}`, {
     credentials: 'include',
   });
   return handleResponse(res);

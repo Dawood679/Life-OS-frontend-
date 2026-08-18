@@ -15,32 +15,56 @@ export default function ResumeAnalyzer() {
   const [activeTab, setActiveTab] = useState("overview"); // "overview" | "skills" | "ats" | "suggestions"
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
 
-  // Fetch all past resume analyses on initial mount
+  // Fetch past resume analyses whenever the current page changes
   useEffect(() => {
-    fetchResumeAnalyses();
-  }, []);
+    fetchResumeAnalyses(pagination.page);
+  }, [pagination.page]);
 
-  const fetchResumeAnalyses = async () => {
+  const fetchResumeAnalyses = async (page = 1) => {
     try {
       setInitialFetching(true);
-      const res = await fetch(`${BACKEND_URL}/resume`, {
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/resume?page=${page}&limit=${pagination.limit}`,
+        {
+          credentials: "include",
+        }
+      );
       const data = await res.json();
 
       if (res.ok && data.analyses) {
         setAnalyses(data.analyses);
+        if (data.pagination) {
+          setPagination(data.pagination);
+        }
         if (data.analyses.length > 0) {
           fetchAnalysisDetail(data.analyses[0]._id);
+        } else {
+          setSelectedAnalysis(null);
         }
       }
     } catch {
       setError("Unable to connect to server to load resume analyses.");
     } finally {
       setInitialFetching(false);
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination((prev) => ({ ...prev, page: newPage }));
     }
   };
 
@@ -95,8 +119,6 @@ export default function ResumeAnalyzer() {
         formData.append("jobDescription", jobDescription.trim());
       }
 
-      // NOTE: no "Content-Type" header here — the browser sets the correct
-      // multipart/form-data boundary automatically for FormData bodies.
       const res = await fetch(`${BACKEND_URL}/resume/analyze`, {
         method: "POST",
         credentials: "include",
@@ -111,7 +133,9 @@ export default function ResumeAnalyzer() {
       }
 
       const newAnalysis = data.resumeAnalysis;
-      setAnalyses((prev) => [newAnalysis, ...prev]);
+
+      // Re-fetch page 1 so pagination metadata updates accurately
+      await fetchResumeAnalyses(1);
       setSelectedAnalysis(newAnalysis);
       setIsCreatingNew(false);
       setResumeFile(null);
@@ -135,15 +159,8 @@ export default function ResumeAnalyzer() {
       });
 
       if (res.ok) {
-        const updated = analyses.filter((item) => item._id !== id);
-        setAnalyses(updated);
-        if (selectedAnalysis?._id === id) {
-          if (updated.length > 0) {
-            fetchAnalysisDetail(updated[0]._id);
-          } else {
-            setSelectedAnalysis(null);
-          }
-        }
+        // Refetch current page to update items and total counts cleanly
+        fetchResumeAnalyses(pagination.page);
       } else {
         const data = await res.json();
         setError(data.message || "Failed to delete resume analysis.");
@@ -350,7 +367,7 @@ export default function ResumeAnalyzer() {
   const renderSidebar = () => (
     <>
       <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider px-2">
-        Past Analyses ({analyses.length})
+        Past Analyses ({pagination.total || analyses.length})
       </h3>
 
       <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
@@ -632,6 +649,8 @@ export default function ResumeAnalyzer() {
       isCreatingNew={isCreatingNew}
       setIsCreatingNew={setIsCreatingNew}
       hasItems={analyses.length > 0}
+      pagination={pagination}
+      onPageChange={handlePageChange}
       renderForm={renderForm}
       renderHero={renderHero}
       renderSidebar={renderSidebar}
