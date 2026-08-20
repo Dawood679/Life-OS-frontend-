@@ -159,18 +159,10 @@ export default function App() {
           }
         />
         <Route
-          path="/health/water"
+          path="/health/wellness"
           element={
             <ProtectedRoute>
               <WellnessTracker />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/health/screen-time"
-          element={
-            <ProtectedRoute>
-              <ScreenTimeTracker />
             </ProtectedRoute>
           }
         />
