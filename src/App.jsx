@@ -1,5 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Toaster } from "react-hot-toast"; // <-- Import Toaster here
+
 import RoadmapGenerator from "../features/roadmap/RoadmapGenerator";
+import StudyPlanDetail from "../features/studyPlan/StudyPlanDetails";
 import ForgotPassword from "./auth/ForgotPassword";
 import Login from "./auth/Login";
 import Register from "./auth/Register";
@@ -10,23 +13,38 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import CreateTodo from "./pages/CreateTodo";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import StudyPlanDetail from "../features/studyPlan/StudyPlanDetails";
 // import StudyPlanList from "../features/studyPlan/StudyPlanList";
-import StudyPlan from "../features/studyPlan/StudyPlan";
-import ProjectGenerator from "../features/projectGenerator/ProjectGenerator";
-import NotesSummarizer from "../features/notesSummerizer/NotesSummarizer";
+import Chat from "../features/chats/Chat";
 import CodeReviewer from "../features/codeReviewer/CodeReviewer";
 import JobMatch from "../features/jobMatch/JobMatch";
+import NotesSummarizer from "../features/notesSummerizer/NotesSummarizer";
+import ProjectGenerator from "../features/projectGenerator/ProjectGenerator";
 import Quiz from "../features/quiz/Quiz";
-import Todos from "../features/todos/Todos";
 import ResumeAnalyzer from "../features/resumeAnalyzer/ResumeAnalyzer";
-import Chat from "../features/chats/Chat";
+import StudyPlan from "../features/studyPlan/StudyPlan";
+import Todos from "../features/todos/Todos";
 import WellnessTracker from "../features/wellness/WellnessTracker";
-import ScreenTimeTracker from "../features/wellness/ScreenTimeTracker";
+import PrescriptionScanner from "../features/health/PrescriptionScanner";
+import MedicineTracker from "../features/health/MedicineTracker";
+import MedicalHistory from "../features/health/MedicalHistory";
 
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Add Toaster globally here */}
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        toastOptions={{
+          style: {
+            fontSize: "14px",
+            borderRadius: "12px",
+            background: "#333",
+            color: "#fff",
+          },
+        }}
+      />
+      
       <Routes>
         <Route path="/" element={<Register />} />
         <Route path="/register" element={<Register />} />
@@ -35,6 +53,7 @@ export default function App() {
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        
         <Route
           path="/dashboard"
           element={
@@ -49,14 +68,6 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
             </ProtectedRoute>
           }
         />
@@ -141,7 +152,6 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/learning/study-plan/:id"
           element={
@@ -163,6 +173,30 @@ export default function App() {
           element={
             <ProtectedRoute>
               <WellnessTracker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/health/prescriptions"
+          element={
+            <ProtectedRoute>
+              <PrescriptionScanner />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/health/medicines"
+          element={
+            <ProtectedRoute>
+              <MedicineTracker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/health/history"
+          element={
+            <ProtectedRoute>
+              <MedicalHistory />
             </ProtectedRoute>
           }
         />

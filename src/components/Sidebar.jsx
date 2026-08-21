@@ -44,6 +44,9 @@ export default function Sidebar() {
 
   const healthSubLinks = [
     { path: '/health/wellness', label: 'Wellness Tracker' },
+    { path: '/health/prescriptions', label: 'Prescription Scanner' },
+    { path: '/health/medicines', label: 'Medicine & Reminders' },
+    { path: '/health/history', label: 'Medical History' },
     { path: '/health/diet', label: 'Diet & Nutrition' },
   ];
 
