@@ -10,7 +10,6 @@ import ResetPassword from "./auth/ResetPassword";
 import VerifyEmail from "./auth/VerifyEmail";
 import VerifyOtp from "./auth/VerifyOtp";
 import ProtectedRoute from "./components/ProtectedRoute";
-import CreateTodo from "./pages/CreateTodo";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 // import StudyPlanList from "../features/studyPlan/StudyPlanList";
@@ -157,14 +156,6 @@ export default function App() {
           element={
             <ProtectedRoute>
               <StudyPlanDetail />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/create-todo"
-          element={
-            <ProtectedRoute>
-              <CreateTodo />
             </ProtectedRoute>
           }
         />
