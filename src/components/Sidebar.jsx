@@ -1,16 +1,16 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import Button from '../components/ui/Button';
+import NotificationDropdown from './ui/NotificationDropdown';
 
 export default function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
 
-  // Dropdown visibility state
   const [openDropdowns, setOpenDropdowns] = useState({
-    learning: true, // Default open to showcase backend routes
-    health: false,
+    learning: true,
+    health: true, // Opened by default for Health OS visibility
     career: false,
     finance: false,
   });
@@ -31,7 +31,6 @@ export default function Sidebar() {
       .catch(() => navigate('/login'));
   }, [navigate]);
 
-  // LearningOS Sub-routes
   const learningSubLinks = [
     { path: '/learning/roadmap', label: 'Roadmap Generator' },
     { path: '/learning/study-plan', label: 'Study Planner' },
@@ -41,13 +40,10 @@ export default function Sidebar() {
     { path: '/learning/notes-summarizer', label: 'Notes Summarizer' },
     { path: '/learning/job-match', label: 'Job Matcher' },
     { path: '/todos', label: 'Todo List' },
-
   ];
 
-  // Placeholder sub-routes
   const healthSubLinks = [
-    { path: '/health/water', label: 'Water Intake Tracker' },
-    { path: '/health/screen-time', label: 'Screen Time Tracker' },
+    { path: '/health/wellness', label: 'Wellness Tracker' },
     { path: '/health/diet', label: 'Diet & Nutrition' },
   ];
 
@@ -63,7 +59,7 @@ export default function Sidebar() {
   ];
 
   const handleLogout = async () => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
     await fetch(`${BACKEND_URL}/auth/logout`, {
       method: 'POST',
       credentials: 'include',
@@ -74,11 +70,9 @@ export default function Sidebar() {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <aside className="w-64 min-h-screen bg-white/80 backdrop-blur-md border-r border-ink-200/80 flex flex-col justify-between p-4 font-sans text-ink-700 shadow-xl select-none">
-      
+    <aside className="w-64 min-h-screen bg-white/80 backdrop-blur-md border-r border-ink-200/80 flex flex-col justify-between p-4 font-sans text-ink-700 shadow-xl select-none relative z-30">
       {/* TOP SECTION: Logo + Navigation */}
       <div className="space-y-6">
-        
         {/* Brand Header */}
         <div className="px-2 py-2 flex items-center justify-between border-b border-ink-100 pb-4">
           <div className="flex items-center gap-2.5">
@@ -110,7 +104,6 @@ export default function Sidebar() {
 
         {/* NAVIGATION LINKS */}
         <nav className="space-y-4 text-xs font-medium">
-          
           {/* MAIN MODULES */}
           <div className="space-y-1">
             {/* Home Link */}
@@ -128,18 +121,55 @@ export default function Sidebar() {
               <span>Home</span>
             </Link>
 
+            {/* HealthOS Dropdown */}
+            <div>
+              <button
+                type="button"
+                onClick={() => toggleDropdown('health')}
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  <span className="font-semibold text-ink-900">HealthOS</span>
+                </div>
+                <svg className={`w-3.5 h-3.5 text-ink-400 transition-transform duration-200 ${openDropdowns.health ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {openDropdowns.health && (
+                <div className="ml-4 mt-1 pl-3 border-l-2 border-emerald-200 space-y-1">
+                  {healthSubLinks.map((sub) => (
+                    <Link
+                      key={sub.path}
+                      to={sub.path}
+                      className={`block px-3 py-1.5 rounded-lg text-[11px] transition ${
+                        isActive(sub.path)
+                          ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                          : 'text-ink-500 hover:text-ink-900 hover:bg-orange-50/50'
+                      }`}
+                    >
+                      {sub.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* LearningOS Dropdown */}
             <div>
               <button
                 type="button"
                 onClick={() => toggleDropdown('learning')}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <svg className="w-4 h-4 text-brand-indigo" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h-4a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
-                  <span className="font-semibold text-ink-900">LearningOS</span>
+                  <span>LearningOS</span>
                 </div>
                 <svg className={`w-3.5 h-3.5 text-ink-400 transition-transform duration-200 ${openDropdowns.learning ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -165,41 +195,12 @@ export default function Sidebar() {
               )}
             </div>
 
-            {/* HealthOS Dropdown */}
-            <div>
-              <button
-                type="button"
-                onClick={() => toggleDropdown('health')}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition"
-              >
-                <div className="flex items-center gap-3">
-                  <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                  <span>HealthOS</span>
-                </div>
-                <svg className={`w-3.5 h-3.5 text-ink-400 transition-transform duration-200 ${openDropdowns.health ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {openDropdowns.health && (
-                <div className="ml-4 mt-1 pl-3 border-l-2 border-ink-200 space-y-1">
-                  {healthSubLinks.map((sub) => (
-                    <Link key={sub.path} to={sub.path} className="block px-3 py-1.5 rounded-lg text-[11px] text-ink-500 hover:text-ink-900 hover:bg-orange-50/50 transition">
-                      {sub.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
             {/* CareerOS Dropdown */}
             <div>
               <button
                 type="button"
                 onClick={() => toggleDropdown('career')}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <svg className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,7 +229,7 @@ export default function Sidebar() {
               <button
                 type="button"
                 onClick={() => toggleDropdown('finance')}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition"
+                className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <svg className="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -272,106 +273,45 @@ export default function Sidebar() {
                 </svg>
                 <span>Smart Planner</span>
               </Link>
-
-              <Link
-                to="/vault"
-                className={`flex items-center gap-3 px-3 py-2 rounded-xl transition ${
-                  isActive('/vault') 
-                    ? 'bg-indigo-50 text-brand-indigo font-semibold' 
-                    : 'text-ink-700 hover:bg-orange-50/70 hover:text-ink-900'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <span>Digital Vault</span>
-              </Link>
             </div>
           </div>
-
-          {/* TOOLS SECTION */}
-          <div className="pt-2">
-            <p className="px-3 text-[10px] font-bold text-ink-400 tracking-wider uppercase mb-1.5">
-              Tools
-            </p>
-            <div className="space-y-1">
-              <Link
-                to="/learning/chat"
-                className="flex items-center gap-3 px-3 py-2 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                <span>AI Assistant</span>
-              </Link>
-
-              <Link
-                to="/tools/suite"
-                className="flex items-center gap-3 px-3 py-2 rounded-xl text-ink-700 hover:bg-orange-50/70 hover:text-ink-900 transition"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                <span>AI Suite</span>
-              </Link>
-            </div>
-          </div>
-
-          {/* PROFILE / ADMIN SECTION */}
-          <div className="pt-2">
-            <p className="px-3 text-[10px] font-bold text-ink-400 tracking-wider uppercase mb-1.5">
-              Profile
-            </p>
-            <div className="space-y-1">
-              {role === 'admin' && (
-                <Link
-                  to="/admin/dashboard"
-                  className={`flex items-center gap-3 px-3 py-2 rounded-xl transition ${
-                    isActive('/admin/dashboard') 
-                      ? 'bg-purple-50 text-purple-700 font-semibold' 
-                      : 'text-ink-700 hover:bg-orange-50/70 hover:text-ink-900'
-                  }`}
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                  <span>Admin Panel</span>
-                </Link>
-              )}
-
-              <Link
-                to="/profile"
-                className={`flex items-center gap-3 px-3 py-2 rounded-xl transition ${
-                  isActive('/profile') 
-                    ? 'bg-indigo-50 text-brand-indigo font-semibold' 
-                    : 'text-ink-700 hover:bg-orange-50/70 hover:text-ink-900'
-                }`}
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span>Settings & Profile</span>
-              </Link>
-            </div>
-          </div>
-
         </nav>
       </div>
 
-      {/* BOTTOM SECTION: Logout Button */}
-      <div className="pt-4 border-t border-ink-100">
+      {/* BOTTOM SECTION: Notifications, Profile & Logout */}
+      <div className="pt-4 border-t border-ink-100 space-y-2">
+        {/* Mount the In-Nav Notification Dropdown */}
+        <NotificationDropdown />
+
+        {/* Profile Settings */}
+        <Link
+          to="/profile"
+          className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition ${
+            isActive('/profile') 
+              ? 'bg-indigo-50 text-brand-indigo' 
+              : 'text-ink-700 hover:bg-orange-50/70 hover:text-ink-900'
+          }`}
+        >
+          <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span>Settings & Profile</span>
+        </Link>
+
+        {/* Logout Button */}
         <Button
           variant="danger"
           onClick={handleLogout}
-          className="w-full justify-center py-2 text-xs"
+          className="w-full py-2"
         >
-          <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          Logout
+          <div className="flex flex-row items-center justify-center gap-1.5 w-full text-xs">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Logout</span>
+          </div>
         </Button>
       </div>
-
     </aside>
   );
 }

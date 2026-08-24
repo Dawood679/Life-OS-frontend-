@@ -1,761 +1,677 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import FeatureLayout from "../../src/components/FeatureLayout";
 
-export default function WellnessPage() {
+const getLocalDateString = (dateObj = new Date()) => {
+  const tzOffset = dateObj.getTimezoneOffset() * 60000;
+  return new Date(dateObj.getTime() - tzOffset).toISOString().split("T")[0];
+};
+
+const TAB_KEYS = {
+  DASHBOARD: "dashboard",
+  INSIGHTS: "insights",
+  SETTINGS: "settings",
+};
+
+export default function WellnessTracker() {
   const navigate = useNavigate();
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
 
-  // Core Data States
-  const [checkIn, setCheckIn] = useState(null);
-  const [history, setHistory] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [activeTab, setActiveTab] = useState("tracker"); // 'tracker' | 'settings'
-
-  // Loading & Global States
-  const [loading, setLoading] = useState(false);
-  const [initialFetching, setInitialFetching] = useState(true);
+  // --- States ---
+  const [activeTab, setActiveTab] = useState(TAB_KEYS.DASHBOARD);
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString());
+  const [log, setLog] = useState(null);
+  const [recentLogs, setRecentLogs] = useState([]);
+  
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState("");
-  const [toastMessage, setToastMessage] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  
+  // AI Report State
+  const [aiReportData, setAiReportData] = useState(null);
+  const [generatingReport, setGeneratingReport] = useState(false);
 
-  // Custom Quick Log Input State
-  const [customMl, setCustomMl] = useState("250");
+  // Input states for daily tracking
+  const [sleepInput, setSleepInput] = useState({ hours: "", quality: "" });
+  const [activityInput, setActivityInput] = useState({ type: "none", minutes: "" });
+  const [screenTimeInput, setScreenTimeInput] = useState({ usedMinutes: "" });
 
-  // Settings States (Mapped directly to backend WellnessSettings Schema)
-  const [waterGoalMl, setWaterGoalMl] = useState(2000);
-  const [reminderEnabled, setReminderEnabled] = useState(false);
-  const [reminderMode, setReminderMode] = useState("auto");
-  const [intervalMinutes, setIntervalMinutes] = useState(120);
-  const [activeStart, setActiveStart] = useState("08:00");
-  const [activeEnd, setActiveEnd] = useState("22:00");
-  const [emailEnabled, setEmailEnabled] = useState(true);
-  const [inAppEnabled, setInAppEnabled] = useState(true);
+  // Settings state
+  const [settings, setSettings] = useState({
+    targetMl: 2000,
+    isActive: false,
+    isEmailAlertEnabled: false,
+    wakeTime: "08:00",
+    sleepTime: "22:00",
+    intervalHours: 2,
+  });
 
-  // UI Interactivity States
-  const [showNotificationDrawer, setShowNotificationDrawer] = useState(false);
-  const [entryToDelete, setEntryToDelete] = useState(null);
+  const [isAutoInterval, setIsAutoInterval] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
-  // Quick Preset Options with Custom Icons & UX Labels
-  const WATER_PRESETS = [
-    { label: "Glass of Water", amount: 250, icon: "🥛", subtitle: "Standard Glass" },
-    { label: "Water Bottle", amount: 500, icon: "🍼", subtitle: "Handy Bottle" },
-    { label: "Sport Canteen", amount: 750, icon: "🏋️", subtitle: "Workout Session" },
-    { label: "Large Jug", amount: 1000, icon: "🫙", subtitle: "1 Full Liter" },
-  ];
-
-  // Fetch All Wellness Data
+  // --- Data Fetching ---
   useEffect(() => {
-    fetchWellnessData();
-    fetchNotifications();
+    fetchDailyLog(selectedDate);
+    fetchRecentLogs();
+  }, [selectedDate]);
+
+  useEffect(() => {
+    fetchSettings();
   }, []);
 
-  const triggerToast = (msg) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(""), 3500);
-  };
-
-  const fetchWellnessData = async () => {
+  const fetchSettings = async () => {
     try {
-      setInitialFetching(true);
-      setError("");
-
-      const [todayRes, historyRes, settingsRes] = await Promise.all([
-        fetch(`${BACKEND_URL}/wellness/today`, { credentials: "include" }),
-        fetch(`${BACKEND_URL}/wellness/history?days=7`, { credentials: "include" }),
-        fetch(`${BACKEND_URL}/wellness/settings`, { credentials: "include" }),
-      ]);
-
-      if (todayRes.ok) {
-        const todayData = await todayRes.json();
-        if (todayData.checkIn) setCheckIn(todayData.checkIn);
-      }
-
-      if (historyRes.ok) {
-        const historyData = await historyRes.json();
-        if (historyData.history) setHistory(historyData.history);
-      }
-
-      if (settingsRes.ok) {
-        const settingsData = await settingsRes.json();
-        const s = settingsData.settings || settingsData;
-        if (s) {
-          setWaterGoalMl(s.waterGoalMl || 2000);
-          if (s.reminder) {
-            setReminderEnabled(!!s.reminder.enabled);
-            setReminderMode(s.reminder.mode || "auto");
-            setIntervalMinutes(s.reminder.intervalMinutes || 120);
-            setActiveStart(s.reminder.activeStart || "08:00");
-            setActiveEnd(s.reminder.activeEnd || "22:00");
-            setEmailEnabled(s.reminder.emailEnabled ?? true);
-            setInAppEnabled(s.reminder.inAppEnabled ?? true);
-          }
-        }
-      }
-    } catch {
-      setError("Unable to connect to server. Please verify backend connection.");
-    } finally {
-      setInitialFetching(false);
-    }
-  };
-
-  const fetchNotifications = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/notifications`, { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data.notifications || data || []);
-      }
-    } catch (err) {
-      console.error("Failed to fetch notifications", err);
-    }
-  };
-
-  // 1-Tap Water Logging Handler
-  const handleLogWater = async (amount) => {
-    const logAmount = Number(amount);
-    if (!logAmount || logAmount <= 0) return;
-
-    setLoading(true);
-    setError("");
-
-    try {
-      const res = await fetch(`${BACKEND_URL}/wellness/water`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ amountMl: logAmount }),
-      });
-
+      const res = await fetch(`${BACKEND_URL}/wellness/water-settings`, { credentials: "include" });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to log water.");
-
-      setCheckIn(data.checkIn);
-      triggerToast(`+${logAmount}ml added! Great job staying hydrated 💧`);
+      if (res.ok && data.data?.waterSettings) {
+        setSettings(data.data.waterSettings);
+      }
     } catch (err) {
-      setError(err.message);
+      console.error("Failed to fetch settings:", err);
+    }
+  };
+
+  const fetchDailyLog = async (dateStr) => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetch(`${BACKEND_URL}/wellness/logs/${dateStr}`, { credentials: "include" });
+      const data = await res.json();
+
+      if (res.ok) {
+        if (data.data) {
+          setLog(data.data);
+          setSleepInput({ hours: data.data.sleep?.hours || "", quality: data.data.sleep?.quality || "" });
+          setActivityInput({ type: data.data.activity?.type || "none", minutes: data.data.activity?.minutes || "" });
+          setScreenTimeInput({ usedMinutes: data.data.screenTime?.usedMinutes || "" });
+        } else {
+          setLog(null);
+          setSleepInput({ hours: "", quality: "" });
+          setActivityInput({ type: "none", minutes: "" });
+          setScreenTimeInput({ usedMinutes: "" });
+        }
+      } else {
+        setError(data.message || "Failed to load wellness data.");
+      }
+    } catch (err) {
+      console.error("Fetch log error:", err);
+      setError("Unable to connect to server.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Save Settings & Cron Configuration
+  const fetchRecentLogs = async () => {
+    try {
+      const today = new Date();
+      const pastWeek = new Date(today);
+      pastWeek.setDate(pastWeek.getDate() - 6);
+      
+      const to = getLocalDateString(today);
+      const from = getLocalDateString(pastWeek);
+
+      const res = await fetch(`${BACKEND_URL}/wellness/logs?from=${from}&to=${to}`, { credentials: "include" });
+      const data = await res.json();
+      if (res.ok) setRecentLogs(data.data || []);
+    } catch (err) {
+      console.error("Fetch recent logs error:", err);
+    }
+  };
+
+  // --- Handlers ---
+  const updateMetric = async (endpoint, payload, widgetName) => {
+    try {
+      setActionLoading(widgetName);
+      setError("");
+      
+      const res = await fetch(`${BACKEND_URL}/wellness/${endpoint}`, {
+        method: endpoint === "water" ? "POST" : "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ date: selectedDate, ...payload }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || `Failed to update ${widgetName}`);
+      
+      setLog(data.data);
+      fetchRecentLogs();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const calculateAutoInterval = () => {
+    const wakeH = parseInt(settings.wakeTime.split(":")[0]) || 8;
+    const sleepH = parseInt(settings.sleepTime.split(":")[0]) || 22;
+    const awakeHours = sleepH > wakeH ? sleepH - wakeH : (24 - wakeH + sleepH);
+    const totalGlassesNeeded = Math.ceil(settings.targetMl / 250);
+    const calcInterval = Math.floor(awakeHours / totalGlassesNeeded);
+    return calcInterval < 1 ? 1 : calcInterval;
+  };
+
   const handleSaveSettings = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
-
     try {
-      const payload = {
-        waterGoalMl: Number(waterGoalMl),
-        reminder: {
-          enabled: reminderEnabled,
-          mode: reminderMode,
-          intervalMinutes: Number(intervalMinutes),
-          activeStart,
-          activeEnd,
-          emailEnabled,
-          inAppEnabled,
-        },
-      };
+      setActionLoading("settings");
+      setError("");
+      setSuccessMsg("");
 
-      const res = await fetch(`${BACKEND_URL}/wellness/settings`, {
-        method: "PUT",
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const finalInterval = isAutoInterval ? calculateAutoInterval() : settings.intervalHours;
+
+      const payload = { ...settings, intervalHours: finalInterval, timezone };
+
+      const res = await fetch(`${BACKEND_URL}/wellness/water-settings`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update settings.");
-
-      triggerToast("Hydration preferences and scheduler updated!");
-      await fetchWellnessData();
+      if (!res.ok) throw new Error(data.message || "Failed to save settings");
+      
+      setSuccessMsg(`Settings saved! Reminders set for every ${finalInterval} hour(s).`);
+      setTimeout(() => setSuccessMsg(""), 4000);
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setActionLoading(null);
     }
   };
 
-  // Delete Logged Entry
-  const handleDeleteEntry = async (entryId) => {
-    setLoading(true);
-
+  // --- Real AI Weekly Report Handler ---
+  const generateAIReport = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/wellness/water/${entryId}`, {
-        method: "DELETE",
+      setGeneratingReport(true);
+      setError("");
+
+      const res = await fetch(`${BACKEND_URL}/wellness/weekly-report`, {
+        method: "GET",
         credentials: "include",
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to delete log.");
 
-      setCheckIn(data.checkIn);
-      setEntryToDelete(null);
-      triggerToast("Entry removed successfully.");
+      if (res.ok && data.data) {
+        setAiReportData(data.data);
+      } else {
+        throw new Error(data.message || "Failed to generate weekly AI report.");
+      }
     } catch (err) {
-      setError(err.message);
+      console.error("AI Report Error:", err);
+      setError(err.message || "Unable to connect to LifeOS AI Engine.");
     } finally {
-      setLoading(false);
+      setGeneratingReport(false);
     }
   };
 
-  // Derived Calculations
-  const totalMl = checkIn?.water?.totalMl || 0;
-  const goalMl = waterGoalMl || 2000;
-  const progressPercent = Math.min(Math.round((totalMl / goalMl) * 100), 100);
-  const remainingMl = Math.max(goalMl - totalMl, 0);
-  const unreadNotifs = notifications.filter((n) => !n.read).length;
+  // --- Derived Data for Insights & Burnout Warning ---
+  const insightsData = useMemo(() => {
+    const chartDays = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      const dateStr = getLocalDateString(d);
+      const foundLog = recentLogs.find((l) => l.date === dateStr);
+      return {
+        dateStr,
+        label: d.toLocaleDateString("en-US", { weekday: 'short' }),
+        score: foundLog?.energyScore || 0
+      };
+    });
 
-  if (initialFetching) {
+    // Feature #7: Rule-based Burnout Threshold (3 consecutive days with score < 50)
+    const sortedLogs = [...recentLogs].sort((a, b) => (a.date > b.date ? -1 : 1));
+    const last3Logs = sortedLogs.slice(0, 3);
+    
+    let consecutiveLowCount = 0;
+    for (let log of last3Logs) {
+      if (log.energyScore !== undefined && log.energyScore < 50) {
+        consecutiveLowCount++;
+      } else {
+        break;
+      }
+    }
+
+    const isBurnoutWarning = consecutiveLowCount >= 3;
+    const avgRecentScore = last3Logs.length > 0 
+      ? last3Logs.reduce((acc, curr) => acc + (curr.energyScore || 0), 0) / last3Logs.length 
+      : 100;
+
+    return { chartDays, isBurnoutWarning, avgRecentScore };
+  }, [recentLogs]);
+
+
+  // --- Render Sections ---
+  const renderHero = () => {
+    const isToday = selectedDate === getLocalDateString();
+    const energyScore = log?.energyScore;
+
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin"></div>
-          <p className="text-xs font-semibold text-slate-500">Loading Hydration Hub...</p>
+      <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-sky-500 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="absolute -right-10 -bottom-10 w-52 h-52 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="relative z-10 space-y-2 text-center md:text-left">
+          <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-wider uppercase inline-block">
+            {isToday ? "Today's Overview" : new Date(selectedDate).toDateString()}
+          </span>
+          <h2 className="text-2xl md:text-3xl font-serif font-bold">
+            {isToday ? "How are you feeling today?" : "Historical Log"}
+          </h2>
+          <p className="text-sky-100 text-xs md:text-sm">Track your daily habits to power your AI Energy Engine.</p>
+        </div>
+        {energyScore !== null && energyScore !== undefined && (
+          <div className="relative z-10 bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl text-center min-w-[120px]">
+            <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">Energy Score</p>
+            <div className="flex items-baseline justify-center gap-1 mt-1">
+              <span className="text-4xl font-black">{Math.round(energyScore)}</span>
+              <span className="text-sm text-sky-200">/100</span>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderSidebar = () => {
+    const days = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      return getLocalDateString(d);
+    });
+
+    return (
+      <div className="space-y-4">
+        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider px-2">Past 7 Days</h3>
+        <div className="space-y-2">
+          {days.map((dateStr) => {
+            const isSelected = selectedDate === dateStr && activeTab === TAB_KEYS.DASHBOARD;
+            const isToday = dateStr === getLocalDateString();
+            const foundLog = recentLogs.find(l => l.date === dateStr);
+
+            return (
+              <button
+                key={dateStr}
+                onClick={() => {
+                  setSelectedDate(dateStr);
+                  setActiveTab(TAB_KEYS.DASHBOARD);
+                }}
+                className={`w-full text-left p-3 rounded-2xl border transition-all flex items-center justify-between cursor-pointer ${
+                  isSelected ? "bg-indigo-50 border-indigo-200 ring-1 ring-indigo-300" : "bg-white/60 border-slate-200/80 hover:bg-slate-50"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold ${isSelected ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"}`}>
+                    {new Date(dateStr).getDate()}
+                  </div>
+                  <div>
+                    <p className={`text-sm font-bold ${isSelected ? "text-indigo-900" : "text-slate-700"}`}>
+                      {isToday ? "Today" : new Date(dateStr).toLocaleDateString("en-US", { weekday: 'short' })}
+                    </p>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-wider">
+                      {new Date(dateStr).toLocaleDateString("en-US", { month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+                {foundLog?.energyScore > 0 && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${foundLog.energyScore >= 70 ? 'bg-emerald-100 text-emerald-700' : foundLog.energyScore >= 50 ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'}`}>
+                    {Math.round(foundLog.energyScore)}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
-  }
+  };
 
-  return (
-    <div className="min-h-screen bg-slate-50/80 text-slate-800 pb-16 font-sans">
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
-        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-sky-600 transition cursor-pointer"
-          >
-            <span className="text-base">←</span> Dashboard
-          </button>
-
-          <div className="flex items-center gap-2">
-            <span className="text-lg">💧</span>
-            <h1 className="text-sm font-extrabold text-slate-800 tracking-tight">
-              HydroPulse
-            </h1>
+  const renderDashboardWidgets = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* WATER TRACKER */}
+      <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sky-600">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-5.34A5.84 5.84 0 0 1 2 12.28 5.9 5.9 0 0 1 8 6.55a5.9 5.9 0 0 1 6 5.73 5.84 5.84 0 0 1 0 2.38A5.9 5.9 0 0 1 20 14.66z" /></svg>
+            <h3 className="font-bold text-sm">Water Intake</h3>
           </div>
+          {actionLoading === "water" && <span className="w-4 h-4 border-2 border-sky-200 border-t-sky-600 rounded-full animate-spin"></span>}
+        </div>
+        <div>
+          <div className="flex justify-between text-xs font-bold text-slate-500 mb-2">
+            <span>{log?.water?.consumedMl || 0} ml</span>
+            <span>Target: {settings.targetMl || 2000} ml</span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-sky-400 to-blue-500 h-3 rounded-full transition-all duration-500"
+              style={{ width: `${Math.min(((log?.water?.consumedMl || 0) / (settings.targetMl || 2000)) * 100, 100)}%` }}
+            ></div>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => updateMetric("water", { amountMl: 250 }, "water")} disabled={actionLoading === "water"} className="flex-1 bg-sky-50 hover:bg-sky-100 text-sky-700 py-2 rounded-xl text-xs font-bold transition cursor-pointer">+ 250ml 🥛</button>
+          <button onClick={() => updateMetric("water", { amountMl: 500 }, "water")} disabled={actionLoading === "water"} className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded-xl text-xs font-bold transition cursor-pointer">+ 500ml 💧</button>
+        </div>
+      </div>
 
-          {/* Real-time Notification Bell */}
-          <div className="relative">
-            <button
-              onClick={() => setShowNotificationDrawer(!showNotificationDrawer)}
-              className="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition cursor-pointer"
-              aria-label="Notifications"
-            >
-              <span className="text-base">🔔</span>
-              {unreadNotifs > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-black rounded-full flex items-center justify-center animate-pulse">
-                  {unreadNotifs}
-                </span>
-              )}
+      {/* MOOD TRACKER */}
+      <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-rose-500">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <h3 className="font-bold text-sm">How are you feeling?</h3>
+          </div>
+          {actionLoading === "mood" && <span className="w-4 h-4 border-2 border-rose-200 border-t-rose-600 rounded-full animate-spin"></span>}
+        </div>
+        <div className="flex justify-between items-center bg-slate-50 p-3 rounded-2xl">
+          {[{ v: 1, e: "😡", l: "Awful" }, { v: 2, e: "🙁", l: "Bad" }, { v: 3, e: "😐", l: "Okay" }, { v: 4, e: "🙂", l: "Good" }, { v: 5, e: "🤩", l: "Great" }].map((m) => (
+            <button key={m.v} onClick={() => updateMetric("mood", { value: m.v }, "mood")} disabled={actionLoading === "mood"} className={`flex flex-col items-center gap-1 p-2 rounded-xl transition cursor-pointer hover:scale-110 ${log?.mood?.value === m.v ? "bg-rose-100 ring-1 ring-rose-300" : "hover:bg-slate-200"}`}>
+              <span className="text-2xl">{m.e}</span><span className={`text-[9px] font-bold ${log?.mood?.value === m.v ? "text-rose-700" : "text-slate-400"}`}>{m.l}</span>
             </button>
-
-            {/* Notification Drawer Popover */}
-            {showNotificationDrawer && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 space-y-3">
-                <div className="flex justify-between items-center border-b border-slate-100 pb-2">
-                  <span className="text-xs font-bold text-slate-800">Reminders Log</span>
-                  <button
-                    onClick={() => setNotifications([])}
-                    className="text-[10px] text-sky-600 font-semibold hover:underline cursor-pointer"
-                  >
-                    Clear All
-                  </button>
-                </div>
-
-                {notifications.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic py-4 text-center">
-                    No active notifications right now.
-                  </p>
-                ) : (
-                  <div className="max-h-60 overflow-y-auto space-y-2">
-                    {notifications.map((notif, idx) => (
-                      <div
-                        key={notif._id || idx}
-                        className="p-3 bg-sky-50/70 border border-sky-100 rounded-xl space-y-0.5"
-                      >
-                        <p className="text-xs font-bold text-sky-900">
-                          {notif.title || "💧 Time to Drink Water"}
-                        </p>
-                        <p className="text-[11px] text-slate-600 leading-snug">
-                          {notif.message}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+          ))}
         </div>
-      </header>
+      </div>
 
-      {/* Main Container */}
-      <main className="max-w-5xl mx-auto px-4 pt-6 space-y-6">
-        {/* Error / Notification Toasts */}
-        {error && (
-          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-2xl flex justify-between items-center">
-            <span>⚠️ {error}</span>
-            <button onClick={() => setError("")} className="font-bold cursor-pointer">✕</button>
-          </div>
-        )}
-
-        {toastMessage && (
-          <div className="p-4 bg-sky-600 text-white text-xs font-bold rounded-2xl shadow-lg flex items-center justify-between animate-bounce">
-            <span>✨ {toastMessage}</span>
-          </div>
-        )}
-
-        {/* HERO HYDRATION CARD */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-sky-600 via-sky-500 to-indigo-600 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-sky-500/15">
-          <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-            
-            {/* Left Column: Metrics & Visual Progress Bar */}
-            <div className="md:col-span-2 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[10px] font-bold tracking-wider uppercase">
-                <span>🎯 Goal: {(goalMl / 1000).toFixed(1)} Liters</span>
-                <span>•</span>
-                <span>{reminderEnabled ? `⏰ Reminder Active` : `🔕 Reminder Off`}</span>
-              </div>
-
-              <div>
-                <p className="text-xs text-sky-100 font-medium uppercase tracking-wider">
-                  Today's Intake
-                </p>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl md:text-5xl font-black tracking-tight">
-                    {totalMl}
-                  </span>
-                  <span className="text-lg text-sky-200 font-bold">/ {goalMl} ml</span>
-                </div>
-              </div>
-
-              {/* Progress Bar Component */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-sky-100">
-                  <span>{progressPercent}% Achieved</span>
-                  <span>
-                    {remainingMl > 0 ? `${remainingMl} ml left` : "Daily Target Met! 🎉"}
-                  </span>
-                </div>
-                <div className="w-full h-3.5 bg-white/20 rounded-full overflow-hidden p-0.5 backdrop-blur-xs">
-                  <div
-                    className="h-full bg-white rounded-full transition-all duration-700 ease-out shadow-sm"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Dynamic Circular Badge */}
-            <div className="hidden md:flex flex-col items-center justify-center p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-center space-y-2">
-              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-3xl shadow-inner">
-                💧
-              </div>
-              <div>
-                <p className="text-sm font-extrabold">{remainingMl === 0 ? "Fully Hydrated!" : "Keep Going!"}</p>
-                <p className="text-[11px] text-sky-100 mt-0.5">
-                  {reminderEnabled ? `Next check inside: ${activeStart} - ${activeEnd}` : "Turn on reminders in settings"}
-                </p>
-              </div>
-            </div>
-          </div>
+      {/* SLEEP TRACKER */}
+      <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 text-indigo-500">
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+          <h3 className="font-bold text-sm">Sleep Log</h3>
         </div>
-
-        {/* Tab Navigation */}
-        <div className="flex bg-slate-200/60 p-1.5 rounded-2xl max-w-xs mx-auto">
-          <button
-            onClick={() => setActiveTab("tracker")}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
-              activeTab === "tracker"
-                ? "bg-white text-slate-800 shadow-sm"
-                : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            🥤 Quick Log
-          </button>
-          <button
-            onClick={() => setActiveTab("settings")}
-            className={`flex-1 py-2 text-xs font-bold rounded-xl transition cursor-pointer ${
-              activeTab === "settings"
-                ? "bg-white text-slate-800 shadow-sm"
-                : "text-slate-500 hover:text-slate-800"
-            }`}
-          >
-            ⚙️ Settings
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-2xl border border-slate-100">
+            <input type="number" placeholder="0" value={sleepInput.hours} onChange={(e) => setSleepInput({...sleepInput, hours: e.target.value})} className="w-16 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-sm font-bold text-slate-700 text-center focus:outline-none focus:border-indigo-500" />
+            <span className="text-xs font-bold text-slate-500">Hours Slept</span>
+          </div>
+          <div className="flex gap-2 text-xs font-medium">
+            {['poor', 'average', 'good', 'excellent'].map((q) => (
+              <button key={q} onClick={() => setSleepInput({...sleepInput, quality: q})} className={`flex-1 py-1.5 rounded-lg capitalize border transition cursor-pointer ${sleepInput.quality === q ? "bg-indigo-50 border-indigo-300 text-indigo-700 font-bold" : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"}`}>{q}</button>
+            ))}
+          </div>
+          <button onClick={() => updateMetric("sleep", { hours: Number(sleepInput.hours), quality: sleepInput.quality }, "sleep")} disabled={!sleepInput.hours || !sleepInput.quality || actionLoading === "sleep"} className="w-full mt-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer">
+            {actionLoading === "sleep" ? "Saving..." : "Save Sleep Log"}
           </button>
         </div>
+      </div>
 
-        {/* TAB 1: QUICK LOGGING TRACKER */}
-        {activeTab === "tracker" && (
-          <div className="space-y-8">
-            {/* 1-Tap Log Cards */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Select Intake Amount (1-Tap Add)
-                </h2>
-                <span className="text-xs text-sky-600 font-semibold">
-                  Clicking adds immediately
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {WATER_PRESETS.map((preset) => (
-                  <button
-                    key={preset.amount}
-                    onClick={() => handleLogWater(preset.amount)}
-                    disabled={loading}
-                    className="p-4 rounded-2xl bg-white border border-slate-200/80 hover:border-sky-400 hover:shadow-md transition-all text-left group cursor-pointer relative overflow-hidden"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <span className="text-3xl group-hover:scale-110 transition-transform">
-                        {preset.icon}
-                      </span>
-                      <span className="px-2 py-0.5 bg-sky-50 text-sky-700 font-black text-[11px] rounded-lg border border-sky-100">
-                        +{preset.amount}ml
-                      </span>
-                    </div>
-                    <p className="text-xs font-bold text-slate-800 block">
-                      {preset.label}
-                    </p>
-                    <p className="text-[10px] text-slate-400 block mt-0.5">
-                      {preset.subtitle}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Custom Amount Logger */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-3">
-              <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
-                Or Log Custom Amount
-              </h3>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleLogWater(customMl);
-                }}
-                className="flex gap-2"
-              >
-                <div className="relative flex-1">
-                  <input
-                    type="number"
-                    min="50"
-                    step="25"
-                    value={customMl}
-                    onChange={(e) => setCustomMl(e.target.value)}
-                    className="w-full p-3 pl-4 pr-12 text-xs font-bold bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500/40"
-                    placeholder="Enter ml (e.g. 350)"
-                  />
-                  <span className="absolute right-4 top-3 text-xs text-slate-400 font-bold">
-                    ml
-                  </span>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-sm transition cursor-pointer"
-                >
-                  {loading ? "Logging..." : "Log Water"}
-                </button>
-              </form>
-            </div>
-
-            {/* Logs & History Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Today's Entries */}
-              <div className="md:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-5 space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-                    Today's Logs ({checkIn?.water?.entries?.length || 0})
-                  </h3>
-                  <span className="text-[11px] font-semibold text-slate-400">
-                    {totalMl} ml total
-                  </span>
-                </div>
-
-                {checkIn?.water?.entries?.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic py-6 text-center">
-                    No water intake logged today yet. Tap a glass above to start!
-                  </p>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    {checkIn?.water?.entries?.map((entry) => (
-                      <div
-                        key={entry._id}
-                        className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100 hover:border-sky-200 transition"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-lg">🥛</span>
-                          <div>
-                            <p className="text-xs font-bold text-slate-800">
-                              +{entry.amountMl} ml
-                            </p>
-                            <p className="text-[10px] text-slate-400">
-                              {new Date(entry.loggedAt).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                            </p>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => setEntryToDelete(entry._id)}
-                          className="text-slate-400 hover:text-rose-500 text-xs p-1.5 transition cursor-pointer"
-                          title="Delete entry"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* 7-Day History Sidebar */}
-              <div className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-3">
-                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
-                  7-Day History
-                </h3>
-
-                <div className="space-y-2">
-                  {history.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic py-2">No history records.</p>
-                  ) : (
-                    history.map((day) => {
-                      const dayTotal = day.water?.totalMl || 0;
-                      const dayGoal = day.water?.goalMl || goalMl;
-                      const isMet = dayTotal >= dayGoal;
-
-                      return (
-                        <div
-                          key={day.date}
-                          className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs"
-                        >
-                          <div>
-                            <p className="font-bold text-slate-700">{day.date}</p>
-                            <p className="text-[10px] text-slate-400">{dayTotal} / {dayGoal} ml</p>
-                          </div>
-                          {isMet ? (
-                            <span className="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-md">
-                              Met Target
-                            </span>
-                          ) : (
-                            <span className="text-[10px] bg-slate-200 text-slate-600 font-medium px-2 py-0.5 rounded-md">
-                              {Math.round((dayTotal / dayGoal) * 100)}%
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
+      {/* ACTIVITY & SCREEN TIME */}
+      <div className="flex flex-col gap-4">
+        {/* Activity */}
+        <div className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm flex-1">
+          <h3 className="font-bold text-sm text-emerald-500 mb-2 flex items-center gap-1.5"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg> Activity</h3>
+          <div className="flex gap-2 mb-2">
+            <select value={activityInput.type} onChange={(e) => setActivityInput({...activityInput, type: e.target.value})} className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none">
+              <option value="none">None</option><option value="walk">Walk</option><option value="run">Run</option><option value="gym">Gym</option>
+            </select>
+            <input type="number" placeholder="Mins" value={activityInput.minutes} onChange={(e) => setActivityInput({...activityInput, minutes: e.target.value})} className="w-16 bg-slate-50 border border-slate-200 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-700 text-center focus:outline-none" />
           </div>
-        )}
+          <button onClick={() => updateMetric("activity", { type: activityInput.type, minutes: Number(activityInput.minutes) }, "activity")} disabled={actionLoading === "activity" || !activityInput.minutes} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-1.5 rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer">Save</button>
+        </div>
+        {/* Screen Time */}
+        <div className="bg-white rounded-3xl p-4 border border-slate-200/80 shadow-sm flex-1">
+          <h3 className="font-bold text-sm text-purple-500 mb-2 flex items-center gap-1.5"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg> Screen Time</h3>
+          <div className="flex gap-2 mb-2">
+            <input type="number" placeholder="0" value={screenTimeInput.usedMinutes} onChange={(e) => setScreenTimeInput({usedMinutes: e.target.value})} className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700 focus:outline-none" />
+            <span className="text-xs font-bold text-slate-500 self-center">Mins</span>
+          </div>
+          <button onClick={() => updateMetric("screen-time", { usedMinutes: Number(screenTimeInput.usedMinutes) }, "screenTime")} disabled={actionLoading === "screenTime" || !screenTimeInput.usedMinutes} className="w-full bg-slate-800 hover:bg-slate-900 text-white py-1.5 rounded-xl text-xs font-bold transition disabled:opacity-50 cursor-pointer">Save</button>
+        </div>
+      </div>
+    </div>
+  );
 
-        {/* TAB 2: AUTOMATION & SCHEDULER SETTINGS */}
-        {activeTab === "settings" && (
-          <form onSubmit={handleSaveSettings} className="max-w-2xl mx-auto space-y-6">
-            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 md:p-8 space-y-6 shadow-xs">
-              <div>
-                <h2 className="text-base font-bold text-slate-800">
-                  Hydration & Automated Reminders
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Configure daily targets and automated cron check-ins.
-                </p>
-              </div>
-
-              {/* Goal Input */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700">
-                  Daily Hydration Goal (ml)
-                </label>
-                <input
-                  type="number"
-                  step="100"
-                  value={waterGoalMl}
-                  onChange={(e) => setWaterGoalMl(e.target.value)}
-                  className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-sky-500/40"
-                />
-                <p className="text-[10px] text-slate-400">Recommended: 2000 ml (2.0L) daily</p>
-              </div>
-
-              {/* Toggle Switch for Reminders */}
-              <div className="flex items-center justify-between p-4 bg-sky-50/60 border border-sky-100 rounded-2xl">
-                <div>
-                  <p className="text-xs font-bold text-sky-950">
-                    Enable Smart Reminders
-                  </p>
-                  <p className="text-[10px] text-sky-700">
-                    Triggers automated notifications until your goal is hit.
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={reminderEnabled}
-                  onChange={(e) => setReminderEnabled(e.target.checked)}
-                  className="w-5 h-5 accent-sky-600 rounded cursor-pointer"
-                />
-              </div>
-
-              {/* Advanced Settings */}
-              {reminderEnabled && (
-                <div className="space-y-5 pt-2 border-t border-slate-100">
-                  {/* Mode */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Interval Calculation Mode
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setReminderMode("auto")}
-                        className={`p-3 rounded-xl border text-left cursor-pointer transition ${
-                          reminderMode === "auto"
-                            ? "border-sky-500 bg-sky-50 text-sky-900 ring-2 ring-sky-200"
-                            : "border-slate-200 bg-white text-slate-600"
-                        }`}
-                      >
-                        <p className="text-xs font-bold">Auto Dynamic</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">
-                          Calculates interval automatically based on active hours
-                        </p>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setReminderMode("manual")}
-                        className={`p-3 rounded-xl border text-left cursor-pointer transition ${
-                          reminderMode === "manual"
-                            ? "border-sky-500 bg-sky-50 text-sky-900 ring-2 ring-sky-200"
-                            : "border-slate-200 bg-white text-slate-600"
-                        }`}
-                      >
-                        <p className="text-xs font-bold">Fixed Manual</p>
-                        <p className="text-[10px] text-slate-500 mt-0.5">
-                          Sends notifications on a fixed minute interval
-                        </p>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Active Window */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Active Window (Hours)
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <span className="text-[10px] text-slate-400 block mb-1">Start Time</span>
-                        <input
-                          type="time"
-                          value={activeStart}
-                          onChange={(e) => setActiveStart(e.target.value)}
-                          className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl"
-                        />
-                      </div>
-                      <div>
-                        <span className="text-[10px] text-slate-400 block mb-1">End Time</span>
-                        <input
-                          type="time"
-                          value={activeEnd}
-                          onChange={(e) => setActiveEnd(e.target.value)}
-                          className="w-full p-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Interval for Manual */}
-                  {reminderMode === "manual" && (
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-bold text-slate-700">
-                        Reminder Interval (Minutes)
-                      </label>
-                      <input
-                        type="number"
-                        min="15"
-                        value={intervalMinutes}
-                        onChange={(e) => setIntervalMinutes(e.target.value)}
-                        className="w-full p-3 text-xs bg-slate-50 border border-slate-200 rounded-xl"
-                      />
-                    </div>
-                  )}
-
-                  {/* Notification Channels */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Delivery Channels
-                    </label>
-                    <div className="flex gap-6">
-                      <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={inAppEnabled}
-                          onChange={(e) => setInAppEnabled(e.target.checked)}
-                          className="accent-sky-600 rounded"
-                        />
-                        🔔 In-App Bell
-                      </label>
-                      <label className="flex items-center gap-2 text-xs font-medium text-slate-700 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={emailEnabled}
-                          onChange={(e) => setEmailEnabled(e.target.checked)}
-                          className="accent-sky-600 rounded"
-                        />
-                        ✉️ Email Alerts
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md transition cursor-pointer"
-              >
-                {loading ? "Saving Settings..." : "Save Preferences"}
-              </button>
-            </div>
-          </form>
-        )}
-      </main>
-
-      {/* Delete Confirmation Modal */}
-      {entryToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-            <h3 className="text-sm font-bold text-slate-800">Delete Entry?</h3>
-            <p className="text-xs text-slate-500">
-              Are you sure you want to remove this log from today's intake?
+  // --- INSIGHTS & ANALYTICS TAB ---
+  const renderInsights = () => (
+    <div className="space-y-6">
+      {/* 1. Burnout Early Warning (Feature #7) */}
+      {insightsData.isBurnoutWarning && (
+        <div className="bg-gradient-to-r from-rose-500 to-red-500 rounded-3xl p-6 text-white shadow-lg flex items-start gap-4 animate-pulse">
+          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-xl shrink-0">⚠️</div>
+          <div>
+            <h3 className="font-bold text-lg">Burnout Early Warning</h3>
+            <p className="text-xs text-rose-100 mt-1 leading-relaxed">
+              Your average energy score over the last 3 days has dropped to <b>{Math.round(insightsData.avgRecentScore)}</b>. 
+              This pattern often leads to burnout. Consider getting more sleep, stepping away from screens, and taking a lighter workload tomorrow. LifeOS AI has flagged this to adjust your task scheduling.
             </p>
-            <div className="flex gap-2 justify-end">
-              <button
-                onClick={() => setEntryToDelete(null)}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleDeleteEntry(entryToDelete)}
-                className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 cursor-pointer"
-              >
-                Delete
-              </button>
-            </div>
           </div>
         </div>
       )}
+
+      {/* 2. 7-Day Energy Trend Chart (Pure CSS) */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm">
+        <h3 className="font-bold text-base text-slate-800 mb-6 flex items-center gap-2">
+          <svg className="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" /></svg>
+          Energy Score Trend (Last 7 Days)
+        </h3>
+        
+        <div className="h-48 flex items-end justify-between gap-2 md:gap-4 mt-8 pt-4 border-b border-slate-100 relative">
+          <div className="absolute inset-0 flex flex-col justify-between pointer-events-none text-[9px] text-slate-300 font-bold pr-2">
+            <span className="w-full border-t border-dashed border-slate-100 relative"><span className="absolute -top-2 -left-6">100</span></span>
+            <span className="w-full border-t border-dashed border-slate-100 relative"><span className="absolute -top-2 -left-6">50</span></span>
+            <span className="w-full relative"><span className="absolute -top-2 -left-6">0</span></span>
+          </div>
+
+          {insightsData.chartDays.map((day, idx) => {
+            const height = day.score > 0 ? `${day.score}%` : '4px';
+            const color = day.score >= 70 ? 'from-emerald-400 to-emerald-500' 
+                        : day.score >= 50 ? 'from-amber-400 to-amber-500' 
+                        : day.score > 0 ? 'from-rose-400 to-rose-500' 
+                        : 'from-slate-200 to-slate-200';
+
+            return (
+              <div key={idx} className="flex flex-col items-center justify-end h-full w-full relative group z-10">
+                <div className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-slate-800 text-white text-[10px] font-bold py-1 px-2 rounded-lg transition-opacity whitespace-nowrap pointer-events-none">
+                  Score: {Math.round(day.score)}
+                </div>
+                <div 
+                  className={`w-full max-w-[40px] rounded-t-lg bg-gradient-to-t ${color} transition-all duration-700 ease-out`}
+                  style={{ height }}
+                ></div>
+                <span className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-wider">{day.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 3. AI Weekly Narrative Report (Real Backend Integration) */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-100 rounded-bl-full blur-3xl pointer-events-none"></div>
+        
+        <div className="flex items-center justify-between mb-4 relative z-10">
+          <div className="flex items-center gap-2">
+             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xs shadow-md">
+              ✦
+            </div>
+            <h3 className="font-bold text-base text-slate-800">Weekly AI Report</h3>
+          </div>
+          <span className="px-2 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-lg border border-purple-100">Premium Feature</span>
+        </div>
+
+        <div className="relative z-10 min-h-[100px]">
+          {!aiReportData && !generatingReport && (
+            <div className="text-center py-6">
+              <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
+                Generate a personalized narrative analyzing your screen time vs productivity and identifying your hidden energy drainers.
+              </p>
+              <button 
+                onClick={generateAIReport}
+                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer"
+              >
+                Generate Real AI Report
+              </button>
+            </div>
+          )}
+
+          {generatingReport && (
+            <div className="flex flex-col items-center justify-center py-6 space-y-3">
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-2 h-2 bg-sky-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+              <p className="text-[11px] font-bold text-slate-500 animate-pulse uppercase tracking-wider">Analyzing Context via Gemini / Groq...</p>
+            </div>
+          )}
+
+          {aiReportData && !generatingReport && (
+            <div className="space-y-4">
+              <div className="bg-purple-50/60 p-5 rounded-2xl border border-purple-100 space-y-3">
+                <p className="text-sm text-slate-800 leading-relaxed font-semibold">
+                  {aiReportData.report}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-purple-100/80">
+                  <div className="text-xs text-purple-900">
+                    <span className="font-bold">Key Insight:</span> {aiReportData.keyInsight}
+                  </div>
+                  <div className="text-xs text-purple-900">
+                    <span className="font-bold">Actionable Tip:</span> {aiReportData.actionableTip}
+                  </div>
+                </div>
+              </div>
+              
+              <button 
+                onClick={generateAIReport}
+                className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
+              >
+                ↻ Regenerate Report
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
+  );
+
+  const renderSettings = () => (
+    <div className="max-w-2xl mx-auto space-y-6">
+      {successMsg && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-2xl text-xs font-bold flex items-center justify-between">
+          <span>{successMsg}</span>
+          <button onClick={() => setSuccessMsg("")} className="text-emerald-900 text-lg cursor-pointer">×</button>
+        </div>
+      )}
+
+      <form onSubmit={handleSaveSettings} className="space-y-6">
+        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 text-indigo-600 mb-2">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            <h3 className="font-bold text-base text-slate-800">Daily Goals</h3>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Daily Water Target (ml)</label>
+            <input type="number" value={settings.targetMl} onChange={(e) => setSettings({...settings, targetMl: Number(e.target.value)})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition" />
+            <p className="text-[10px] text-slate-400 mt-1.5">Recommended: 2000ml to 3000ml per day.</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+           <div className="flex items-center gap-2 text-indigo-600 mb-2">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+            <h3 className="font-bold text-base text-slate-800">Smart Reminders</h3>
+          </div>
+
+          <label className="flex items-center justify-between cursor-pointer p-4 bg-slate-50 rounded-2xl border border-slate-100">
+            <div>
+              <p className="text-sm font-bold text-slate-800">Enable Water Reminders</p>
+              <p className="text-xs text-slate-500">Receive alerts to stay hydrated</p>
+            </div>
+            <div className="relative">
+              <input type="checkbox" className="sr-only" checked={settings.isActive} onChange={() => setSettings({...settings, isActive: !settings.isActive})} />
+              <div className={`block w-12 h-7 rounded-full transition-colors ${settings.isActive ? "bg-indigo-500" : "bg-slate-300"}`}></div>
+              <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${settings.isActive ? "translate-x-5" : ""}`}></div>
+            </div>
+          </label>
+
+          <label className={`flex items-center justify-between cursor-pointer p-4 rounded-2xl border transition ${settings.isActive ? "bg-slate-50 border-slate-100" : "bg-slate-50/50 border-slate-100/50 opacity-60"}`}>
+            <div>
+              <p className="text-sm font-bold text-slate-800">Email Alerts</p>
+              <p className="text-xs text-slate-500">Send reminders to your registered email</p>
+            </div>
+            <div className="relative">
+              <input type="checkbox" className="sr-only" disabled={!settings.isActive} checked={settings.isEmailAlertEnabled} onChange={() => setSettings({...settings, isEmailAlertEnabled: !settings.isEmailAlertEnabled})} />
+              <div className={`block w-12 h-7 rounded-full transition-colors ${settings.isEmailAlertEnabled ? "bg-sky-500" : "bg-slate-300"}`}></div>
+              <div className={`absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${settings.isEmailAlertEnabled ? "translate-x-5" : ""}`}></div>
+            </div>
+          </label>
+
+          {settings.isActive && (
+            <div className="space-y-4 pt-2">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Wake Time</label>
+                  <input type="time" value={settings.wakeTime} onChange={(e) => setSettings({...settings, wakeTime: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:outline-none" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1.5">Sleep Time</label>
+                  <input type="time" value={settings.sleepTime} onChange={(e) => setSettings({...settings, sleepTime: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-bold text-slate-700 focus:outline-none" />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Reminder Frequency</label>
+                <div className="flex gap-2 p-1 bg-slate-100 rounded-xl">
+                  <button type="button" onClick={() => setIsAutoInterval(true)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${isAutoInterval ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>Auto (Smart AI)</button>
+                  <button type="button" onClick={() => setIsAutoInterval(false)} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${!isAutoInterval ? "bg-white text-indigo-700 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}>Manual Setup</button>
+                </div>
+                
+                <div className="mt-3">
+                  {isAutoInterval ? (
+                    <div className="p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                      <p className="text-xs text-indigo-700 font-medium leading-relaxed">
+                        ✨ LifeOS will automatically calculate the best time to remind you based on your daily target ({settings.targetMl}ml) and waking hours.
+                      </p>
+                    </div>
+                  ) : (
+                    <div>
+                      <select value={settings.intervalHours} onChange={(e) => setSettings({...settings, intervalHours: Number(e.target.value)})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-bold text-slate-700 focus:outline-none">
+                        <option value={1}>Every 1 Hour</option><option value={2}>Every 2 Hours</option><option value={3}>Every 3 Hours</option><option value={4}>Every 4 Hours</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <button type="submit" disabled={actionLoading === "settings"} className="w-full bg-gradient-to-r from-indigo-600 to-sky-500 hover:opacity-95 text-white py-3.5 rounded-2xl text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
+          {actionLoading === "settings" ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span> Saving Settings...</> : "Save Preferences"}
+        </button>
+      </form>
+    </div>
+  );
+
+  const tabs = [
+    { key: TAB_KEYS.DASHBOARD, label: "Daily Tracker" },
+    { key: TAB_KEYS.INSIGHTS, label: "Insights & AI" },
+    { key: TAB_KEYS.SETTINGS, label: "Settings & Reminders" },
+  ];
+
+  return (
+    <FeatureLayout
+      badgeText="Health OS"
+      title="Wellness Tracker"
+      subtitle="Log your daily metrics to power your AI Energy Score"
+      onBack={() => navigate("/dashboard")}
+      loading={loading && !log && activeTab === TAB_KEYS.DASHBOARD}
+      error={error}
+      setError={setError}
+      hasItems={true} 
+      isCreatingNew={false}
+      tabs={tabs}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      renderHero={renderHero}
+      renderSidebar={renderSidebar}
+      renderTabContent={
+        activeTab === TAB_KEYS.DASHBOARD ? renderDashboardWidgets : 
+        activeTab === TAB_KEYS.INSIGHTS ? renderInsights : 
+        renderSettings
+      }
+    />
   );
 }

@@ -7,12 +7,18 @@ export default function RoadmapGenerator() {
 
   // State Management
   const [goal, setGoal] = useState("");
-  const [roadmaps, setRoadmaps] = useState([]); // Array for all separate roadmaps
+  const [roadmaps, setRoadmaps] = useState([]); // Array for current page roadmaps
   const [activeRoadmapIndex, setActiveRoadmapIndex] = useState(0); // Selected Roadmap index
   const [loading, setLoading] = useState(false);
   const [initialFetching, setInitialFetching] = useState(true);
   const [error, setError] = useState("");
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+
+  // Server Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRoadmaps, setTotalRoadmaps] = useState(0);
+  const itemsPerPage = 10;
 
   // Delete Roadmap Modal States
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -22,27 +28,49 @@ export default function RoadmapGenerator() {
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // Fetch All Existing Roadmaps
+  // Fetch Existing Roadmaps with Server Pagination
   useEffect(() => {
-    fetchRoadmaps();
-  }, []);
+    fetchRoadmaps(currentPage);
+  }, [currentPage]);
 
-  const fetchRoadmaps = async () => {
+  const fetchRoadmaps = async (page = 1) => {
     try {
       setInitialFetching(true);
-      const res = await fetch(`${BACKEND_URL}/roadmap`, {
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/roadmap?page=${page}&limit=${itemsPerPage}`,
+        {
+          credentials: "include",
+        }
+      );
       const data = await res.json();
 
       if (res.ok && data.roadmaps) {
-        // Backend should return array of roadmaps: { roadmaps: [...] }
         setRoadmaps(Array.isArray(data.roadmaps) ? data.roadmaps : [data.roadmaps]);
+        setActiveRoadmapIndex(0);
+
+        if (data.pagination) {
+          setTotalPages(data.pagination.totalPages);
+          setTotalRoadmaps(data.pagination.totalRoadmaps);
+        }
       }
     } catch {
-      // Error handling
+      setError("Failed to load roadmaps.");
     } finally {
       setInitialFetching(false);
+    }
+  };
+
+  const paginationConfig = {
+    page: currentPage,
+    totalPages: totalPages,
+    total: totalRoadmaps,
+    hasNextPage: currentPage < totalPages,
+    hasPrevPage: currentPage > 1,
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
     }
   };
 
@@ -69,14 +97,15 @@ export default function RoadmapGenerator() {
         return;
       }
 
-      // Append new roadmap to the array
-      const newRoadmap = data.roadmap;
-      const updatedList = [newRoadmap, ...roadmaps];
-      
-      setRoadmaps(updatedList);
-      setActiveRoadmapIndex(0); // Select the newly created roadmap
       setIsCreatingNew(false);
       setGoal("");
+
+      // Refresh page 1 to see newly created roadmap at the top
+      if (currentPage === 1) {
+        fetchRoadmaps(1);
+      } else {
+        setCurrentPage(1);
+      }
     } catch {
       setError("Unable to connect to AI server. Please try again.");
     } finally {
@@ -108,15 +137,11 @@ export default function RoadmapGenerator() {
         });
       }
 
-      const updatedList = roadmaps.filter((_, idx) => idx !== roadmapToDeleteIndex);
-      setRoadmaps(updatedList);
-
-      if (activeRoadmapIndex >= updatedList.length) {
-        setActiveRoadmapIndex(Math.max(0, updatedList.length - 1));
-      }
-
       setShowDeleteModal(false);
       setRoadmapToDeleteIndex(null);
+
+      // Refresh list for the active page
+      fetchRoadmaps(currentPage);
     } catch {
       setError("Failed to delete roadmap.");
     } finally {
@@ -125,10 +150,6 @@ export default function RoadmapGenerator() {
   };
 
   const activeRoadmap = roadmaps[activeRoadmapIndex] || null;
-
-  /* -------------------------------------------------------------------------- */
-  /*                            RENDER SLOTS                                    */
-  /* -------------------------------------------------------------------------- */
 
   // 1. INPUT FORM
   const renderForm = () => (
@@ -192,12 +213,12 @@ export default function RoadmapGenerator() {
     </div>
   );
 
-  // 3. SIDEBAR (LIST OF ALL ROADMAPS)
+  // 3. SIDEBAR (LIST OF ROADMAPS FOR CURRENT PAGE)
   const renderSidebar = () => (
     <div className="space-y-3">
       <div className="flex items-center justify-between px-2">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-          My Roadmaps ({roadmaps.length})
+          My Roadmaps ({totalRoadmaps})
         </h3>
         <button
           onClick={() => setIsCreatingNew(true)}
@@ -233,7 +254,7 @@ export default function RoadmapGenerator() {
                 </p>
               </div>
 
-              {/* Delete Button for each Roadmap */}
+              {/* Delete Button */}
               <button
                 type="button"
                 onClick={(e) => confirmDeleteRoadmap(e, idx)}
@@ -248,7 +269,7 @@ export default function RoadmapGenerator() {
     </div>
   );
 
-  // 4. MAIN CONTENT (PHASES/MILESTONES OF SELECTED ROADMAP)
+  // 4. MAIN CONTENT
   const renderTabContent = () => {
     if (!activeRoadmap) return null;
 
@@ -290,7 +311,9 @@ export default function RoadmapGenerator() {
         onBack={() => navigate("/dashboard")}
         isCreatingNew={isCreatingNew}
         setIsCreatingNew={setIsCreatingNew}
-        hasItems={roadmaps.length > 0}
+        hasItems={totalRoadmaps > 0}
+        pagination={paginationConfig}
+        onPageChange={handlePageChange}
         renderForm={renderForm}
         renderHero={renderHero}
         renderSidebar={renderSidebar}

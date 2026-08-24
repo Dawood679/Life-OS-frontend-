@@ -1,9 +1,8 @@
-import React from "react";
 import DeleteModal from "./DeleteModal";
 
 export default function FeatureLayout({
   // Metadata
-  badgeText = "LearningOS Hub",
+  badgeText = "LifeOS Hub",
   title,
   subtitle,
 
@@ -16,6 +15,10 @@ export default function FeatureLayout({
   isDeleting = false,
   showDeleteModal = false,
   setShowDeleteModal,
+
+  // Pagination Props (NEW)
+  pagination = null, // Expects: { page, totalPages, total, hasNextPage, hasPrevPage }
+  onPageChange, // Function: (newPage) => void
 
   // State flags
   loading = false,
@@ -50,10 +53,8 @@ export default function FeatureLayout({
   return (
     <div className="min-h-screen w-full bg-surface-pink/30 p-4 md:p-8 font-sans text-slate-800 relative">
       <div className="max-w-6xl mx-auto space-y-8">
-        
         {/* TOP HEADER SECTION */}
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-sky-50/80 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-xs">
-          
           <div className="flex items-start md:items-center gap-4">
             {/* BACK BUTTON */}
             {typeof onBack === "function" && (
@@ -97,7 +98,6 @@ export default function FeatureLayout({
 
           {/* ACTION BUTTONS (Delete & Create) */}
           <div className="flex items-center gap-3 self-start md:self-auto">
-            {/* DELETE FEATURE BUTTON */}
             {hasItems && !isCreatingNew && onDelete && (
               <button
                 type="button"
@@ -105,22 +105,41 @@ export default function FeatureLayout({
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 text-xs font-semibold shadow-2xs transition cursor-pointer"
                 title="Delete Feature"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
                 Delete
               </button>
             )}
 
-            {/* CREATE NEW BUTTON */}
             {!isCreatingNew && hasItems && setIsCreatingNew && (
               <button
                 type="button"
                 onClick={() => setIsCreatingNew(true)}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-sky-500 to-sky-400 hover:opacity-95 text-white text-xs font-semibold shadow-md transition cursor-pointer"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
                 Create New
               </button>
@@ -145,9 +164,9 @@ export default function FeatureLayout({
         )}
 
         {/* INPUT FORM (Empty state or Create New state) */}
-        {(!hasItems || isCreatingNew) && !loading && (
-          typeof renderForm === "function" ? renderForm() : renderForm
-        )}
+        {(!hasItems || isCreatingNew) &&
+          !loading &&
+          (typeof renderForm === "function" ? renderForm() : renderForm)}
 
         {/* LOADING STATE */}
         {loading && (
@@ -159,7 +178,9 @@ export default function FeatureLayout({
               </div>
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-800">Processing Request...</h3>
+              <h3 className="text-base font-bold text-slate-800">
+                Processing Request...
+              </h3>
               <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
                 LifeOS AI is generating your requested blueprint...
               </p>
@@ -170,19 +191,77 @@ export default function FeatureLayout({
         {/* MAIN DISPLAY GRID */}
         {hasItems && !loading && !isCreatingNew && (
           <div className="space-y-6">
-            
             {/* HERO BANNER */}
-            {renderHero && (
-              typeof renderHero === "function" ? renderHero() : renderHero
-            )}
+            {renderHero &&
+              (typeof renderHero === "function" ? renderHero() : renderHero)}
 
             {/* 2-COLUMN GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              
-              {/* LEFT SIDEBAR */}
+              {/* LEFT SIDEBAR + PAGINATION */}
               {renderSidebar && (
-                <div className="lg:col-span-4 space-y-3">
-                  {typeof renderSidebar === "function" ? renderSidebar() : renderSidebar}
+                <div className="lg:col-span-4 space-y-4">
+                  {typeof renderSidebar === "function"
+                    ? renderSidebar()
+                    : renderSidebar}
+
+                  {/* REUSABLE PAGINATION BAR */}
+                  {pagination && pagination.totalPages > 1 && (
+                    <nav
+                      aria-label="Pagination Navigation"
+                      className="flex items-center justify-between gap-3 bg-white/80 backdrop-blur-md border border-slate-200/90 rounded-2xl p-2.5 shadow-xs"
+                    >
+                      {/* PREVIOUS BUTTON */}
+                      <button
+                        type="button"
+                        disabled={!pagination.hasPrevPage}
+                        onClick={() => onPageChange?.(pagination.page - 1)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 active:scale-95 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-700 disabled:hover:border-slate-200/80 disabled:active:scale-100 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 19l-7-7 7-7"
+                          />
+                        </svg>
+                        Prev
+                      </button>
+
+                      {/* PAGE INDICATOR */}
+                      <span className="text-xs font-bold text-slate-500">
+                        Page {pagination.page} of {pagination.totalPages}
+                      </span>
+
+                      {/* NEXT BUTTON */}
+                      <button
+                        type="button"
+                        disabled={!pagination.hasNextPage}
+                        onClick={() => onPageChange?.(pagination.page + 1)}
+                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 active:scale-95 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-700 disabled:hover:border-slate-200/80 disabled:active:scale-100 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                      >
+                        Next
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </button>
+                    </nav>
+                  )}
                 </div>
               )}
 
@@ -213,15 +292,14 @@ export default function FeatureLayout({
                 )}
 
                 {/* TAB CONTENT */}
-                {renderTabContent && (
-                  typeof renderTabContent === "function" ? renderTabContent() : renderTabContent
-                )}
-
+                {renderTabContent &&
+                  (typeof renderTabContent === "function"
+                    ? renderTabContent()
+                    : renderTabContent)}
               </div>
             </div>
           </div>
         )}
-
       </div>
 
       {/* SEPARATE REUSABLE DELETE MODAL */}

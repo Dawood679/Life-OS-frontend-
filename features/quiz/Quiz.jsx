@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import FeatureLayout from "../../src/components/FeatureLayout";
 import { useNavigate } from "react-router-dom";
+import FeatureLayout from "../../src/components/FeatureLayout";
 
 export default function Quiz() {
   const navigate = useNavigate();
@@ -11,6 +11,21 @@ export default function Quiz() {
   const [fetchingDetail, setFetchingDetail] = useState(false);
   const [error, setError] = useState("");
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+
+  // Quiz List Pagination State (passed to FeatureLayout)
+  const [quizPagination, setQuizPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
+    totalItems: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+
+  // Question Pagination State (inside individual quiz view) - client-side only,
+  // since fetchQuizDetail always loads ALL questions (limit=100) in one go.
+  const [questionPage, setQuestionPage] = useState(1);
+  const QUESTIONS_PER_PAGE = 5;
 
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
@@ -32,23 +47,31 @@ export default function Quiz() {
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
 
-  // 1. Fetch All Quizzes on Mount
+  // 1. Fetch Quizzes List with Pagination
   useEffect(() => {
-    fetchQuizzes();
+    fetchQuizzes(quizPagination.currentPage);
   }, []);
 
-  const fetchQuizzes = async () => {
+  const fetchQuizzes = async (page = 1) => {
     try {
       setInitialFetching(true);
-      const res = await fetch(`${BACKEND_URL}/quiz`, {
-        credentials: "include",
-      });
+      const res = await fetch(
+        `${BACKEND_URL}/quiz?page=${page}&limit=${quizPagination.pageSize}`,
+        {
+          credentials: "include",
+        }
+      );
       const data = await res.json();
 
       if (res.ok && data.quizzes) {
         setQuizzes(data.quizzes);
+        if (data.pagination) {
+          setQuizPagination(data.pagination);
+        }
         if (data.quizzes.length > 0) {
           fetchQuizDetail(data.quizzes[0]._id);
+        } else {
+          setSelectedQuiz(null);
         }
       } else {
         setError(data.message || "Failed to fetch quizzes.");
@@ -60,20 +83,35 @@ export default function Quiz() {
     }
   };
 
-  // 2. Fetch Single Quiz Detail
+  const handleQuizPageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= quizPagination.totalPages) {
+      fetchQuizzes(newPage);
+    }
+  };
+
+  // 2. Fetch Single Quiz Detail (always loads ALL questions so scoring/review
+  // works correctly; "pagination" of questions is handled client-side below)
   const fetchQuizDetail = async (id) => {
     try {
       setFetchingDetail(true);
       setError("");
-      const res = await fetch(`${BACKEND_URL}/quiz/${id}`, {
+
+      const res = await fetch(`${BACKEND_URL}/quiz/${id}?page=1&limit=100`, {
         credentials: "include",
       });
       const data = await res.json();
 
       if (res.ok && data.quiz) {
         setSelectedQuiz(data.quiz);
-        setUserAnswers({});
-        setIsSubmitted(false);
+        setQuestionPage(1);
+
+        // Restore real submission state from the server instead of
+        // always resetting to "not submitted".
+        setIsSubmitted(!!data.quiz.isSubmitted);
+        setUserAnswers(
+          data.quiz.isSubmitted ? data.quiz.userAnswers || {} : {}
+        );
+
         setActiveTab("takeQuiz");
       } else {
         setError(data.message || "Failed to load quiz details.");
@@ -82,6 +120,18 @@ export default function Quiz() {
       setError("Error loading selected quiz details.");
     } finally {
       setFetchingDetail(false);
+    }
+  };
+
+  // Client-side question page navigation (no refetch needed - we already
+  // have every question in selectedQuiz.questions)
+  const totalQuestionPages = selectedQuiz?.questions
+    ? Math.ceil(selectedQuiz.questions.length / QUESTIONS_PER_PAGE)
+    : 1;
+
+  const handleQuestionPageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalQuestionPages) {
+      setQuestionPage(newPage);
     }
   };
 
@@ -112,9 +162,8 @@ export default function Quiz() {
         return;
       }
 
-      const newQuiz = data.quiz;
-      setQuizzes((prev) => [newQuiz, ...prev]);
-      setSelectedQuiz(newQuiz);
+      // Re-fetch page 1 so the list updates with fresh pagination
+      fetchQuizzes(1);
       setUserAnswers({});
       setIsSubmitted(false);
       setIsCreatingNew(false);
@@ -143,7 +192,7 @@ export default function Quiz() {
     setDeleteModal({ isOpen: false, quizId: null, quizTitle: "" });
   };
 
-  // 4. Confirm Delete Quiz Function
+  // 4. Confirm Delete Quiz
   const confirmDelete = async () => {
     const { quizId } = deleteModal;
     if (!quizId) return;
@@ -156,16 +205,9 @@ export default function Quiz() {
       });
 
       if (res.ok) {
-        const updated = quizzes.filter((item) => item._id !== quizId);
-        setQuizzes(updated);
-        if (selectedQuiz?._id === quizId) {
-          if (updated.length > 0) {
-            fetchQuizDetail(updated[0]._id);
-          } else {
-            setSelectedQuiz(null);
-          }
-        }
         closeDeleteModal();
+        // Refresh current list page
+        fetchQuizzes(quizPagination.currentPage);
       } else {
         const data = await res.json();
         setError(data.message || "Failed to delete quiz.");
@@ -178,17 +220,20 @@ export default function Quiz() {
   };
 
   // Quiz Interaction Logic
-  const handleSelectOption = (questionIdx, optionKey) => {
+  const handleSelectOption = (globalIdx, optionKey) => {
     if (isSubmitted) return;
     setUserAnswers((prev) => ({
       ...prev,
-      [questionIdx]: optionKey,
+      [globalIdx]: optionKey,
     }));
   };
 
   const calculateScore = () => {
     if (!selectedQuiz?.questions) return 0;
     let correctCount = 0;
+
+    // selectedQuiz.questions always holds the FULL list (limit=100 on fetch),
+    // so the array index IS the true global index - no page offset needed.
     selectedQuiz.questions.forEach((q, idx) => {
       if (userAnswers[idx] === q.correctAnswer) {
         correctCount++;
@@ -197,20 +242,46 @@ export default function Quiz() {
     return correctCount;
   };
 
-  const handleSubmitQuiz = () => {
-    setIsSubmitted(true);
+  const handleSubmitQuiz = async () => {
+    try {
+      setError("");
+      const res = await fetch(
+        `${BACKEND_URL}/quiz/${selectedQuiz._id}/submit`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ userAnswers }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setIsSubmitted(true);
+        // Refresh quizzes list to update overall score badges
+        fetchQuizzes(quizPagination.currentPage);
+      } else {
+        setError(data.message || "Failed to submit quiz score.");
+      }
+    } catch (err) {
+      setError("Error submitting quiz results to server.");
+    }
   };
 
   // Navigation Dynamic Tabs
   const tabs = [
-    { key: "takeQuiz", label: isSubmitted ? "Questions & Explanations" : "Take Quiz" },
+    {
+      key: "takeQuiz",
+      label: isSubmitted ? "Questions & Explanations" : "Take Quiz",
+    },
     {
       key: "summary",
       label: `Results & Analytics ${isSubmitted ? "🏆" : ""}`,
     },
   ];
 
-  // Helper Badge Color for Difficulty
+  // Helper Badge Color
   const getDifficultyBadge = (diff = "") => {
     switch (diff.toLowerCase()) {
       case "advanced":
@@ -225,7 +296,6 @@ export default function Quiz() {
   };
 
   // SECTION 1: GENERATE FORM
-
   const renderForm = () => (
     <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-3xl p-6 md:p-10 shadow-xl relative overflow-hidden transition-all">
       <div className="absolute top-10 right-10 w-48 h-48 bg-indigo-100/40 rounded-full blur-3xl pointer-events-none" />
@@ -238,8 +308,9 @@ export default function Quiz() {
           Generate AI Knowledge Assessment
         </h2>
         <p className="text-xs text-slate-500 leading-relaxed">
-          Specify a topic, choose your target difficulty level, and set question limits.
-          LifeOS AI will dynamically craft progressive MCQs with detailed explanations.
+          Specify a topic, choose your target difficulty level, and set question
+          limits. LifeOS AI will dynamically craft progressive MCQs with
+          detailed explanations.
         </p>
 
         <form onSubmit={handleGenerate} className="mt-6 space-y-4 text-left">
@@ -316,8 +387,18 @@ export default function Quiz() {
               ) : (
                 <>
                   <span>Create Quiz</span>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M14 5l7 7m0 0l-7 7m7-7H3"
+                    />
                   </svg>
                 </>
               )}
@@ -332,10 +413,12 @@ export default function Quiz() {
   const renderHero = () => {
     if (!selectedQuiz) return null;
 
-    const totalQuestions = selectedQuiz.questions?.length || 0;
+    const totalQuestions =
+      selectedQuiz.questions?.length || selectedQuiz.numberOfQuestions || 0;
     const answeredCount = Object.keys(userAnswers).length;
     const score = calculateScore();
-    const scorePercentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+    const scorePercentage =
+      totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
     return (
       <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-sky-500 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
@@ -344,39 +427,60 @@ export default function Quiz() {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${getDifficultyBadge(selectedQuiz.difficulty)}`}>
+              <span
+                className={`px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase ${getDifficultyBadge(selectedQuiz.difficulty)}`}
+              >
                 {selectedQuiz.difficulty || "Beginner"}
               </span>
-              <span className="text-xs text-sky-100/80">• {totalQuestions} MCQs</span>
+              <span className="text-xs text-sky-100/80">
+                • {totalQuestions} MCQs
+              </span>
             </div>
             <h2 className="text-2xl md:text-3xl font-serif font-bold line-clamp-2">
               {selectedQuiz.quizTitle || selectedQuiz.topic}
             </h2>
             <p className="text-xs text-indigo-100">
-              Created on: {new Date(selectedQuiz.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
+              Created on:{" "}
+              {new Date(selectedQuiz.createdAt).toLocaleDateString(undefined, {
+                dateStyle: "medium",
+              })}
             </p>
           </div>
 
           <div className="bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-2xl flex items-center gap-5 self-start md:self-auto shrink-0">
             {isSubmitted ? (
               <div className="text-center">
-                <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">Final Score</p>
+                <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">
+                  Final Score
+                </p>
                 <p className="text-xl font-extrabold text-white mt-0.5">
-                  {scorePercentage}% <span className="text-xs font-normal text-sky-200">({score}/{totalQuestions})</span>
+                  {scorePercentage}%{" "}
+                  <span className="text-xs font-normal text-sky-200">
+                    ({score}/{totalQuestions})
+                  </span>
                 </p>
               </div>
             ) : (
               <div className="text-center">
-                <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">Progress</p>
+                <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">
+                  Progress
+                </p>
                 <p className="text-xl font-extrabold text-white mt-0.5">
-                  {answeredCount} <span className="text-xs font-normal text-sky-200">/ {totalQuestions} answered</span>
+                  {answeredCount}{" "}
+                  <span className="text-xs font-normal text-sky-200">
+                    / {totalQuestions} answered
+                  </span>
                 </p>
               </div>
             )}
             <div className="h-8 w-px bg-white/20" />
             <div className="text-center">
-              <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">Status</p>
-              <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold mt-1 ${isSubmitted ? "bg-emerald-400 text-slate-900" : "bg-amber-400 text-slate-900"}`}>
+              <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">
+                Status
+              </p>
+              <span
+                className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold mt-1 ${isSubmitted ? "bg-emerald-400 text-slate-900" : "bg-amber-400 text-slate-900"}`}
+              >
                 {isSubmitted ? "Completed" : "In Progress"}
               </span>
             </div>
@@ -386,12 +490,11 @@ export default function Quiz() {
     );
   };
 
-
   // SECTION 3: SIDEBAR
   const renderSidebar = () => (
     <>
       <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider px-2">
-        Saved Quizzes ({quizzes.length})
+        Saved Quizzes ({quizPagination.totalItems || quizzes.length})
       </h3>
 
       <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
@@ -431,14 +534,25 @@ export default function Quiz() {
                 </div>
               </div>
 
-              {/* Triggers New Custom Delete Modal */}
               <button
-                onClick={(e) => openDeleteModal(item._id, item.quizTitle || item.topic, e)}
+                onClick={(e) =>
+                  openDeleteModal(item._id, item.quizTitle || item.topic, e)
+                }
                 className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 transition cursor-pointer shrink-0 rounded-lg hover:bg-rose-50"
                 title="Delete Quiz"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
               </button>
             </div>
@@ -447,7 +561,6 @@ export default function Quiz() {
       </div>
     </>
   );
-
 
   // SECTION 4: TAB CONTENT
   const renderTabContent = () => {
@@ -465,8 +578,14 @@ export default function Quiz() {
     if (!selectedQuiz || !selectedQuiz.questions) return null;
 
     if (activeTab === "takeQuiz") {
-      const answeredCount = Object.keys(userAnswers).length;
       const totalQuestions = selectedQuiz.questions.length;
+      const totalPages = totalQuestionPages;
+      const startIndex = (questionPage - 1) * QUESTIONS_PER_PAGE;
+      // Slice client-side - selectedQuiz.questions already holds ALL questions.
+      const visibleQuestions = selectedQuiz.questions.slice(
+        startIndex,
+        startIndex + QUESTIONS_PER_PAGE
+      );
 
       return (
         <div className="space-y-6">
@@ -476,7 +595,7 @@ export default function Quiz() {
             </h4>
             {!isSubmitted ? (
               <span className="text-xs font-semibold text-indigo-600">
-                {answeredCount} of {totalQuestions} Answered
+                {Object.keys(userAnswers).length} of {totalQuestions} Answered
               </span>
             ) : (
               <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
@@ -485,19 +604,21 @@ export default function Quiz() {
             )}
           </div>
 
+          {/* Question Cards */}
           <div className="space-y-6">
-            {selectedQuiz.questions.map((q, qIdx) => {
-              const selectedOption = userAnswers[qIdx];
+            {visibleQuestions.map((q, idx) => {
+              const globalIdx = startIndex + idx;
+              const selectedOption = userAnswers[globalIdx];
               const options = q.options || [];
 
               return (
                 <div
-                  key={qIdx}
+                  key={globalIdx}
                   className="p-5 md:p-6 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs space-y-4"
                 >
                   <div className="flex items-start gap-3">
                     <span className="w-7 h-7 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs mt-0.5">
-                      {qIdx + 1}
+                      {globalIdx + 1}
                     </span>
                     <h5 className="text-sm md:text-base font-bold text-slate-800 leading-snug">
                       {q.question}
@@ -506,24 +627,32 @@ export default function Quiz() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                     {options.map((opt, optIdx) => {
-                      const key = typeof opt === "object" ? opt.key || String.fromCharCode(65 + optIdx) : String.fromCharCode(65 + optIdx);
-                      const label = typeof opt === "object" ? opt.text || opt.label : opt;
+                      const key =
+                        typeof opt === "object"
+                          ? opt.key || String.fromCharCode(65 + optIdx)
+                          : String.fromCharCode(65 + optIdx);
+                      const label =
+                        typeof opt === "object" ? opt.text || opt.label : opt;
 
                       const isSelected = selectedOption === key;
                       const isCorrect = q.correctAnswer === key;
 
-                      let btnStyle = "bg-slate-50/70 border-slate-200/80 text-slate-700 hover:bg-orange-50/40";
+                      let btnStyle =
+                        "bg-slate-50/70 border-slate-200/80 text-slate-700 hover:bg-orange-50/40";
                       if (isSelected) {
-                        btnStyle = "bg-orange-500 text-white border-orange-500 shadow-xs";
+                        btnStyle =
+                          "bg-orange-500 text-white border-orange-500 shadow-xs";
                       }
 
                       if (isSubmitted) {
                         if (isCorrect) {
-                          btnStyle = "bg-emerald-500 text-white border-emerald-500 font-bold";
+                          btnStyle =
+                            "bg-emerald-500 text-white border-emerald-500 font-bold";
                         } else if (isSelected && !isCorrect) {
                           btnStyle = "bg-rose-500 text-white border-rose-500";
                         } else {
-                          btnStyle = "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
+                          btnStyle =
+                            "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
                         }
                       }
 
@@ -532,7 +661,7 @@ export default function Quiz() {
                           key={optIdx}
                           type="button"
                           disabled={isSubmitted}
-                          onClick={() => handleSelectOption(qIdx, key)}
+                          onClick={() => handleSelectOption(globalIdx, key)}
                           className={`w-full p-3.5 rounded-xl border text-xs text-left transition-all flex items-center gap-3 cursor-pointer ${btnStyle}`}
                         >
                           <span
@@ -564,17 +693,85 @@ export default function Quiz() {
             })}
           </div>
 
+          {/* Question-level Pagination Control Bar */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-slate-200/80">
+              <p className="text-xs font-semibold text-slate-500">
+                Page{" "}
+                <span className="text-slate-800 font-bold">{questionPage}</span>{" "}
+                of{" "}
+                <span className="text-slate-800 font-bold">{totalPages}</span>
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuestionPageChange(questionPage - 1)}
+                  disabled={questionPage <= 1}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200/80 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition cursor-pointer flex items-center gap-1"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                  <span>Prev</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuestionPageChange(questionPage + 1)}
+                  disabled={questionPage >= totalPages}
+                  className="px-3.5 py-2 rounded-xl border border-slate-200/80 bg-white text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white transition cursor-pointer flex items-center gap-1"
+                >
+                  <span>Next</span>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )}
+
           {!isSubmitted && (
-            <div className="pt-4 flex justify-end">
+            <div className="pt-2 flex justify-end">
               <button
                 type="button"
                 onClick={handleSubmitQuiz}
-                disabled={answeredCount === 0}
+                disabled={Object.keys(userAnswers).length === 0}
                 className="w-full md:w-auto px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs shadow-md hover:opacity-95 disabled:opacity-50 transition cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>Submit Quiz Answers</span>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </button>
             </div>
@@ -586,7 +783,8 @@ export default function Quiz() {
     if (activeTab === "summary") {
       const totalQuestions = selectedQuiz.questions.length;
       const score = calculateScore();
-      const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
+      const percentage =
+        totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) : 0;
 
       return (
         <div className="space-y-6">
@@ -609,25 +807,37 @@ export default function Quiz() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-1">
-                <p className="text-[10px] font-bold uppercase text-emerald-600 tracking-wider">Correct Answers</p>
+                <p className="text-[10px] font-bold uppercase text-emerald-600 tracking-wider">
+                  Correct Answers
+                </p>
                 <p className="text-3xl font-black text-emerald-700">{score}</p>
               </div>
 
               <div className="p-6 rounded-2xl bg-rose-50 border border-rose-200 text-center space-y-1">
-                <p className="text-[10px] font-bold uppercase text-rose-600 tracking-wider">Incorrect Answers</p>
-                <p className="text-3xl font-black text-rose-700">{totalQuestions - score}</p>
+                <p className="text-[10px] font-bold uppercase text-rose-600 tracking-wider">
+                  Incorrect Answers
+                </p>
+                <p className="text-3xl font-black text-rose-700">
+                  {totalQuestions - score}
+                </p>
               </div>
 
               <div className="p-6 rounded-2xl bg-indigo-50 border border-indigo-200 text-center space-y-1">
-                <p className="text-[10px] font-bold uppercase text-indigo-600 tracking-wider">Overall Accuracy</p>
-                <p className="text-3xl font-black text-indigo-700">{percentage}%</p>
+                <p className="text-[10px] font-bold uppercase text-indigo-600 tracking-wider">
+                  Overall Accuracy
+                </p>
+                <p className="text-3xl font-black text-indigo-700">
+                  {percentage}%
+                </p>
               </div>
             </div>
           )}
 
           {isSubmitted && (
             <div className="p-6 rounded-2xl bg-white/80 border border-slate-200 space-y-3">
-              <h5 className="text-xs font-bold uppercase text-slate-500 tracking-wider">Recommendations</h5>
+              <h5 className="text-xs font-bold uppercase text-slate-500 tracking-wider">
+                Recommendations
+              </h5>
               <p className="text-xs text-slate-600 leading-relaxed">
                 {percentage >= 80
                   ? "🎉 Outstanding! You have demonstrated strong mastery over this topic. Try increasing the difficulty or testing another module."
@@ -640,89 +850,79 @@ export default function Quiz() {
         </div>
       );
     }
-
-    return null;
   };
 
-
-  // MAIN RENDER WITH FEATURE LAYOUT & MODAL
   return (
     <>
       <FeatureLayout
-        badgeText="LearningOS Hub"
-        title="AI Quiz & Knowledge Assessment"
-        subtitle="Powered by Gemini 2.5 Flash • Custom MCQ Generation & Detailed Explanations"
-        onBack={() => navigate("/dashboard")}
-        loading={loading}
-        initialFetching={initialFetching}
+        title="Interactive AI Quiz Generator"
+        subtitle="Generate, practice, and evaluate custom multiple-choice quizzes dynamically crafted by AI to test your domain expertise."
+        onBack={() => navigate(-1)}
         error={error}
         setError={setError}
+        initialFetching={initialFetching}
         isCreatingNew={isCreatingNew}
         setIsCreatingNew={setIsCreatingNew}
-        hasItems={quizzes.length > 0}
         renderForm={renderForm}
         renderHero={renderHero}
         renderSidebar={renderSidebar}
+        pagination={{
+          page: quizPagination.currentPage,
+          totalPages: quizPagination.totalPages,
+          hasNextPage: quizPagination.hasNextPage,
+          hasPrevPage: quizPagination.hasPrevPage,
+        }}
+        onPageChange={handleQuizPageChange}
         tabs={tabs}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         renderTabContent={renderTabContent}
+        hasItems={quizzes.length > 0}
       />
 
-
-      {/* DELETE MODAL */}
-     
+      {/* Delete Confirmation Modal */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn">
-          {/* Modal Overlay backdrop click */}
-          <div
-            className="fixed inset-0"
-            onClick={closeDeleteModal}
-          />
-
-          {/* Modal Container */}
-          <div className="relative w-full max-w-sm bg-white border border-slate-100 rounded-3xl p-6 shadow-2xl z-10 space-y-5 text-center transform transition-all scale-100">
-            {/* Warning Icon Badge */}
-            <div className="w-14 h-14 bg-rose-100/80 text-rose-600 rounded-2xl mx-auto flex items-center justify-center shadow-inner">
-              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-4 border border-slate-100">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl font-bold">
+              🗑️
             </div>
 
-            {/* Modal Title & Message */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <h3 className="text-lg font-bold text-slate-800">
                 Delete Quiz?
               </h3>
-              <p className="text-xs text-slate-500 leading-relaxed px-2">
-                Are you sure you want to delete <span className="font-semibold text-slate-700">"{deleteModal.quizTitle}"</span>? This action cannot be undone.
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-slate-700">
+                  "{deleteModal.quizTitle}"
+                </span>
+                ? This action cannot be undone.
               </p>
             </div>
 
-            {/* Modal Buttons */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               <button
                 type="button"
                 onClick={closeDeleteModal}
                 disabled={isDeleting}
-                className="flex-1 py-3 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 active:bg-slate-100 transition cursor-pointer"
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>
-
               <button
                 type="button"
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white text-xs font-bold shadow-md shadow-rose-200 active:scale-98 disabled:opacity-50 transition cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isDeleting ? (
                   <>
-                    <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                     Deleting...
                   </>
                 ) : (
-                  "Yes, Delete"
+                  "Delete"
                 )}
               </button>
             </div>
