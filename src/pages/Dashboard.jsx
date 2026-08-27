@@ -2,51 +2,196 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import Layout from "../components/Layout";
+import SmartOnboardingModal from "../components/SmartOnboardingModal";
+import SkillCelebrationModal from "../components/SkillCelebrationModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+  const API_URL = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
 
+  const [user, setUser] = useState(null);
+  const [lifeScore, setLifeScore] = useState(null);
   const [todos, setTodos] = useState([]);
+  const [verifiedSkills, setVerifiedSkills] = useState([]);
+  const [selectedBadgeModal, setSelectedBadgeModal] = useState({
+    isOpen: false,
+    badge: null,
+  });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [loggingWater, setLoggingWater] = useState(false);
+  const [showFormulaDetails, setShowFormulaDetails] = useState(false);
+
+  // Todo Edit State
   const [editTodo, setEditTodo] = useState(null);
   const [editData, setEditData] = useState({});
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTodos();
+    fetchDashboardData();
   }, []);
 
-  const fetchTodos = async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${BACKEND_URL}/api/to-dos`, {
+
+      // 1. Fetch User Profile
+      const userRes = await fetch(`${API_URL}/auth/me`, {
         credentials: "include",
       });
-      const data = await res.json();
-      if (data.success) {
-        setTodos(data.todos);
+      const userData = await userRes.json();
+      if (userData.user) {
+        setUser(userData.user);
+        if (!userData.user.focusGoal) {
+          setIsOnboardingOpen(true);
+        }
+      }
+
+      // 2. Fetch Today's Life Score & Deltas
+      const todayDate = getLocalDate();
+      const scoreRes = await fetch(`${API_URL}/life-score/today?date=${todayDate}`, {
+        credentials: "include",
+      });
+      const scoreData = await scoreRes.json();
+      if (scoreData.success && scoreData.data) {
+        setLifeScore(scoreData.data);
+      }
+
+      // 3. Fetch Todos
+      const todosRes = await fetch(`${API_URL}/to-dos`, {
+        credentials: "include",
+      });
+      const todosData = await todosRes.json();
+      if (todosData.success) {
+        setTodos(todosData.todos || []);
+      }
+
+      // 4. Fetch Verified Skills
+      const skillsRes = await fetch(`${API_URL}/life-score/verified-skills`, {
+        credentials: "include",
+      });
+      const skillsData = await skillsRes.json();
+      if (skillsData.success && skillsData.data) {
+        setVerifiedSkills(skillsData.data);
       }
     } catch (err) {
-      setError("Unable to load tasks.");
-      toast.error("Unable to load tasks.");
+      console.error("Dashboard load error:", err);
+      setError("Unable to load some dashboard metrics.");
     } finally {
       setLoading(false);
     }
   };
 
+  // Helper: Get user's local date YYYY-MM-DD
+  const getLocalDate = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Quick Action: Log Water (+250ml or +500ml) with instant Life Score update
+  const handleQuickWater = async (amountMl) => {
+    try {
+      setLoggingWater(true);
+      const todayDate = getLocalDate();
+
+      const res = await fetch(`${API_URL}/wellness/water`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ date: todayDate, amountMl }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`💧 Logged ${amountMl}ml water! Life Score updated.`);
+        // Refresh Life Score
+        const scoreRes = await fetch(`${API_URL}/life-score/today?date=${todayDate}`, {
+          credentials: "include",
+        });
+        const scoreData = await scoreRes.json();
+        if (scoreData.success && scoreData.data) {
+          setLifeScore(scoreData.data);
+        }
+      } else {
+        toast.error(data.message || "Failed to log water.");
+      }
+    } catch {
+      toast.error("Unable to log water.");
+    } finally {
+      setLoggingWater(false);
+    }
+  };
+
+  // Quick Action: Log Mood (1-5)
+  const handleQuickMood = async (value, note = "") => {
+    try {
+      const todayDate = getLocalDate();
+      const res = await fetch(`${API_URL}/wellness/mood`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ date: todayDate, value, note }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(`Mood logged! Energy score updated 😊`);
+        const scoreRes = await fetch(`${API_URL}/life-score/today`, {
+          credentials: "include",
+        });
+        const scoreData = await scoreRes.json();
+        if (scoreData.success && scoreData.data) {
+          setLifeScore(scoreData.data);
+        }
+      }
+    } catch {
+      toast.error("Failed to log mood.");
+    }
+  };
+
+  // Toggle Todo Completion
+  const handleToggleTodo = async (todo) => {
+    try {
+      const res = await fetch(`${API_URL}/to-dos/${todo._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ isCompleted: !todo.isCompleted }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setTodos((prev) =>
+          prev.map((t) => (t._id === todo._id ? { ...t, isCompleted: !t.isCompleted } : t))
+        );
+        toast.success(todo.isCompleted ? "Task marked active" : "Task completed! Life Score boosted 🎉");
+        // Refresh score
+        const scoreRes = await fetch(`${API_URL}/life-score/today`, {
+          credentials: "include",
+        });
+        const scoreData = await scoreRes.json();
+        if (scoreData.success && scoreData.data) {
+          setLifeScore(scoreData.data);
+        }
+      }
+    } catch {
+      toast.error("Failed to update task.");
+    }
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this task?")) return;
-    
     try {
-      const res = await fetch(`${BACKEND_URL}/api/to-dos/${id}`, {
+      const res = await fetch(`${API_URL}/to-dos/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
       const data = await res.json();
       if (data.success) {
         toast.success("Task deleted successfully");
-        fetchTodos();
+        setTodos((prev) => prev.filter((t) => t._id !== id));
       }
     } catch {
       toast.error("Unable to delete task.");
@@ -66,7 +211,7 @@ export default function Dashboard() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${BACKEND_URL}/api/to-dos/${editTodo}`, {
+      const res = await fetch(`${API_URL}/to-dos/${editTodo}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -76,7 +221,7 @@ export default function Dashboard() {
       if (data.success) {
         toast.success("Task updated successfully");
         setEditTodo(null);
-        fetchTodos();
+        fetchDashboardData();
       }
     } catch {
       toast.error("Unable to update task.");
@@ -89,112 +234,564 @@ export default function Dashboard() {
     return "bg-emerald-50 text-emerald-700 border-emerald-200";
   };
 
+  const totalScore = lifeScore?.totalScore || 0;
+  const healthScore = lifeScore?.healthScore || 0;
+  const learningScore = lifeScore?.learningScore || 0;
+  const careerScore = lifeScore?.careerScore || 0;
+  const weights = lifeScore?.weights || { health: 0.35, learning: 0.40, career: 0.25 };
+  const deltas = lifeScore?.deltas || [];
+  const streak = lifeScore?.streak?.current || 0;
+
   return (
     <Layout>
+      {/* Smart Onboarding / Focus Setup Modal */}
+      <SmartOnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+        initialGoal={user?.focusGoal || ""}
+        onComplete={(updatedUser) => {
+          setUser(updatedUser);
+          fetchDashboardData();
+          toast.success("LifeOS configured for your goal!");
+        }}
+      />
+
       <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-        
-        {/* HEADER SECTION */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-8 rounded-3xl border border-slate-200 shadow-xs">
-          <div>
-            <h2 className="text-3xl font-serif font-bold text-slate-900 tracking-tight">
-              Welcome back! 👋
+        {/* HERO HEADER: Focus Goal & Personalized Greeting */}
+        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+          {/* Background Ambient Glow */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-indigo/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+
+          <div className="space-y-2 z-10">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-sky-300 text-xs font-bold uppercase tracking-wider">
+                Active LifeOS
+              </span>
+              <span className="text-xs text-slate-400">
+                Mode: <strong className="text-white capitalize">{lifeScore?.focusMode?.replace("_", " ") || "Balanced"}</strong>
+              </span>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
+              Welcome back, {user?.name || "LifeOS User"} 👋
             </h2>
-            <p className="text-sm text-slate-500 mt-2 max-w-lg">
-              Manage your daily tasks, track your health metrics, and stay on top of your LifeOS priorities all in one place.
-            </p>
+
+            {user?.focusGoal ? (
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-xs text-slate-300">🎯 Monthly Focus:</span>
+                <span className="text-xs font-bold text-sky-200 bg-sky-950/80 px-2.5 py-1 rounded-xl border border-sky-800/80">
+                  {user.focusGoal}
+                </span>
+                <button
+                  onClick={() => setIsOnboardingOpen(true)}
+                  className="text-[11px] text-sky-400 hover:text-white underline cursor-pointer"
+                >
+                  Edit
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-400">
+                Set your primary goal to auto-tailor your daily habit loops.
+              </p>
+            )}
           </div>
-          <button
-            onClick={() => navigate('/todos')}
-            className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition whitespace-nowrap cursor-pointer"
-          >
-            + Create New Task
-          </button>
+
+          <div className="flex items-center gap-3 z-10 shrink-0">
+            <button
+              onClick={() => setIsOnboardingOpen(true)}
+              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold border border-white/20 transition cursor-pointer"
+            >
+              ⚙️ Customize Focus
+            </button>
+
+            <button
+              onClick={() => navigate("/todos")}
+              className="px-5 py-2.5 bg-gradient-to-r from-brand-indigo to-sky-500 hover:opacity-95 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer"
+            >
+              + Create Task
+            </button>
+          </div>
         </div>
 
-        {/* WIDGETS GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Health Vault Widget */}
-          <div
-            onClick={() => navigate("/health/history")}
-            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:shadow-md hover:border-rose-300 transition-all cursor-pointer flex flex-col justify-between h-48 group relative overflow-hidden"
-          >
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-rose-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
-            <div className="relative flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center text-rose-600 group-hover:bg-rose-500 group-hover:text-white transition-colors shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+        {/* LIFE SCORE COMMAND CENTER (Interactive Habit Hook) */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <h3 className="font-serif font-bold text-slate-900 text-lg sm:text-xl">
+                  Daily Life Score
+                </h3>
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 px-3 py-1 rounded-full">Health Profile</span>
-            </div>
-            <div className="relative">
-              <h3 className="text-xl font-bold text-slate-800 group-hover:text-rose-600 transition-colors">Medical Vault</h3>
-              <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
-                View timeline & conditions <span className="group-hover:translate-x-1 transition-transform">→</span>
+              <p className="text-xs text-slate-500 mt-1">
+                Your live 0–100 composite habit metric combining Health, Learning, and Career momentum.
               </p>
+            </div>
+
+            {/* Streak Counter & Formula Info Button */}
+            <div className="flex items-center gap-2">
+              <div className="px-3.5 py-1.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-extrabold flex items-center gap-1.5">
+                <span>🔥</span>
+                <span>{streak} Day Streak</span>
+              </div>
+
+              <button
+                onClick={() => setShowFormulaDetails(!showFormulaDetails)}
+                className="px-3 py-1.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer"
+              >
+                {showFormulaDetails ? "Hide Formula" : "ℹ️ Formula"}
+              </button>
             </div>
           </div>
 
-          {/* Task Manager Widget */}
-          <div
-            onClick={() => navigate("/todos")}
-            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between h-48 group relative overflow-hidden"
-          >
-            <div className="absolute -right-6 -top-6 w-24 h-24 bg-indigo-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-500"></div>
-            <div className="relative flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-500 group-hover:text-white transition-colors shadow-inner">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          {/* Life Score Gauge & Pillar Breakdowns */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            {/* Circular Gauge Card */}
+            <div className="md:col-span-4 flex flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-50/60 via-sky-50/30 to-white rounded-2xl border border-indigo-100 text-center space-y-2">
+              <div className="relative w-32 h-32 flex items-center justify-center">
+                {/* SVG Progress Ring */}
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    className="stroke-slate-200"
+                    strokeWidth="8"
+                    fill="transparent"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    className="stroke-indigo-600 transition-all duration-1000 ease-out"
+                    strokeWidth="8"
+                    strokeDasharray="251.2"
+                    strokeDashoffset={251.2 - (251.2 * totalScore) / 100}
+                    strokeLinecap="round"
+                    fill="transparent"
+                  />
                 </svg>
+
+                <div className="absolute flex flex-col items-center">
+                  <span className="text-3xl font-serif font-extrabold text-slate-900">
+                    {totalScore}
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    out of 100
+                  </span>
+                </div>
               </div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 px-3 py-1 rounded-full">Productivity</span>
-            </div>
-            <div className="relative">
-              <h3 className="text-xl font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">Task Manager</h3>
-              <p className="text-xs text-slate-500 mt-1.5 flex items-center gap-1">
-                {todos.length} active tasks <span className="group-hover:translate-x-1 transition-transform">→</span>
+
+              <p className="text-xs font-bold text-slate-700">
+                {totalScore >= 80 ? "🌟 Peak Momentum!" : totalScore >= 50 ? "⚡ Good Progress" : "🌱 Build Momentum Today"}
               </p>
+            </div>
+
+            {/* Pillar Breakdown Cards */}
+            <div className="md:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {/* 1. Health Pillar */}
+              <div className="p-4 rounded-2xl bg-rose-50/50 border border-rose-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-rose-900 flex items-center gap-1">
+                    💚 Health & Wellness
+                  </span>
+                  <span className="text-xs font-extrabold text-rose-700 font-mono">
+                    {healthScore}/100
+                  </span>
+                </div>
+                <div className="w-full bg-rose-200/50 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-rose-500 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${healthScore}%` }}
+                  ></div>
+                </div>
+                <div className="flex items-center justify-between text-[10px] text-slate-500">
+                  <span>⚡ Energy: {lifeScore?.breakdown?.energyScore || healthScore}/100</span>
+                  <span>💧 {lifeScore?.breakdown?.waterConsumedMl || 0}ml</span>
+                  <span>😴 {lifeScore?.breakdown?.sleepHours || 0}h</span>
+                </div>
+              </div>
+
+              {/* 2. Learning Pillar */}
+              <div className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-indigo-900 flex items-center gap-1">
+                    🧠 Learning
+                  </span>
+                  <span className="text-xs font-extrabold text-indigo-700 font-mono">
+                    {learningScore}/100
+                  </span>
+                </div>
+                <div className="w-full bg-indigo-200/50 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-indigo-600 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${learningScore}%` }}
+                  ></div>
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  Quizzes ({lifeScore?.breakdown?.quizzesCompleted || 0}) • Study Tasks ({lifeScore?.breakdown?.studyTasksCompleted || 0}) • {lifeScore?.breakdown?.studyTasksEarnedPoints || (lifeScore?.breakdown?.studyTasksCompleted || 0) * 25} pts
+                </p>
+              </div>
+
+              {/* 3. Career / Action Pillar */}
+              <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-900 flex items-center gap-1">
+                    💼 Career & Action
+                  </span>
+                  <span className="text-xs font-extrabold text-emerald-700 font-mono">
+                    {careerScore}/100
+                  </span>
+                </div>
+                <div className="w-full bg-emerald-200/50 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    className="bg-emerald-600 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${careerScore}%` }}
+                  ></div>
+                </div>
+                <p className="text-[10px] text-slate-500">
+                  Tasks ({lifeScore?.breakdown?.todosCompleted || 0}) • Milestones ({lifeScore?.breakdown?.actionMilestonesCompleted || 0}) • Daily Target Reached
+                </p>
+              </div>
             </div>
           </div>
 
+          {/* FORMULA TRANSPARENCY ACCORDION */}
+          {showFormulaDetails && (
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between font-bold text-slate-800">
+                <span>📐 Life Score Calculation Formula</span>
+                <span className="text-[11px] text-slate-500 font-mono">
+                  LifeScore = ({weights.health} × Health) + ({weights.learning} × Learning) + ({weights.career} × Career)
+                </span>
+              </div>
+              <p className="text-slate-600 leading-relaxed">
+                LifeOS never uses black-box numbers. Your score dynamically updates with your daily logs. Focus Mode weights can be adjusted anytime in Profile Settings. Historical snapshots remain permanently immutable.
+              </p>
+            </div>
+          )}
+
+          {/* REAL-TIME WHAT-IF DELTA RECOMMENDATIONS */}
+          {deltas?.length > 0 && (
+            <div className="p-4 bg-gradient-to-r from-amber-50/70 via-sky-50/50 to-indigo-50/60 rounded-2xl border border-amber-200/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  <span>⚡</span>
+                  <span>Recommended Boosts for Today</span>
+                </span>
+                <span className="text-[11px] text-slate-500">
+                  Complete any action below to raise your score
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
+                {deltas.map((d) => (
+                  <div
+                    key={d.id}
+                    className={`p-2.5 rounded-xl border transition flex items-center justify-between gap-2 ${
+                      d.isCompleted
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800 opacity-60"
+                        : "bg-white border-slate-200 hover:border-brand-indigo shadow-xs"
+                    }`}
+                  >
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold truncate text-slate-800">
+                        {d.action}
+                      </p>
+                      <span className="text-[10px] font-bold text-indigo-600">
+                        {d.isCompleted ? "✓ Goal Met" : `+${d.points} Score Pts`}
+                      </span>
+                    </div>
+
+                    {!d.isCompleted && d.id === "water" && (
+                      <button
+                        onClick={() => handleQuickWater(250)}
+                        disabled={loggingWater}
+                        className="px-2 py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 text-[10px] font-bold rounded-lg transition shrink-0"
+                      >
+                        +250ml
+                      </button>
+                    )}
+
+                    {!d.isCompleted && d.id === "quiz" && (
+                      <button
+                        onClick={() => navigate("/learning/quiz")}
+                        className="px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-[10px] font-bold rounded-lg transition shrink-0"
+                      >
+                        Start ➔
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* RECENT TASKS SECTION */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-serif font-bold text-slate-900">Current Priorities</h3>
-            <button onClick={() => navigate('/todos')} className="text-xs font-bold text-indigo-600 hover:underline">View All</button>
+        {/* VERIFIED SKILLS & ACHIEVEMENTS TROPHY SHOWCASE */}
+        {verifiedSkills?.length > 0 && (
+          <div className="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-indigo-100 shadow-xs space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-300 text-slate-950 flex items-center justify-center text-lg font-bold shadow-xs">
+                  🏆
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Verified Competencies & Trophies ({verifiedSkills.length})
+                  </h3>
+                  <p className="text-[11px] text-slate-500">
+                    Official LifeOS verified credentials & badges earned through skill mastery
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => navigate("/learning/quiz")}
+                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>+ Test New Skill</span>
+                <span>➔</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {verifiedSkills.map((sk, idx) => {
+                const isToday =
+                  sk.verifiedAt &&
+                  new Date(sk.verifiedAt).toISOString().split("T")[0] === getLocalDate();
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() =>
+                      setSelectedBadgeModal({
+                        isOpen: true,
+                        badge: {
+                          skill: sk.skill,
+                          subCompetency: "Verified Competency",
+                          score: sk.score || 90,
+                          date: sk.verifiedAt,
+                          badgeId: sk._id || `LOS-${idx}`,
+                        },
+                      })
+                    }
+                    className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between group hover:scale-[1.02] ${
+                      isToday
+                        ? "bg-gradient-to-br from-amber-500/10 via-indigo-500/10 to-sky-500/10 border-amber-300 ring-2 ring-amber-400/30 shadow-md"
+                        : "bg-slate-50/70 hover:bg-white border-slate-200 hover:border-indigo-300 shadow-xs"
+                    }`}
+                  >
+                    {isToday && (
+                      <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider animate-pulse">
+                        Unlocked Today ⭐
+                      </div>
+                    )}
+
+                    <div className="space-y-1 pt-1">
+                      <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 text-white flex items-center justify-center text-base font-bold shadow-xs">
+                        🛡️
+                      </div>
+                      <h4 className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition truncate">
+                        {sk.skill}
+                      </h4>
+                      <p className="text-[10px] text-slate-500">
+                        {sk.score ? `${sk.score}% Mastery` : "Verified Specialist"}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 mt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                      <span>Click to view credential</span>
+                      <span className="text-indigo-600 font-bold">Inspect ➔</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* MODULAR QUICK-ACTION WIDGETS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Quick Water Logging Card */}
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                  💧 Water Intake
+                </span>
+                <span className="text-xs font-bold text-sky-600 font-mono">
+                  {lifeScore?.breakdown?.waterConsumedMl || 0} / 2000 ml
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                Log drinking water & daily mood to boost Energy & Life Score.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleQuickWater(250)}
+                  disabled={loggingWater}
+                  className="flex-1 py-2 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  +250 ml
+                </button>
+                <button
+                  onClick={() => handleQuickWater(500)}
+                  disabled={loggingWater}
+                  className="flex-1 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-xl text-xs font-bold transition shadow-xs cursor-pointer"
+                >
+                  +500 ml
+                </button>
+              </div>
+
+              {/* Quick Mood Check */}
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
+                <span className="text-[11px] font-bold text-slate-400">Mood:</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleQuickMood(5, "Great")}
+                    className="px-2 py-1 bg-slate-100 hover:bg-emerald-100 rounded-lg text-xs transition cursor-pointer"
+                    title="Energized & Great"
+                  >
+                    😊 Great
+                  </button>
+                  <button
+                    onClick={() => handleQuickMood(3, "Neutral")}
+                    className="px-2 py-1 bg-slate-100 hover:bg-amber-100 rounded-lg text-xs transition cursor-pointer"
+                    title="Okay"
+                  >
+                    😐 Okay
+                  </button>
+                  <button
+                    onClick={() => handleQuickMood(1, "Tired")}
+                    className="px-2 py-1 bg-slate-100 hover:bg-rose-100 rounded-lg text-xs transition cursor-pointer"
+                    title="Tired / Low"
+                  >
+                    🥱 Low
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Work & Asset Review Card */}
+          <div
+            onClick={() => navigate("/learning/work-review")}
+            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-indigo transition cursor-pointer space-y-4 flex flex-col justify-between group"
+          >
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                ✦ Work & Asset Analyzer
+              </span>
+              <p className="text-xs text-slate-500">
+                Analyze code, essays, business proposals, or marketing plans with dual technical & strategic lenses.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-brand-indigo group-hover:underline">
+              Open Work Analyzer ➔
+            </span>
+          </div>
+
+          {/* Action Plan Blueprint Card */}
+          <div
+            onClick={() => navigate("/learning/action-plan")}
+            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-emerald-400 transition cursor-pointer space-y-4 flex flex-col justify-between group"
+          >
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                🚀 Action Plan Generator
+              </span>
+              <p className="text-xs text-slate-500">
+                Turn your tech ideas, exam preparations, or business goals into milestone-driven roadmaps.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-emerald-600 group-hover:underline">
+              Generate Action Blueprint ➔
+            </span>
+          </div>
+        </div>
+
+        {/* DAILY TASKS & TODOS SECTION */}
+        <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-serif font-bold text-slate-900">
+                Today's Action Priorities
+              </h3>
+              <p className="text-xs text-slate-500">
+                Check off items to directly boost your Career & Action Life Score.
+              </p>
+            </div>
+
+            <button
+              onClick={() => navigate("/todos")}
+              className="text-xs font-bold text-brand-indigo hover:underline"
+            >
+              View Full Planner ➔
+            </button>
           </div>
 
           {loading ? (
-            <div className="animate-pulse space-y-4">
-              {[1, 2, 3].map(i => <div key={i} className="h-16 bg-slate-100 rounded-2xl w-full"></div>)}
-            </div>
+            <p className="text-xs text-slate-400 py-6 text-center">Loading priorities...</p>
           ) : todos.length === 0 ? (
-            <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-100 text-slate-400 text-sm">
-              No active tasks found. Time to relax! ☕
+            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+              <p className="text-xs font-bold text-slate-700">No active priorities for today.</p>
+              <button
+                onClick={() => navigate("/todos")}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold"
+              >
+                + Add Priority Task
+              </button>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {todos.slice(0, 5).map((todo) => (
-                <div key={todo._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-indigo-100 transition-colors gap-4">
-                  <div>
-                    <div className="flex items-center gap-3 mb-1">
-                      <h4 className="text-sm font-bold text-slate-800">{todo.title}</h4>
-                      <span className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full border ${priorityBadgeStyle(todo.priority)}`}>
-                        {todo.priority}
-                      </span>
-                    </div>
-                    {todo.description && <p className="text-xs text-slate-500 line-clamp-1">{todo.description}</p>}
+                <div
+                  key={todo._id}
+                  className={`p-3.5 rounded-2xl border transition flex items-center justify-between gap-3 ${
+                    todo.isCompleted
+                      ? "bg-slate-50 border-slate-200 opacity-60"
+                      : "bg-white border-slate-200 hover:border-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <input
+                      type="checkbox"
+                      checked={todo.isCompleted}
+                      onChange={() => handleToggleTodo(todo)}
+                      className="w-4 h-4 text-indigo-600 rounded cursor-pointer"
+                    />
+                    <span
+                      className={`text-xs font-bold truncate ${
+                        todo.isCompleted ? "line-through text-slate-400" : "text-slate-900"
+                      }`}
+                    >
+                      {todo.title}
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${priorityBadgeStyle(
+                        todo.priority
+                      )}`}
+                    >
+                      {todo.priority}
+                    </span>
                   </div>
-                  
+
                   <div className="flex items-center gap-2">
-                    <button onClick={() => handleEditOpen(todo)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition cursor-pointer">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    <button
+                      onClick={() => handleEditOpen(todo)}
+                      className="text-slate-400 hover:text-slate-700 text-xs p-1"
+                    >
+                      ✎
                     </button>
-                    <button onClick={() => handleDelete(todo._id)} className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition cursor-pointer">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <button
+                      onClick={() => handleDelete(todo._id)}
+                      className="text-slate-400 hover:text-rose-500 text-xs p-1"
+                    >
+                      ✕
                     </button>
                   </div>
                 </div>
@@ -202,46 +799,20 @@ export default function Dashboard() {
             </div>
           )}
         </div>
-
       </div>
 
-      {/* EDIT MODAL */}
-      {editTodo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-6">
-            <h3 className="text-lg font-bold text-slate-900">Edit Task</h3>
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Title</label>
-                <input required type="text" value={editData.title} onChange={(e) => setEditData({...editData, title: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Description</label>
-                <textarea rows="3" value={editData.description} onChange={(e) => setEditData({...editData, description: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs text-slate-800 focus:outline-none focus:border-indigo-500"></textarea>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Priority</label>
-                  <select value={editData.priority} onChange={(e) => setEditData({...editData, priority: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Due Date</label>
-                  <input type="datetime-local" value={editData.dueDate} onChange={(e) => setEditData({...editData, dueDate: e.target.value})} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" />
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <button type="button" onClick={() => setEditTodo(null)} className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition cursor-pointer">Cancel</button>
-                <button type="submit" className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition shadow-md cursor-pointer">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
+      {/* Skill Verification Inspection / Celebration Modal */}
+      <SkillCelebrationModal
+        isOpen={selectedBadgeModal.isOpen}
+        onClose={() => setSelectedBadgeModal({ isOpen: false, badge: null })}
+        badge={selectedBadgeModal.badge}
+        onBuildActionPlan={(skill) => {
+          setSelectedBadgeModal({ isOpen: false, badge: null });
+          navigate("/learning/action-plan", {
+            state: { goal: `Build a production-grade portfolio project using ${skill}` },
+          });
+        }}
+      />
     </Layout>
   );
 }

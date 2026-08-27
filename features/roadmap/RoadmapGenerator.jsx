@@ -198,7 +198,7 @@ export default function RoadmapGenerator() {
 
   // 2. HERO BANNER
   const renderHero = () => (
-    <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-sky-500 rounded-3xl p-6 md:p-8 text-white shadow-xl">
+    <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-sky-500 rounded-3xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div className="space-y-2">
         <span className="inline-block px-3 py-1 rounded-full bg-white/20 text-[10px] font-bold tracking-wider uppercase">
           Selected Roadmap
@@ -209,6 +209,25 @@ export default function RoadmapGenerator() {
         <p className="text-xs text-indigo-100">
           Goal: <span className="font-semibold text-white">{activeRoadmap?.goal}</span>
         </p>
+      </div>
+
+      <div className="shrink-0">
+        <button
+          type="button"
+          onClick={() =>
+            navigate("/learning/study-plan", {
+              state: {
+                subject: activeRoadmap?.title || activeRoadmap?.goal,
+                roadmapPhases: activeRoadmap?.phases,
+                sourceRoadmapId: activeRoadmap?._id,
+              },
+            })
+          }
+          className="px-4 py-2.5 bg-white text-indigo-900 hover:bg-indigo-50 rounded-xl text-xs font-bold transition shadow-md cursor-pointer flex items-center gap-2"
+        >
+          <span>📅 Convert to Study Plan</span>
+          <span>➔</span>
+        </button>
       </div>
     </div>
   );

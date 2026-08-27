@@ -1,9 +1,20 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import SkillCelebrationModal from "../../src/components/SkillCelebrationModal";
+
+const SUGGESTED_TRACKS = [
+  "React.js State Management",
+  "TypeScript Generics & Interfaces",
+  "Node.js & Express REST APIs",
+  "Financial Cash Flow & Valuation",
+  "Digital Marketing & SEO Funnels",
+];
 
 export default function Quiz() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [quizzes, setQuizzes] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -11,6 +22,13 @@ export default function Quiz() {
   const [fetchingDetail, setFetchingDetail] = useState(false);
   const [error, setError] = useState("");
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+
+  // Verified Skills & Celebration State
+  const [verifiedSkillsList, setVerifiedSkillsList] = useState([]);
+  const [celebrationModal, setCelebrationModal] = useState({
+    isOpen: false,
+    badge: null,
+  });
 
   // Quiz List Pagination State (passed to FeatureLayout)
   const [quizPagination, setQuizPagination] = useState({
@@ -22,8 +40,7 @@ export default function Quiz() {
     hasPrevPage: false,
   });
 
-  // Question Pagination State (inside individual quiz view) - client-side only,
-  // since fetchQuizDetail always loads ALL questions (limit=100) in one go.
+  // Question Pagination State (inside individual quiz view)
   const [questionPage, setQuestionPage] = useState(1);
   const QUESTIONS_PER_PAGE = 5;
 
@@ -38,19 +55,46 @@ export default function Quiz() {
   const [topic, setTopic] = useState("");
   const [difficulty, setDifficulty] = useState("beginner");
   const [numberOfQuestions, setNumberOfQuestions] = useState(10);
+  const [isVerificationMode, setIsVerificationMode] = useState(false);
 
   // Interactive Quiz Taking State
   const [userAnswers, setUserAnswers] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState("takeQuiz");
 
-  const BACKEND_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+  const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+  const BACKEND_URL = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
 
-  // 1. Fetch Quizzes List with Pagination
+  // Pre-fill state if redirected from StudyPlan or Capstone
+  useEffect(() => {
+    if (location.state?.topic) {
+      setTopic(location.state.topic);
+      if (location.state.isVerificationMode !== undefined) {
+        setIsVerificationMode(!!location.state.isVerificationMode);
+      }
+      setIsCreatingNew(true);
+    }
+  }, [location.state]);
+
+  // 1. Fetch Quizzes List & Verified Skills
   useEffect(() => {
     fetchQuizzes(quizPagination.currentPage);
+    fetchVerifiedSkills();
   }, []);
+
+  const fetchVerifiedSkills = async () => {
+    try {
+      const res = await fetch(`${BACKEND_URL}/life-score/verified-skills`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.data) {
+        setVerifiedSkillsList(data.data);
+      }
+    } catch {
+      // ignore
+    }
+  };
 
   const fetchQuizzes = async (page = 1) => {
     try {
@@ -152,6 +196,7 @@ export default function Quiz() {
           topic: topic.trim(),
           difficulty,
           numberOfQuestions: Number(numberOfQuestions),
+          isVerificationMode,
         }),
       });
 
@@ -259,8 +304,26 @@ export default function Quiz() {
 
       if (res.ok) {
         setIsSubmitted(true);
-        // Refresh quizzes list to update overall score badges
+        setActiveTab("summary");
         fetchQuizzes(quizPagination.currentPage);
+        fetchVerifiedSkills();
+
+        const scoreVal = calculateScore();
+        const totalQ = selectedQuiz.questions?.length || 10;
+        const pct = data.quiz?.percentage ?? Math.round((scoreVal / totalQ) * 100);
+
+        if (pct >= 75) {
+          setCelebrationModal({
+            isOpen: true,
+            badge: {
+              skill: selectedQuiz.canonicalSkill || selectedQuiz.topic,
+              subCompetency: selectedQuiz.subCompetency || "Official Assessment",
+              score: pct,
+              date: new Date(),
+              badgeId: `VERIFIED-${selectedQuiz._id ? selectedQuiz._id.slice(-6).toUpperCase() : Math.random().toString(36).substr(2, 6).toUpperCase()}`
+            }
+          });
+        }
       } else {
         setError(data.message || "Failed to submit quiz score.");
       }
@@ -308,22 +371,107 @@ export default function Quiz() {
           Generate AI Knowledge Assessment
         </h2>
         <p className="text-xs text-slate-500 leading-relaxed">
-          Specify a topic, choose your target difficulty level, and set question
-          limits. LifeOS AI will dynamically craft progressive MCQs with
-          detailed explanations.
+          Select assessment mode, specify a topic or choose from recommended skill tracks. LifeOS AI will dynamically craft progressive MCQs with detailed explanations.
         </p>
 
-        <form onSubmit={handleGenerate} className="mt-6 space-y-4 text-left">
+        {/* Assessment Mode Toggle */}
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <button
+            type="button"
+            onClick={() => setIsVerificationMode(false)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+              !isVerificationMode
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            📝 Casual Practice Mode
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsVerificationMode(true)}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 ${
+              isVerificationMode
+                ? "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-xs"
+                : "bg-amber-50 text-amber-900 hover:bg-amber-100 border border-amber-200"
+            }`}
+          >
+            <span>🏆 Official Skill Verification Exam</span>
+          </button>
+        </div>
+
+        {/* Verified Competencies Shelf */}
+        {verifiedSkillsList?.length > 0 && (
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50/80 via-indigo-50/60 to-sky-50/80 border border-amber-200/80 text-left space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <span>🛡️</span>
+                <span>Your Verified Competencies ({verifiedSkillsList.length})</span>
+              </span>
+              <span className="text-[10px] font-bold text-indigo-600">
+                Official LifeOS Badges
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {verifiedSkillsList.map((sk, idx) => (
+                <div
+                  key={idx}
+                  onClick={() =>
+                    setCelebrationModal({
+                      isOpen: true,
+                      badge: {
+                        skill: sk.skill,
+                        subCompetency: "Verified Competency",
+                        score: sk.score || 90,
+                        date: sk.verifiedAt,
+                        badgeId: sk._id || `LOS-${idx}`,
+                      },
+                    })
+                  }
+                  className="px-3 py-1.5 rounded-xl bg-white/90 border border-amber-200 shadow-xs hover:border-indigo-400 hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5 text-xs font-bold text-slate-800 group"
+                  title="Click to view verified credential proof"
+                >
+                  <span className="text-amber-500">⭐</span>
+                  <span>{sk.skill}</span>
+                  <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-mono">
+                    {sk.score}%
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Suggested Tracks */}
+        <div className="space-y-1 pt-2 text-left">
+          <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
+            Suggested Next Skill Assessments
+          </label>
+          <div className="flex flex-wrap gap-1.5">
+            {SUGGESTED_TRACKS.map((trk, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setTopic(trk)}
+                className="text-[11px] text-slate-600 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 px-2.5 py-1 rounded-xl transition cursor-pointer"
+              >
+                ✦ {trk}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <form onSubmit={handleGenerate} className="mt-4 space-y-4 text-left">
           <div className="space-y-1">
             <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-              Quiz Topic or Subject
+              Quiz Topic or Skill Area
             </label>
             <input
               type="text"
               required
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="e.g., React Hooks, PostgreSQL Indexing, Data Analysis Basics..."
+              placeholder="e.g., React Props vs State, Financial Cash Flow, Biochemistry..."
               disabled={loading}
               className="w-full p-4 text-xs bg-slate-50/50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:bg-white transition text-slate-800"
             />
@@ -382,11 +530,11 @@ export default function Quiz() {
               {loading ? (
                 <>
                   <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-                  Generating AI Quiz...
+                  Generating AI Assessment...
                 </>
               ) : (
                 <>
-                  <span>Create Quiz</span>
+                  <span>Create Assessment</span>
                   <svg
                     className="w-4 h-4"
                     fill="none"
@@ -432,6 +580,19 @@ export default function Quiz() {
               >
                 {selectedQuiz.difficulty || "Beginner"}
               </span>
+
+              {selectedQuiz.canonicalSkill && (
+                <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold">
+                  Skill: {selectedQuiz.canonicalSkill}
+                </span>
+              )}
+
+              {selectedQuiz.isVerificationMode && (
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-400 text-slate-900 text-[10px] font-bold">
+                  🏅 Official Verification Exam
+                </span>
+              )}
+
               <span className="text-xs text-sky-100/80">
                 • {totalQuestions} MCQs
               </span>
@@ -929,6 +1090,19 @@ export default function Quiz() {
           </div>
         </div>
       )}
+
+      {/* Skill Verification Celebration Modal */}
+      <SkillCelebrationModal
+        isOpen={celebrationModal.isOpen}
+        onClose={() => setCelebrationModal({ isOpen: false, badge: null })}
+        badge={celebrationModal.badge}
+        onBuildActionPlan={(skill) => {
+          setCelebrationModal({ isOpen: false, badge: null });
+          navigate("/learning/action-plan", {
+            state: { goal: `Build a production-grade portfolio project using ${skill}` },
+          });
+        }}
+      />
     </>
   );
 }

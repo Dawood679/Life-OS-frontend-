@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import SkillCelebrationModal from "../components/SkillCelebrationModal";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -10,6 +11,12 @@ export default function Profile() {
   const [initialLoading, setInitialLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [passwordSaving, setPasswordSaving] = useState(false);
+
+  // Badge Inspection Modal State
+  const [selectedBadgeModal, setSelectedBadgeModal] = useState({
+    isOpen: false,
+    badge: null,
+  });
 
   // Alert States
   const [error, setError] = useState("");
@@ -465,10 +472,85 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Skills Tags */}
-                  <div className="space-y-4">
+                  {/* Official Verified Competency Badges */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                        <span>🛡️</span> Official Verified Competencies
+                      </h3>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/learning/quiz")}
+                        className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition cursor-pointer"
+                      >
+                        + Verify New Skill in Quiz Center ➔
+                      </button>
+                    </div>
+
+                    {Array.isArray(user?.verifiedSkills) && user.verifiedSkills.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-1">
+                        {user.verifiedSkills.map((sk, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() =>
+                              setSelectedBadgeModal({
+                                isOpen: true,
+                                badge: {
+                                  skill: sk.skill,
+                                  subCompetency: "Verified Competency",
+                                  score: sk.score || 90,
+                                  date: sk.verifiedAt,
+                                  badgeId: sk._id || `LOS-VERIFIED-${idx}`,
+                                },
+                              })
+                            }
+                            className="p-3.5 rounded-2xl bg-gradient-to-br from-amber-50/60 via-indigo-50/40 to-sky-50/60 border border-amber-200/80 shadow-xs hover:shadow-md hover:border-indigo-400 hover:scale-[1.02] transition-all cursor-pointer flex items-center justify-between gap-2"
+                            title="Click to view verified credential proof"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <span className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-300 text-slate-900 flex items-center justify-center text-sm font-bold shadow-xs shrink-0">
+                                🛡️
+                              </span>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-slate-800 truncate">
+                                  {sk.skill}
+                                </p>
+                                <p className="text-[10px] text-slate-500">
+                                  {sk.verifiedAt
+                                    ? new Date(sk.verifiedAt).toLocaleDateString(undefined, {
+                                        month: "short",
+                                        year: "numeric",
+                                      })
+                                    : "Verified"}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold font-mono shrink-0">
+                              {sk.score || 90}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-center space-y-1">
+                        <p className="text-xs font-medium text-slate-500">
+                          No verified competency badges earned yet.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => navigate("/learning/quiz")}
+                          className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
+                        >
+                          Take an assessment in the Quiz Center to earn your first badge!
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* General Profile Skills */}
+                  <div className="space-y-3">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2 flex items-center gap-2">
-                      <span>⚡</span> Verified Skills
+                      <span>⚡</span> Profile Listed Skills
                     </h3>
                     {Array.isArray(user?.skills) && user.skills.length > 0 ? (
                       <div className="flex flex-wrap gap-2 pt-1">
@@ -482,7 +564,7 @@ export default function Profile() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-slate-400 italic">No skills added yet.</p>
+                      <p className="text-xs text-slate-400 italic">No additional skills listed.</p>
                     )}
                   </div>
                 </div>
@@ -798,6 +880,18 @@ export default function Profile() {
           </div>
         )}
 
+        {/* Skill Verification Inspection Modal */}
+        <SkillCelebrationModal
+          isOpen={selectedBadgeModal.isOpen}
+          onClose={() => setSelectedBadgeModal({ isOpen: false, badge: null })}
+          badge={selectedBadgeModal.badge}
+          onBuildActionPlan={(skill) => {
+            setSelectedBadgeModal({ isOpen: false, badge: null });
+            navigate("/learning/action-plan", {
+              state: { goal: `Build a production-grade portfolio project using ${skill}` },
+            });
+          }}
+        />
       </div>
     </div>
   );
