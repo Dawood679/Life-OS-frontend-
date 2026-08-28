@@ -26,6 +26,7 @@ import WellnessTracker from "../features/wellness/WellnessTracker";
 import PrescriptionScanner from "../features/health/PrescriptionScanner";
 import MedicineTracker from "../features/health/MedicineTracker";
 import MedicalHistory from "../features/health/MedicalHistory";
+import InterviewStudio from "../features/interview/InterviewStudio";
 
 export default function App() {
   return (
@@ -147,6 +148,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ResumeAnalyzer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/career/mock-interview"
+          element={
+            <ProtectedRoute>
+              <InterviewStudio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/mock-interview"
+          element={
+            <ProtectedRoute>
+              <InterviewStudio />
             </ProtectedRoute>
           }
         />
