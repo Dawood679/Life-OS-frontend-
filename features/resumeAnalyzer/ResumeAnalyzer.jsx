@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 export default function ResumeAnalyzer() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [resumeFile, setResumeFile] = useState(null);
   const [jobDescription, setJobDescription] = useState(""); // optional
   const [analyses, setAnalyses] = useState([]);
@@ -28,6 +29,17 @@ export default function ResumeAnalyzer() {
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
 
+  // Pre-fill state if navigated from Job Tracker / Kanban
+  useEffect(() => {
+    if (location.state?.jobDescription || location.state?.targetRole) {
+      if (location.state.jobDescription) {
+        setJobDescription(location.state.jobDescription);
+      }
+      setSelectedAnalysis(null);
+      setIsCreatingNew(true);
+    }
+  }, [location.state]);
+
   // Fetch past resume analyses whenever the current page changes
   useEffect(() => {
     fetchResumeAnalyses(pagination.page);
@@ -49,10 +61,16 @@ export default function ResumeAnalyzer() {
         if (data.pagination) {
           setPagination(data.pagination);
         }
-        if (data.analyses.length > 0) {
+
+        // If navigated with location.state to create new analysis, keep form open
+        if (location.state?.jobDescription || location.state?.targetRole) {
+          setSelectedAnalysis(null);
+          setIsCreatingNew(true);
+        } else if (data.analyses.length > 0) {
           fetchAnalysisDetail(data.analyses[0]._id);
         } else {
           setSelectedAnalysis(null);
+          setIsCreatingNew(true);
         }
       }
     } catch {
@@ -641,7 +659,8 @@ export default function ResumeAnalyzer() {
       badgeText="CareerOS Hub"
       title="AI Resume Analyzer"
       subtitle="Powered by Gemini 2.5 Flash • ATS Scoring, Skill Gaps & Improvement Suggestions"
-      onBack={() => navigate("/dashboard")}
+      onBack={() => navigate(-1)}
+      backTooltip="Go Back"
       loading={loading}
       initialFetching={initialFetching}
       error={error}

@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import Layout from "../components/Layout";
 import SmartOnboardingModal from "../components/SmartOnboardingModal";
 import SkillCelebrationModal from "../components/SkillCelebrationModal";
+import AIAssistantDashboard from "../components/AIAssistantDashboard";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -257,61 +258,13 @@ export default function Dashboard() {
       />
 
       <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
-        {/* HERO HEADER: Focus Goal & Personalized Greeting */}
-        <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
-          {/* Background Ambient Glow */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-brand-indigo/20 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
-
-          <div className="space-y-2 z-10">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-sky-300 text-xs font-bold uppercase tracking-wider">
-                Active LifeOS
-              </span>
-              <span className="text-xs text-slate-400">
-                Mode: <strong className="text-white capitalize">{lifeScore?.focusMode?.replace("_", " ") || "Balanced"}</strong>
-              </span>
-            </div>
-
-            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
-              Welcome back, {user?.name || "LifeOS User"} 👋
-            </h2>
-
-            {user?.focusGoal ? (
-              <div className="flex items-center gap-2 pt-1">
-                <span className="text-xs text-slate-300">🎯 Monthly Focus:</span>
-                <span className="text-xs font-bold text-sky-200 bg-sky-950/80 px-2.5 py-1 rounded-xl border border-sky-800/80">
-                  {user.focusGoal}
-                </span>
-                <button
-                  onClick={() => setIsOnboardingOpen(true)}
-                  className="text-[11px] text-sky-400 hover:text-white underline cursor-pointer"
-                >
-                  Edit
-                </button>
-              </div>
-            ) : (
-              <p className="text-xs text-slate-400">
-                Set your primary goal to auto-tailor your daily habit loops.
-              </p>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 z-10 shrink-0">
-            <button
-              onClick={() => setIsOnboardingOpen(true)}
-              className="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-bold border border-white/20 transition cursor-pointer"
-            >
-              ⚙️ Customize Focus
-            </button>
-
-            <button
-              onClick={() => navigate("/todos")}
-              className="px-5 py-2.5 bg-gradient-to-r from-brand-indigo to-sky-500 hover:opacity-95 text-white rounded-xl text-xs font-bold shadow-md transition cursor-pointer"
-            >
-              + Create Task
-            </button>
-          </div>
-        </div>
+        {/* UNIFIED EXECUTIVE AI CHIEF OF STAFF COMMAND CENTER */}
+        <AIAssistantDashboard
+          user={user}
+          lifeScore={lifeScore}
+          onDataRefresh={fetchDashboardData}
+          onOpenOnboarding={() => setIsOnboardingOpen(true)}
+        />
 
         {/* LIFE SCORE COMMAND CENTER (Interactive Habit Hook) */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">

@@ -510,7 +510,8 @@ export default function Todos() {
       badgeText="TaskOS Hub"
       title="To-Do & Workflow Manager"
       subtitle="Organize, prioritize, and track target deadlines seamlessly"
-      onBack={() => navigate("/dashboard")}
+      onBack={() => navigate(-1)}
+      backTooltip="Go Back"
       loading={loading}
       initialFetching={initialFetching}
       error={error}

@@ -1188,8 +1188,8 @@ export default function InterviewStudio() {
         badgeText="CareerOS Simulator"
         title="AI Mock Interview Simulator"
         subtitle="Adaptive multi-round interview practice with turn-by-turn AI evaluation and weak topic study plans."
-        onBack={() => navigate("/dashboard")}
-        backTooltip="Back to Dashboard"
+        onBack={() => navigate(-1)}
+        backTooltip="Go Back"
         initialFetching={initialFetching}
         loading={loading}
         error={error}

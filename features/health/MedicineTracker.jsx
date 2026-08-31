@@ -374,7 +374,8 @@ export default function MedicineTracker() {
         badgeText="Health OS"
         title="Medicine Tracker"
         subtitle="Manage prescriptions and set accurate alarms."
-        onBack={() => navigate("/dashboard")}
+        onBack={() => navigate(-1)}
+        backTooltip="Go Back"
         loading={loading}
         error={error}
         setError={setError}

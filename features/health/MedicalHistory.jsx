@@ -333,7 +333,8 @@ export default function MedicalHistory() {
         badgeText="Health OS"
         title="Medical History"
         subtitle="Complete chronological timeline and profile"
-        onBack={() => navigate('/dashboard')}
+        onBack={() => navigate(-1)}
+        backTooltip="Go Back"
         loading={loading}
         error={error}
         setError={setError}

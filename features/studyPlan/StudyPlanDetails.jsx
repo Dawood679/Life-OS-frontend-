@@ -66,9 +66,9 @@ export default function StudyPlanDetail() {
         <Button
           variant="outline"
           className="mt-4 sm:w-auto px-6"
-          onClick={() => navigate('/learning/study-plan')}
+          onClick={() => navigate(-1)}
         >
-          Back to Study Planner
+          Back
         </Button>
       </div>
     );
@@ -82,13 +82,13 @@ export default function StudyPlanDetail() {
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
       {/* Back link */}
       <button
-        onClick={() => navigate('/learning/study-plan')}
+        onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-xs font-semibold text-ink-500 hover:text-ink-900 transition"
       >
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
         </svg>
-        Back to Study Planner
+        Back
       </button>
 
       {/* Header */}

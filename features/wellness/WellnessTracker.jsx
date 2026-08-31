@@ -656,7 +656,8 @@ export default function WellnessTracker() {
       badgeText="Health OS"
       title="Wellness Tracker"
       subtitle="Log your daily metrics to power your AI Energy Score"
-      onBack={() => navigate("/dashboard")}
+      onBack={() => navigate(-1)}
+      backTooltip="Go Back"
       loading={loading && !log && activeTab === TAB_KEYS.DASHBOARD}
       error={error}
       setError={setError}
