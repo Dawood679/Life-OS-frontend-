@@ -65,13 +65,15 @@ export default function Quiz() {
   const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
   const BACKEND_URL = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
 
-  // Pre-fill state if redirected from StudyPlan or Capstone
+  // Pre-fill state if redirected from StudyPlan, Roadmap, or Capstone
   useEffect(() => {
-    if (location.state?.topic) {
-      setTopic(location.state.topic);
+    const incomingTopic = location.state?.topic || location.state?.initialTopic;
+    if (incomingTopic) {
+      setTopic(incomingTopic);
       if (location.state.isVerificationMode !== undefined) {
         setIsVerificationMode(!!location.state.isVerificationMode);
       }
+      setSelectedQuiz(null);
       setIsCreatingNew(true);
     }
   }, [location.state]);

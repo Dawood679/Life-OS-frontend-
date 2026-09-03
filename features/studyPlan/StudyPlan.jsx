@@ -70,10 +70,12 @@ export default function StudyPlan() {
   const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
   const BACKEND_URL = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
 
-  // Check if routed from RoadmapGenerator with state
+  // Check if routed from RoadmapGenerator or Dashboard with state
   useEffect(() => {
-    if (location.state?.subject) {
-      setSubject(location.state.subject);
+    const incomingTopic = location.state?.subject || location.state?.initialGoal || location.state?.goal;
+    if (incomingTopic) {
+      setSubject(incomingTopic);
+      setSelectedPlan(null);
       setIsCreatingNew(true);
     }
   }, [location.state]);

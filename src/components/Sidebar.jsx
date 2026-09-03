@@ -9,12 +9,12 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
 
-  // Automatically open the dropdown matching current path
+  // All OS sub-modules open by default for immediate 1-click access
   const [openDropdowns, setOpenDropdowns] = useState({
-    learning: location.pathname.startsWith('/learning') || location.pathname === '/todos',
-    health: location.pathname.startsWith('/health'),
-    career: location.pathname.startsWith('/career'),
-    finance: location.pathname.startsWith('/finance'),
+    learning: true,
+    health: true,
+    career: true,
+    finance: true,
   });
 
   const toggleDropdown = (key) => {
@@ -305,21 +305,6 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
             </div>
           )}
         </div>
-
-        {/* Smart Planner Link */}
-        <Link
-          to="/create-todo"
-          className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition ${
-            isActive('/create-todo') 
-              ? 'bg-indigo-50 text-brand-indigo font-semibold' 
-              : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <span>Smart Planner</span>
-        </Link>
       </nav>
 
       {/* 3. BOTTOM PINNED FOOTER (Always 100% visible on laptop screens, shrink-0) */}

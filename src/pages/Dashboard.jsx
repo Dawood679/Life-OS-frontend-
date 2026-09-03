@@ -24,6 +24,8 @@ export default function Dashboard() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [loggingWater, setLoggingWater] = useState(false);
   const [showFormulaDetails, setShowFormulaDetails] = useState(false);
+  const [quickTaskTitle, setQuickTaskTitle] = useState("");
+  const [addingQuickTask, setAddingQuickTask] = useState(false);
 
   // Todo Edit State
   const [editTodo, setEditTodo] = useState(null);
@@ -31,6 +33,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+
+    const handleRefreshEvent = () => {
+      fetchDashboardData();
+    };
+
+    window.addEventListener("lifeos-data-refresh", handleRefreshEvent);
+    return () => window.removeEventListener("lifeos-data-refresh", handleRefreshEvent);
   }, []);
 
   const fetchDashboardData = async () => {
@@ -153,6 +162,58 @@ export default function Dashboard() {
     }
   };
 
+  // Quick Action: Log Sleep (hours)
+  const handleQuickSleep = async (hours) => {
+    try {
+      const todayDate = getLocalDate();
+      const res = await fetch(`${API_URL}/wellness/sleep`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ date: todayDate, hours, quality: hours >= 7 ? "good" : "fair" }),
+      });
+      if (res.ok) {
+        toast.success(`Sleep logged (${hours}h)! Energy restored 😴`);
+        const scoreRes = await fetch(`${API_URL}/life-score/today`, { credentials: "include" });
+        const scoreData = await scoreRes.json();
+        if (scoreData.success && scoreData.data) setLifeScore(scoreData.data);
+      }
+    } catch {
+      toast.error("Failed to log sleep.");
+    }
+  };
+
+  // Quick Brain Dump Action: Create priority task immediately from Dashboard
+  const handleQuickTaskSubmit = async (e) => {
+    e?.preventDefault();
+    if (!quickTaskTitle.trim()) return;
+    try {
+      setAddingQuickTask(true);
+      const res = await fetch(`${API_URL}/to-dos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          title: quickTaskTitle.trim(),
+          priority: "high",
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.todo) {
+        setTodos((prev) => [data.todo, ...prev]);
+        setQuickTaskTitle("");
+        toast.success("Action priority added! ⚡");
+        const scoreRes = await fetch(`${API_URL}/life-score/today`, { credentials: "include" });
+        const scoreData = await scoreRes.json();
+        if (scoreData.success && scoreData.data) setLifeScore(scoreData.data);
+      }
+    } catch {
+      toast.error("Failed to add action priority.");
+    } finally {
+      setAddingQuickTask(false);
+    }
+  };
+
   // Toggle Todo Completion
   const handleToggleTodo = async (todo) => {
     try {
@@ -257,7 +318,7 @@ export default function Dashboard() {
         }}
       />
 
-      <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8">
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         {/* UNIFIED EXECUTIVE AI CHIEF OF STAFF COMMAND CENTER */}
         <AIAssistantDashboard
           user={user}
@@ -577,25 +638,65 @@ export default function Dashboard() {
           </div>
         )}
 
+        {/* DYNAMIC NEXT BEST ACTION AI NUDGE */}
+        <div className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-indigo-700/50">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center font-bold text-lg shrink-0">
+              ⚡
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md bg-indigo-500/30 text-indigo-200 text-[10px] font-bold uppercase tracking-wider border border-indigo-400/30">
+                  Next Best Action
+                </span>
+              </div>
+              <h4 className="text-sm sm:text-base font-bold text-white">
+                {todos.find((t) => !t.isCompleted)
+                  ? `Focus: "${todos.find((t) => !t.isCompleted)?.title}"`
+                  : "All today's priorities are complete! Ready for your next milestone?"}
+              </h4>
+              <p className="text-xs text-indigo-200">
+                {todos.find((t) => !t.isCompleted)
+                  ? "Execute your highest priority item to protect momentum and gain +5.0 Life Score."
+                  : "Jump into your 90-Day Roadmap or Study Planner to prepare for tomorrow."}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => {
+              const topTask = todos.find((t) => !t.isCompleted);
+              if (topTask) {
+                handleToggleTodo(topTask);
+              } else {
+                navigate("/learning/roadmap");
+              }
+            }}
+            className="px-4 py-2.5 bg-white hover:bg-slate-100 text-indigo-950 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer self-start sm:self-auto shrink-0 flex items-center gap-1.5"
+          >
+            <span>{todos.find((t) => !t.isCompleted) ? "✓ Mark Top Priority Done" : "Open 90-Day Roadmap ➔"}</span>
+          </button>
+        </div>
+
         {/* MODULAR QUICK-ACTION WIDGETS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Quick Water Logging Card */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* Quick Water & Energy Logging Card */}
           <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-4 flex flex-col justify-between">
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                  💧 Water Intake
+                  💧 Hydration & Sleep
                 </span>
                 <span className="text-xs font-bold text-sky-600 font-mono">
                   {lifeScore?.breakdown?.waterConsumedMl || 0} / 2000 ml
                 </span>
               </div>
               <p className="text-xs text-slate-500">
-                Log drinking water & daily mood to boost Energy & Life Score.
+                Log water intake & sleep to restore Energy & Life Score.
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => handleQuickWater(250)}
@@ -613,40 +714,71 @@ export default function Dashboard() {
                 </button>
               </div>
 
-              {/* Quick Mood Check */}
-              <div className="flex items-center justify-between pt-1 border-t border-slate-100">
-                <span className="text-[11px] font-bold text-slate-400">Mood:</span>
+              {/* Quick Sleep & Mood Check */}
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
+                <span className="font-bold text-slate-400">Sleep:</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => handleQuickSleep(7.5)}
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-indigo-100 text-indigo-900 rounded-lg text-[11px] font-bold transition cursor-pointer"
+                    title="Log 7.5h Good Sleep"
+                  >
+                    😴 7.5h
+                  </button>
+                  <button
+                    onClick={() => handleQuickSleep(6.0)}
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-amber-100 text-amber-900 rounded-lg text-[11px] font-bold transition cursor-pointer"
+                    title="Log 6h Fair Sleep"
+                  >
+                    🥱 6.0h
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
+                <span className="font-bold text-slate-400">Mood:</span>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => handleQuickMood(5, "Great")}
-                    className="px-2 py-1 bg-slate-100 hover:bg-emerald-100 rounded-lg text-xs transition cursor-pointer"
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-emerald-100 rounded-lg text-[11px] transition cursor-pointer"
                     title="Energized & Great"
                   >
                     😊 Great
                   </button>
                   <button
                     onClick={() => handleQuickMood(3, "Neutral")}
-                    className="px-2 py-1 bg-slate-100 hover:bg-amber-100 rounded-lg text-xs transition cursor-pointer"
+                    className="px-2 py-0.5 bg-slate-100 hover:bg-amber-100 rounded-lg text-[11px] transition cursor-pointer"
                     title="Okay"
                   >
                     😐 Okay
-                  </button>
-                  <button
-                    onClick={() => handleQuickMood(1, "Tired")}
-                    className="px-2 py-1 bg-slate-100 hover:bg-rose-100 rounded-lg text-xs transition cursor-pointer"
-                    title="Tired / Low"
-                  >
-                    🥱 Low
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* 90-Day Transformation Roadmap Card */}
+          <div
+            onClick={() => navigate("/learning/roadmap")}
+            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-indigo-400 transition cursor-pointer space-y-4 flex flex-col justify-between group"
+          >
+            <div className="space-y-1">
+              <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                🧭 90-Day Roadmap Generator
+              </span>
+              <p className="text-xs text-slate-500">
+                Strategic 3-month career blueprints with milestones bridged to Study Planner & Interviews.
+              </p>
+            </div>
+            <span className="text-xs font-bold text-brand-indigo group-hover:underline">
+              Open 90-Day Roadmap ➔
+            </span>
+          </div>
+
           {/* Quick Work & Asset Review Card */}
           <div
             onClick={() => navigate("/learning/work-review")}
-            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-brand-indigo transition cursor-pointer space-y-4 flex flex-col justify-between group"
+            className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:border-sky-400 transition cursor-pointer space-y-4 flex flex-col justify-between group"
           >
             <div className="space-y-1">
               <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
@@ -656,7 +788,7 @@ export default function Dashboard() {
                 Analyze code, essays, business proposals, or marketing plans with dual technical & strategic lenses.
               </p>
             </div>
-            <span className="text-xs font-bold text-brand-indigo group-hover:underline">
+            <span className="text-xs font-bold text-sky-600 group-hover:underline">
               Open Work Analyzer ➔
             </span>
           </div>
@@ -671,18 +803,18 @@ export default function Dashboard() {
                 🚀 Action Plan Generator
               </span>
               <p className="text-xs text-slate-500">
-                Turn your tech ideas, exam preparations, or business goals into milestone-driven roadmaps.
+                Turn your tech ideas, exam preparations, or business goals into actionable execution steps.
               </p>
             </div>
             <span className="text-xs font-bold text-emerald-600 group-hover:underline">
-              Generate Action Blueprint ➔
+              Generate Action Plan ➔
             </span>
           </div>
         </div>
 
         {/* DAILY TASKS & TODOS SECTION */}
         <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h3 className="text-lg font-serif font-bold text-slate-900">
                 Today's Action Priorities
@@ -694,11 +826,35 @@ export default function Dashboard() {
 
             <button
               onClick={() => navigate("/todos")}
-              className="text-xs font-bold text-brand-indigo hover:underline"
+              className="text-xs font-bold text-brand-indigo hover:underline self-start sm:self-auto"
             >
               View Full Planner ➔
             </button>
           </div>
+
+          {/* FAST INLINE TASK CREATOR (Quick Brain Dump) */}
+          <form onSubmit={handleQuickTaskSubmit} className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={quickTaskTitle}
+                onChange={(e) => setQuickTaskTitle(e.target.value)}
+                placeholder="⚡ Quick Brain Dump: Add an action priority for today... (Press Enter)"
+                disabled={addingQuickTask}
+                className="w-full pl-4 pr-16 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:bg-white transition"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-200/60 px-1.5 py-0.5 rounded">
+                ↵ Enter
+              </span>
+            </div>
+            <button
+              type="submit"
+              disabled={addingQuickTask || !quickTaskTitle.trim()}
+              className="px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-2xl transition cursor-pointer disabled:opacity-50 shrink-0 shadow-xs flex items-center gap-1.5 active:scale-95"
+            >
+              <span>{addingQuickTask ? "Adding..." : "+ Add"}</span>
+            </button>
+          </form>
 
           {loading ? (
             <p className="text-xs text-slate-400 py-6 text-center">Loading priorities...</p>
@@ -744,6 +900,27 @@ export default function Dashboard() {
                     >
                       {todo.priority}
                     </span>
+
+                    {/* Reminder & Notification Channel Badges */}
+                    {todo.reminderTime && (
+                      <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        <span>⏰</span>
+                        <span>{new Date(todo.reminderTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </span>
+                    )}
+
+                    {todo.repeat && todo.repeat !== 'none' && (
+                      <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200 capitalize">
+                        <span>🔁</span>
+                        <span>{todo.repeat}</span>
+                      </span>
+                    )}
+
+                    {todo.notificationChannel && todo.notificationChannel !== 'none' && (
+                      <span className="hidden lg:inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200" title={`Notification via ${todo.notificationChannel}`}>
+                        <span>{todo.notificationChannel === 'both' ? '🔔✉️' : todo.notificationChannel === 'email' ? '✉️' : '🔔'}</span>
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-2">

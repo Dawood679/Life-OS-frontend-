@@ -110,12 +110,14 @@ export default function InterviewStudio() {
     };
   }, []);
 
-  // Pre-fill state if navigated from Job Match or Study Plan
+  // Pre-fill state if navigated from Job Match, Study Plan, or Roadmap
   useEffect(() => {
-    if (location.state?.roleTitle) {
-      setRoleTitle(location.state.roleTitle);
-      if (location.state.jobDescription) {
-        setJobDescription(location.state.jobDescription);
+    const incomingRole = location.state?.roleTitle || location.state?.targetRole;
+    if (incomingRole) {
+      setRoleTitle(incomingRole);
+      const incomingTopic = location.state.jobDescription || location.state.customTopic;
+      if (incomingTopic) {
+        setJobDescription(location.state.jobDescription || `Target Milestone Focus: ${location.state.customTopic}`);
         setShowJdInput(true);
       }
       setSelectedSession(null);
