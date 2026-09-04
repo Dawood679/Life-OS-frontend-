@@ -27,10 +27,6 @@ export default function WellnessTracker() {
   const [actionLoading, setActionLoading] = useState(null);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  
-  // AI Report State
-  const [aiReportData, setAiReportData] = useState(null);
-  const [generatingReport, setGeneratingReport] = useState(false);
 
   // Input states for daily tracking
   const [sleepInput, setSleepInput] = useState({ hours: "", quality: "" });
@@ -180,32 +176,6 @@ export default function WellnessTracker() {
       setError(err.message);
     } finally {
       setActionLoading(null);
-    }
-  };
-
-  // --- Real AI Weekly Report Handler ---
-  const generateAIReport = async () => {
-    try {
-      setGeneratingReport(true);
-      setError("");
-
-      const res = await fetch(`${BACKEND_URL}/wellness/weekly-report`, {
-        method: "GET",
-        credentials: "include",
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.data) {
-        setAiReportData(data.data);
-      } else {
-        throw new Error(data.message || "Failed to generate weekly AI report.");
-      }
-    } catch (err) {
-      console.error("AI Report Error:", err);
-      setError(err.message || "Unable to connect to LifeOS AI Engine.");
-    } finally {
-      setGeneratingReport(false);
     }
   };
 
@@ -477,70 +447,33 @@ export default function WellnessTracker() {
         </div>
       </div>
 
-      {/* 3. AI Weekly Narrative Report (Real Backend Integration) */}
-      <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-purple-100 rounded-bl-full blur-3xl pointer-events-none"></div>
+      {/* 3. Universal LifeOS Weekly Executive Report Bridge */}
+      <div className="bg-gradient-to-r from-purple-900/90 via-indigo-900/90 to-slate-900 text-white rounded-3xl p-6 md:p-8 border border-purple-500/30 shadow-lg relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-purple-500/20 rounded-bl-full blur-2xl pointer-events-none"></div>
         
-        <div className="flex items-center justify-between mb-4 relative z-10">
-          <div className="flex items-center gap-2">
-             <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center text-white font-bold text-xs shadow-md">
-              ✦
+        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-xl">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-purple-400/20 text-purple-200 border border-purple-400/30">
+                ✦ Universal 3-Pillar Audit
+              </span>
+              <span className="text-[10px] text-purple-300 font-medium">Health • Learning • Career</span>
             </div>
-            <h3 className="font-bold text-base text-slate-800">Weekly AI Report</h3>
+            <h3 className="text-lg font-bold text-white tracking-tight">Master Weekly Life Intelligence Report</h3>
+            <p className="text-xs text-purple-200/80 leading-relaxed">
+              Your weekly health metrics are unified with your <span className="font-bold text-white">Study Plans, AI Quizzes, Job Applications, Medicine Adherence</span>, and <span className="font-bold text-white">Life Score (0–100)</span> into a master executive retrospective on your main dashboard.
+            </p>
           </div>
-          <span className="px-2 py-1 bg-purple-50 text-purple-700 text-[10px] font-bold rounded-lg border border-purple-100">Premium Feature</span>
-        </div>
 
-        <div className="relative z-10 min-h-[100px]">
-          {!aiReportData && !generatingReport && (
-            <div className="text-center py-6">
-              <p className="text-xs text-slate-500 mb-4 max-w-sm mx-auto">
-                Generate a personalized narrative analyzing your screen time vs productivity and identifying your hidden energy drainers.
-              </p>
-              <button 
-                onClick={generateAIReport}
-                className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition cursor-pointer"
-              >
-                Generate Real AI Report
-              </button>
-            </div>
-          )}
-
-          {generatingReport && (
-            <div className="flex flex-col items-center justify-center py-6 space-y-3">
-              <div className="flex gap-1.5">
-                <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                <div className="w-2 h-2 bg-sky-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              </div>
-              <p className="text-[11px] font-bold text-slate-500 animate-pulse uppercase tracking-wider">Analyzing Context via Gemini / Groq...</p>
-            </div>
-          )}
-
-          {aiReportData && !generatingReport && (
-            <div className="space-y-4">
-              <div className="bg-purple-50/60 p-5 rounded-2xl border border-purple-100 space-y-3">
-                <p className="text-sm text-slate-800 leading-relaxed font-semibold">
-                  {aiReportData.report}
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-purple-100/80">
-                  <div className="text-xs text-purple-900">
-                    <span className="font-bold">Key Insight:</span> {aiReportData.keyInsight}
-                  </div>
-                  <div className="text-xs text-purple-900">
-                    <span className="font-bold">Actionable Tip:</span> {aiReportData.actionableTip}
-                  </div>
-                </div>
-              </div>
-              
-              <button 
-                onClick={generateAIReport}
-                className="text-xs font-bold text-indigo-600 hover:underline cursor-pointer"
-              >
-                ↻ Regenerate Report
-              </button>
-            </div>
-          )}
+          <button
+            onClick={() => navigate("/dashboard")}
+            className="px-5 py-3 bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs rounded-2xl shadow-md hover:shadow-purple-500/25 transition-all duration-200 flex items-center gap-2 whitespace-nowrap cursor-pointer group"
+          >
+            <span>Open Dashboard Report</span>
+            <svg className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </button>
         </div>
       </div>
     </div>

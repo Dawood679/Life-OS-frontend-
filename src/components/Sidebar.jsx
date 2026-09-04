@@ -69,7 +69,6 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
     { path: '/health/prescriptions', label: 'Prescription Scanner' },
     { path: '/health/medicines', label: 'Medicine & Reminders' },
     { path: '/health/history', label: 'Medical History' },
-    { path: '/health/diet', label: 'Diet & Nutrition' },
   ];
 
   const careerSubLinks = [

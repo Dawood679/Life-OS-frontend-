@@ -35,6 +35,7 @@ import {
   ShieldCheck,
   RotateCcw
 } from "lucide-react";
+import WeeklyReportModal from "./WeeklyReportModal";
 
 export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, onOpenOnboarding }) {
   const navigate = useNavigate();
@@ -42,8 +43,16 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const totalScore = lifeScore?.totalScore || briefing?.statsSnapshot?.compositeScore || 0;
+  const healthScore = lifeScore?.healthScore || (briefing?.statsSnapshot?.compositeScore ? Math.round(briefing.statsSnapshot.compositeScore * 0.9) : 0);
+  const learningScore = lifeScore?.learningScore || 0;
+  const careerScore = lifeScore?.careerScore || 0;
+  const weights = lifeScore?.weights || { health: 0.35, learning: 0.40, career: 0.25 };
+  const streak = lifeScore?.streak?.current || briefing?.statsSnapshot?.streakCount || 0;
+
   // View Mode: 'today' (Interactive Checklist) | 'horizon' (7-Day Day-by-Day Schedule)
   const [activeView, setActiveView] = useState("today");
+  const [isWeeklyReportOpen, setIsWeeklyReportOpen] = useState(false);
 
   // Audio Speech Synthesis State (Uses already-cached narrative, 0 new AI calls)
   const [speechState, setSpeechState] = useState("idle"); // 'idle' | 'playing' | 'paused'
@@ -445,53 +454,61 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
 
     window.speechSynthesis.cancel();
 
-    // Construct live, non-redundant Chief of Staff speech script
-    const todayAgendaTitles = agendaTasks.map((t) => t.title).slice(0, 3).join(", ");
-    let tasksNarration = "";
-    if (reschedulerProposal?.isRecoveryActive) {
-      tasksNarration = "Recovery mode is active today. Rest up and focus only on essential priorities.";
-    } else if (agendaTasks.length > 0) {
-      tasksNarration = `On your active agenda today, you have ${agendaTasks.length} task${agendaTasks.length > 1 ? "s" : ""}: ${todayAgendaTitles}.`;
+    const hour = new Date().getHours();
+    let currentGreeting = "Good morning";
+    if (hour >= 12 && hour < 17) currentGreeting = "Good afternoon";
+    else if (hour >= 17 && hour < 22) currentGreeting = "Good evening";
+    else if (hour >= 22 || hour < 4) currentGreeting = "Welcome back";
+
+    const userName = user?.name || "Explorer";
+    const currentScore = lifeScore?.totalScore || briefing?.statsSnapshot?.compositeScore || 0;
+    const quote = briefing?.motivationalQuote || "Small daily improvements over time lead to stunning results. Keep building momentum!";
+
+    // Build real-time synchronized narration based on live visible dashboard tasks
+    let taskText = "";
+    if (agendaTasks && agendaTasks.length > 0) {
+      if (agendaTasks.length === 1) {
+        taskText = `You have 1 active task on your agenda today: "${agendaTasks[0].title}".`;
+      } else {
+        taskText = `You have ${agendaTasks.length} active tasks on your agenda today. Your top priority is "${agendaTasks[0].title}"${agendaTasks[1] ? `, followed by "${agendaTasks[1].title}"` : ""}.`;
+      }
     } else {
-      tasksNarration = "All your priority tasks for today are currently complete.";
+      taskText = "Your agenda is clear with no pending tasks today.";
     }
 
-    let interviewNarration = "";
-    if (briefing.careerAlerts && briefing.careerAlerts.length > 0) {
-      interviewNarration = `Career alert: ${briefing.careerAlerts[0]}.`;
-    }
-
-    let learningNarration = "";
-    if (briefing.learningFocus) {
-      learningNarration = `For your learning focus: ${briefing.learningFocus}.`;
-    }
-
-    // Dynamic Live Hydration Speech
-    const waterConsumed = briefing?.statsSnapshot?.waterConsumedMl || 0;
-    const waterTarget = briefing?.statsSnapshot?.waterTargetMl || 2000;
-    let healthNarration = "";
-    if (waterConsumed >= waterTarget) {
-      healthNarration = "Your daily hydration goal of 2000ml is fully achieved.";
+    let wellnessText = "";
+    const waterConsumed = lifeScore?.breakdown?.waterConsumedMl ?? briefing?.statsSnapshot?.waterConsumedMl ?? 0;
+    const waterTarget = lifeScore?.breakdown?.waterTargetMl ?? briefing?.statsSnapshot?.waterTargetMl ?? 2000;
+    if (waterConsumed < waterTarget) {
+      wellnessText = `Make sure to drink ${waterTarget - waterConsumed}ml more water to reach your daily hydration target.`;
     } else {
-      healthNarration = `Drink ${waterTarget - waterConsumed}ml more water to reach your ${waterTarget}ml daily hydration target.`;
+      wellnessText = "Your hydration goal is fully secured.";
     }
 
-    let quoteNarration = "";
-    if (briefing.motivationalQuote) {
-      quoteNarration = `Focus anchor: ${briefing.motivationalQuote}.`;
-    }
-
-    const voiceScript = `${getTimeAwareGreeting()}. ${tasksNarration} ${interviewNarration} ${learningNarration} ${healthNarration} ${quoteNarration}`;
+    const voiceScript = `${currentGreeting}, ${userName}. Your Life Score today is currently sitting at ${currentScore} out of 100. ${taskText} ${wellnessText} Remember: ${quote}`;
 
     const utterance = new SpeechSynthesisUtterance(voiceScript);
     utterance.rate = 0.98; // natural cadence
-    utterance.pitch = 1.0;
+    utterance.pitch = 1.05;
 
     const voices = window.speechSynthesis.getVoices();
-    const naturalVoice = voices.find(
-      (v) => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Samantha") || v.name.includes("Daniel"))
-    );
-    if (naturalVoice) utterance.voice = naturalVoice;
+    const femaleVoice =
+      voices.find(
+        (v) =>
+          v.lang.startsWith("en") &&
+          (v.name.includes("Zira") ||
+            v.name.includes("Jenny") ||
+            v.name.includes("Aria") ||
+            v.name.includes("Sonia") ||
+            v.name.includes("Samantha") ||
+            v.name.includes("Google US English") ||
+            v.name.includes("Victoria") ||
+            v.name.includes("Karen") ||
+            v.name.toLowerCase().includes("female") ||
+            v.name.includes("Natural"))
+      ) || voices.find((v) => v.lang.startsWith("en"));
+
+    if (femaleVoice) utterance.voice = femaleVoice;
 
     utterance.onend = () => setSpeechState("idle");
     utterance.onerror = () => setSpeechState("idle");
@@ -560,31 +577,8 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
           </span>
         </div>
 
-        {/* Action Controls Suite */}
-        <div className="flex items-center gap-2 flex-wrap self-start lg:self-auto">
-          {/* Schedule View Switcher */}
-          <div className="flex items-center bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80 shadow-2xs text-xs font-bold">
-            <button
-              onClick={() => setActiveView("today")}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
-                activeView === "today" ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60" : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <ListTodo className="w-3.5 h-3.5" />
-              <span>Today's Agenda</span>
-            </button>
-
-            <button
-              onClick={() => setActiveView("horizon")}
-              className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
-                activeView === "horizon" ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60" : "text-slate-600 hover:text-slate-900"
-              }`}
-            >
-              <CalendarDays className="w-3.5 h-3.5" />
-              <span>7-Day Schedule</span>
-            </button>
-          </div>
-
+        {/* Action Controls: Audio Voice Player & Refresh */}
+        <div className="flex items-center gap-2 self-start lg:self-auto">
           {/* Voice Controls */}
           {speechState === "idle" && (
             <button
@@ -676,6 +670,243 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl font-normal pt-1">
           {briefing.executiveSummary}
         </p>
+      </div>
+
+      {/* 🌟 INTEGRATED 4-PILLAR LIFE SCORE COMMAND HUB (Full Rich Aesthetics & Zero-Scroll) */}
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 relative z-10 items-stretch">
+        {/* Pillar 1: Total Life Score Orbit Gauge (Enlarged Hero Ring) */}
+        <div className="p-4.5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-sky-50/40 to-white border border-indigo-100/90 shadow-2xs flex flex-col items-center justify-between text-center space-y-2">
+          <div className="w-full flex items-center justify-between pb-1.5 border-b border-indigo-100/60">
+            <span className="text-[11px] font-extrabold text-indigo-950 uppercase tracking-wider">
+              Total Score
+            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 shadow-2xs">
+                🔥 {streak}d
+              </span>
+            </div>
+          </div>
+
+          {/* Enlarged Prominent SVG Circular Progress Ring */}
+          <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center my-1">
+            <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                className="stroke-slate-200/80"
+                strokeWidth="7"
+                fill="transparent"
+              />
+              <circle
+                cx="50"
+                cy="50"
+                r="40"
+                className="stroke-indigo-600 transition-all duration-1000 ease-out"
+                strokeWidth="7"
+                strokeDasharray="251.2"
+                strokeDashoffset={251.2 - (251.2 * totalScore) / 100}
+                strokeLinecap="round"
+                fill="transparent"
+              />
+            </svg>
+
+            <div className="absolute flex flex-col items-center">
+              <span className="text-3xl sm:text-3.5xl font-serif font-black text-slate-900 leading-none">
+                {totalScore}
+              </span>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
+                out of 100
+              </span>
+            </div>
+          </div>
+
+          <div className="w-full pt-1.5 border-t border-indigo-100/60">
+            <p className="text-xs font-bold text-indigo-900 bg-indigo-50/80 py-1.5 px-3 rounded-xl border border-indigo-100/80 shadow-2xs">
+              {totalScore >= 80 ? "🌟 Peak Momentum!" : totalScore >= 50 ? "⚡ Good Progress" : "🌱 Build Momentum"}
+            </p>
+          </div>
+        </div>
+
+        {/* Pillar 2: Health & Wellness */}
+        <div className="p-4.5 rounded-2xl bg-rose-50/50 border border-rose-100/90 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between pb-1 border-b border-rose-100/60">
+              <span className="text-xs font-extrabold text-rose-950 flex items-center gap-1.5">
+                <span>💚 Health</span>
+                <span className="text-[10px] font-bold text-rose-600 font-mono">({Math.round((lifeScore?.weights?.health || 0.35) * 100)}%)</span>
+              </span>
+              <span className="text-xs font-black text-rose-700 font-mono bg-white px-2 py-0.5 rounded-lg border border-rose-200 shadow-2xs">
+                {healthScore}/100
+              </span>
+            </div>
+
+            <div className="w-full bg-rose-200/50 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-rose-500 h-full rounded-full transition-all duration-500"
+                style={{ width: `${healthScore}%` }}
+              ></div>
+            </div>
+
+            <div className="space-y-1.5 text-[11px] text-slate-600 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">⚡ Energy Score:</span>
+                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.energyScore || healthScore}/100</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">💧 Water Target:</span>
+                <span className="font-bold text-slate-800">
+                  {Math.min(lifeScore?.breakdown?.waterConsumedMl || 0, 2000)} / 2000ml
+                  {(lifeScore?.breakdown?.waterConsumedMl || 0) >= 2000 && (
+                    <span className="ml-1 text-[9px] text-emerald-700 font-extrabold bg-emerald-50 px-1 py-0.2 rounded">✓ Met</span>
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">😴 Sleep Duration:</span>
+                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.sleepHours || 0}h</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-rose-100/60">
+            <button
+              type="button"
+              disabled={(lifeScore?.breakdown?.waterConsumedMl || 0) >= 2000}
+              onClick={async () => {
+                const todayDate = new Date().toISOString().split("T")[0];
+                const res = await fetch(`${API_URL}/wellness/water`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  credentials: "include",
+                  body: JSON.stringify({ date: todayDate, amountMl: 250 })
+                });
+                if (res.ok) {
+                  toast.success("💧 Logged 250ml water!");
+                  if (onDataRefresh) onDataRefresh();
+                }
+              }}
+              className="flex-1 py-1.5 px-2 rounded-xl bg-white hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold transition shadow-2xs cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {(lifeScore?.breakdown?.waterConsumedMl || 0) >= 2000 ? "Goal Met 🎉" : "+250ml Water"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/health/wellness")}
+              className="py-1.5 px-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold transition shadow-2xs cursor-pointer"
+            >
+              Logs ➔
+            </button>
+          </div>
+        </div>
+
+        {/* Pillar 3: Learning & Skills */}
+        <div className="p-4.5 rounded-2xl bg-indigo-50/50 border border-indigo-100/90 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between pb-1 border-b border-indigo-100/60">
+              <span className="text-xs font-extrabold text-indigo-950 flex items-center gap-1.5">
+                <span>🧠 Learning</span>
+                <span className="text-[10px] font-bold text-indigo-600 font-mono">({Math.round((lifeScore?.weights?.learning || 0.40) * 100)}%)</span>
+              </span>
+              <span className="text-xs font-black text-indigo-700 font-mono bg-white px-2 py-0.5 rounded-lg border border-indigo-200 shadow-2xs">
+                {learningScore}/100
+              </span>
+            </div>
+
+            <div className="w-full bg-indigo-200/50 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-indigo-600 h-full rounded-full transition-all duration-500"
+                style={{ width: `${learningScore}%` }}
+              ></div>
+            </div>
+
+            <div className="space-y-1.5 text-[11px] text-slate-600 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">🧠 Quizzes Done:</span>
+                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.quizzesCompleted || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">📚 Study Tasks:</span>
+                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.studyTasksCompleted || 0} / {lifeScore?.breakdown?.studyTasksTotal || 1}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">🏆 Points Earned:</span>
+                <span className="font-bold text-indigo-700">+{lifeScore?.breakdown?.studyTasksEarnedPoints || (lifeScore?.breakdown?.studyTasksCompleted || 0) * 25} pts</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-indigo-100/60">
+            <button
+              type="button"
+              onClick={() => navigate("/learning/study-plan")}
+              className="flex-1 py-1.5 px-2 rounded-xl bg-white hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold transition shadow-2xs cursor-pointer text-center"
+            >
+              Study Plan
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/learning/quiz")}
+              className="py-1.5 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-2xs cursor-pointer"
+            >
+              Quiz ➔
+            </button>
+          </div>
+        </div>
+
+        {/* Pillar 4: Career & Action */}
+        <div className="p-4.5 rounded-2xl bg-emerald-50/50 border border-emerald-100/90 shadow-2xs flex flex-col justify-between space-y-3">
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between pb-1 border-b border-emerald-100/60">
+              <span className="text-xs font-extrabold text-emerald-950 flex items-center gap-1.5">
+                <span>💼 Career</span>
+                <span className="text-[10px] font-bold text-emerald-600 font-mono">({Math.round((lifeScore?.weights?.career || 0.25) * 100)}%)</span>
+              </span>
+              <span className="text-xs font-black text-emerald-700 font-mono bg-white px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+                {careerScore}/100
+              </span>
+            </div>
+
+            <div className="w-full bg-emerald-200/50 rounded-full h-2 overflow-hidden">
+              <div
+                className="bg-emerald-600 h-full rounded-full transition-all duration-500"
+                style={{ width: `${careerScore}%` }}
+              ></div>
+            </div>
+
+            <div className="space-y-1.5 text-[11px] text-slate-600 pt-1">
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">✓ Todos Done:</span>
+                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.todosCompleted || 0} / {lifeScore?.breakdown?.todosTotal || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">🚀 Milestones:</span>
+                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.actionMilestonesCompleted || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-slate-500">💼 Interviews:</span>
+                <span className="font-bold text-emerald-700">{lifeScore?.breakdown?.interviewsCompleted || 0}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-emerald-100/60">
+            <button
+              type="button"
+              onClick={() => navigate("/create-todo")}
+              className="flex-1 py-1.5 px-2 rounded-xl bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold transition shadow-2xs cursor-pointer text-center"
+            >
+              + Add Task
+            </button>
+            <button
+              type="button"
+              onClick={() => navigate("/career/applications")}
+              className="py-1.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition shadow-2xs cursor-pointer"
+            >
+              Jobs ➔
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* 🛡️ SPRINT 3.2: PROACTIVE HUMAN EA BURNOUT GUARD PROPOSAL CARD */}
@@ -798,25 +1029,81 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         </div>
       )}
 
+      {/* 🚀 WORK & PLANNING HUB: TODAY'S AGENDA | 7-DAY SCHEDULE | WEEKLY LIFE REPORT */}
+      <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200/80 relative z-10">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-2xs text-xs font-bold w-fit">
+          <button
+            onClick={() => setActiveView("today")}
+            className={`px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-2 ${
+              activeView === "today"
+                ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60 font-black"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <ListTodo className="w-4 h-4 text-indigo-600" />
+            <span>Today's Agenda</span>
+            {agendaTasks.length > 0 && (
+              <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
+                activeView === "today" ? "bg-indigo-100 text-indigo-800" : "bg-slate-200 text-slate-700"
+              }`}>
+                {agendaTasks.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveView("horizon")}
+            className={`px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-2 ${
+              activeView === "horizon"
+                ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60 font-black"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <CalendarDays className="w-4 h-4 text-indigo-600" />
+            <span>7-Day Schedule</span>
+          </button>
+
+          <button
+            onClick={() => setIsWeeklyReportOpen(true)}
+            className="px-3.5 py-2 rounded-xl text-purple-700 hover:text-purple-900 hover:bg-purple-50 transition cursor-pointer flex items-center gap-2 border border-transparent hover:border-purple-200"
+            title="Open Universal 7-Day Weekly Life Audit"
+          >
+            <Award className="w-4 h-4 text-purple-600" />
+            <span>Weekly Report</span>
+            <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+              Audit
+            </span>
+          </button>
+        </div>
+
+        {/* Right Action Button */}
+        <div className="flex items-center gap-2">
+          {activeView === "today" ? (
+            <button
+              onClick={() => setShowTaskInput(!showTaskInput)}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-brand-indigo to-sky-500 hover:opacity-95 text-white text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>{showTaskInput ? "Cancel" : "Quick Add Task"}</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setShowTaskInput(true);
+                setActiveView("today");
+              }}
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-indigo-700 border border-indigo-200 text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs active:scale-95"
+            >
+              <Plus className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Schedule Event / Task</span>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* VIEW 1: TODAY'S LIVE INTERACTIVE AGENDA */}
       {activeView === "today" && (
-        <div className="mt-5 space-y-3 relative z-10 animate-fadeIn">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Today's Interactive Agenda ({agendaTasks.length} pending)</span>
-            </h3>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowTaskInput(!showTaskInput)}
-                className="px-3 py-1 rounded-xl bg-gradient-to-r from-brand-indigo to-sky-500 hover:opacity-95 text-white text-[11px] font-bold transition cursor-pointer flex items-center gap-1 shadow-2xs active:scale-95"
-              >
-                <Plus className="w-3 h-3" />
-                <span>Quick Add Task</span>
-              </button>
-            </div>
-          </div>
+        <div className="mt-4 space-y-3 relative z-10 animate-fadeIn">
 
           {/* INLINE QUICK TASK ADD FORM */}
           {showTaskInput && (
@@ -1093,9 +1380,15 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         {/* Streak Flame Badge */}
         <div className="flex items-center gap-1 font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200 shrink-0">
           <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-          <span>{stats.streakCount || 0}d Streak Active</span>
+          <span>{streak || 0}d Streak Active</span>
         </div>
       </div>
+
+      {/* 7-Day Universal Weekly Life Report Modal */}
+      <WeeklyReportModal
+        isOpen={isWeeklyReportOpen}
+        onClose={() => setIsWeeklyReportOpen(false)}
+      />
     </div>
   );
 }
