@@ -1,14 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand colors -> text-brand-indigo, bg-brand-sky, etc. */
+  /* =========================================================
+     1. EXACT ORIGINAL BRAND PALETTE (Light Mode Preserved)
+     ========================================================= */
   --color-brand-indigo: #6366f1;
   --color-brand-sky: #0ea5e9;
   --color-brand-sky-light: #38bdf8;
   --color-brand-link: #4f46e5;
   --color-brand-link-hover: #4338ca;
+  --color-brand-emerald: #10b981;
+  --color-brand-purple: #a855f7;
 
-  /* Neutrals */
+  /* Neutrals (Original Light Mode) */
   --color-ink-900: #1e293b;
   --color-ink-700: #334155;
   --color-ink-600: #475569; /* guaranteed-AA body text on white (7.5:1) */
@@ -18,7 +22,7 @@
   --color-ink-100: #f1f5f9;
   --color-ink-50:  #f8fafc; /* subtle page wash, near-white */
 
-  /* Surfaces */
+  /* Original Light Surfaces */
   --color-surface-pink: #fdf2f8;        /* default app/page canvas background */
   --color-surface-orange: #fff7ed;      /* interactive input / form field backgrounds */
   --color-surface-blue: #eff6ff;        /* informational panels, hero/aside callouts */
@@ -37,11 +41,162 @@
   --color-focus-ring: #818cf8;
   --color-focus-ring-offset: #ffffff;
 
-  --color-disabled-bg: var(--color-ink-100);
-  --color-disabled-border: var(--color-ink-200);
-  --color-disabled-text: var(--color-ink-400);
+  --color-disabled-bg: #f1f5f9;
+  --color-disabled-border: #e2e8f0;
+  --color-disabled-text: #94a3b8;
 
-  /* Gradients -> bg-brand-gradient, bg-page-gradient */
+  /* Gradients */
   --background-image-brand-gradient: linear-gradient(to right, #6366f1, #0ea5e9, #38bdf8);
   --background-image-page-gradient: linear-gradient(to bottom right, #f1f5f9, #e2e8f0, #94a3b8);
+  --background-image-cyber-gradient: linear-gradient(135deg, #818cf8 0%, #c084fc 50%, #38bdf8 100%);
+  --background-image-emerald-gradient: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+
+  /* =========================================================
+     2. HARMONIZED DARK MODE TOKENS (Matching Original Hues)
+     ========================================================= */
+  --color-dark-bg: #07090e;
+  --color-dark-surface: #0e131f;
+  --color-dark-card: #131b2e;
+  --color-dark-card-hover: #1c2642;
+  --color-dark-border: rgba(255, 255, 255, 0.08);
+  --color-dark-border-glow: rgba(99, 102, 241, 0.3);
+}
+
+/* =========================================================
+   3. THEME-AWARE DYNAMIC CLASSES & GLASSMORPHISM
+   ========================================================= */
+@layer utilities {
+  .text-glow-indigo {
+    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 20px rgba(14, 165, 233, 0.5), 0 0 40px rgba(14, 165, 233, 0.2);
+  }
+
+  .text-glow-emerald {
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2);
+  }
+
+  .box-glow-indigo {
+    box-shadow: 0 0 40px -10px rgba(99, 102, 241, 0.35);
+  }
+
+  .box-glow-cyan {
+    box-shadow: 0 0 40px -10px rgba(14, 165, 233, 0.35);
+  }
+
+  .box-glow-emerald {
+    box-shadow: 0 0 40px -10px rgba(16, 185, 129, 0.35);
+  }
+}
+
+/* Glass Panels with seamless Dark/Light harmony */
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.08), 0 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+.glass-panel-dark {
+  background: rgba(14, 19, 31, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(99, 102, 241, 0.15);
+}
+
+/* Background Grids & Dots */
+.bg-grid-pattern-light {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+}
+
+.bg-grid-pattern-dark {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.bg-dots-light {
+  background-image: radial-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.bg-dots-dark {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Micro Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(0.5deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite;
+}
+
+/* Smooth HTML scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.65);
 }

@@ -1,13 +1,17 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Button from '../components/ui/Button';
 import NotificationDropdown from './ui/NotificationDropdown';
+import SidebarFeatureTooltip from './ui/SidebarFeatureTooltip';
+import { SIDEBAR_FEATURE_DATA } from '../data/sidebarFeatureData';
 import { X, Flame, LogOut, Settings } from 'lucide-react';
 
 export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
+  const [hoveredFeature, setHoveredFeature] = useState(null);
+  const hoverTimeoutRef = useRef(null);
 
   // All OS sub-modules open by default for immediate 1-click access
   const [openDropdowns, setOpenDropdowns] = useState({
@@ -22,6 +26,33 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   };
 
   const [lifeScoreData, setLifeScoreData] = useState(null);
+
+  const handleLinkMouseEnter = (path, e) => {
+    const data = SIDEBAR_FEATURE_DATA[path];
+    if (!data) return;
+
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredFeature({
+        data,
+        pos: {
+          top: rect.top,
+          left: rect.right + 12,
+        },
+      });
+    }, 120);
+  };
+
+  const handleLinkMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoveredFeature(null);
+  };
 
   useEffect(() => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
@@ -47,12 +78,16 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
       .catch(() => {});
   }, [navigate]);
 
-  // Close mobile sidebar whenever location changes
+  // Close mobile sidebar and clear tooltip whenever location changes
   useEffect(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    setHoveredFeature(null);
     if (setIsMobileOpen) {
       setIsMobileOpen(false);
     }
-  }, [location.pathname]);
+  }, [location.pathname, setIsMobileOpen]);
 
   const learningSubLinks = [
     { path: '/learning/roadmap', label: 'Roadmap Generator' },
@@ -181,6 +216,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 <Link
                   key={sub.path}
                   to={sub.path}
+                  onMouseEnter={(e) => handleLinkMouseEnter(sub.path, e)}
+                  onMouseLeave={handleLinkMouseLeave}
                   className={`block px-2.5 py-1.5 rounded-lg text-[11px] transition ${
                     isActive(sub.path)
                       ? 'bg-emerald-50 text-emerald-700 font-semibold'
@@ -218,6 +255,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 <Link
                   key={sub.path}
                   to={sub.path}
+                  onMouseEnter={(e) => handleLinkMouseEnter(sub.path, e)}
+                  onMouseLeave={handleLinkMouseLeave}
                   className={`block px-2.5 py-1.5 rounded-lg text-[11px] transition ${
                     isActive(sub.path)
                       ? 'bg-indigo-50 text-brand-indigo font-semibold'
@@ -255,6 +294,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 <Link
                   key={sub.path}
                   to={sub.path}
+                  onMouseEnter={(e) => handleLinkMouseEnter(sub.path, e)}
+                  onMouseLeave={handleLinkMouseLeave}
                   className={`block px-2.5 py-1.5 rounded-lg text-[11px] transition ${
                     isActive(sub.path)
                       ? 'bg-sky-50 text-sky-700 font-semibold'
@@ -292,6 +333,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                 <Link
                   key={sub.path}
                   to={sub.path}
+                  onMouseEnter={(e) => handleLinkMouseEnter(sub.path, e)}
+                  onMouseLeave={handleLinkMouseLeave}
                   className={`block px-2.5 py-1.5 rounded-lg text-[11px] transition ${
                     isActive(sub.path)
                       ? 'bg-emerald-50 text-emerald-700 font-semibold'
@@ -377,6 +420,14 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
       <aside className="hidden lg:flex w-64 h-screen sticky top-0 bg-white/85 backdrop-blur-md border-r border-slate-200/80 flex-col justify-between font-sans text-slate-700 shadow-sm z-30 shrink-0 overflow-hidden">
         {renderSidebarContent()}
       </aside>
+
+      {/* Floating Feature Hover Tooltip (Rendered outside overflow containers) */}
+      {hoveredFeature && (
+        <SidebarFeatureTooltip
+          feature={hoveredFeature.data}
+          position={hoveredFeature.pos}
+        />
+      )}
 
       {/* 2. MOBILE & TABLET SLIDE-OVER DRAWER (< 1024px) */}
       {isMobileOpen && (
