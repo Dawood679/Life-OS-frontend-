@@ -2,6 +2,9 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast"; // <-- Import Toaster here
 
 import LandingPage from "./pages/LandingPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
+import Security from "./pages/Security";
 import RoadmapGenerator from "../features/roadmap/RoadmapGenerator";
 import StudyPlanDetail from "../features/studyPlan/StudyPlanDetails";
 import ForgotPassword from "./auth/ForgotPassword";
@@ -49,6 +52,12 @@ export default function App() {
       
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsConditions />} />
+        <Route path="/terms-of-service" element={<TermsConditions />} />
+        <Route path="/security" element={<Security />} />
+        <Route path="/security-policy" element={<Security />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
