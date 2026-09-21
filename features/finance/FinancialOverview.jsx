@@ -477,16 +477,16 @@ export default function FinancialOverview() {
       {/* TOP CONTROLS & MONTH SELECTOR */}
       <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white/80 backdrop-blur-md border border-slate-200/80 p-4 rounded-2xl shadow-xs">
         {/* Month Selector Carousel */}
-        <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+        <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl shadow-2xs">
           <button
             onClick={() => changeMonth(-1)}
-            className="p-1 hover:bg-slate-200/70 rounded-lg text-slate-600 transition-colors"
+            className="p-1 hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-300 transition-colors"
             title="Previous Month"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-2 px-2 text-xs md:text-sm font-bold text-slate-800 tracking-wide">
-            <Calendar className="w-4 h-4 text-emerald-600" />
+          <div className="flex items-center gap-2 px-2 text-xs md:text-sm font-bold text-slate-800 dark:text-white tracking-wide">
+            <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>
               {new Date(`${selectedMonth}-01T00:00:00Z`).toLocaleString("en-US", {
                 month: "long",
@@ -497,7 +497,7 @@ export default function FinancialOverview() {
           </div>
           <button
             onClick={() => changeMonth(1)}
-            className="p-1 hover:bg-slate-200/70 rounded-lg text-slate-600 transition-colors"
+            className="p-1 hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-300 transition-colors"
             title="Next Month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -515,7 +515,7 @@ export default function FinancialOverview() {
               }
               setIsTxModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 hover:opacity-95 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-emerald-600 via-teal-600 to-sky-600 hover:opacity-95 text-white font-bold text-xs rounded-xl shadow-md shadow-emerald-500/10 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Record Transaction</span>
@@ -523,18 +523,18 @@ export default function FinancialOverview() {
 
           <button
             onClick={() => setIsAccountModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200/80 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-[#131b2e] hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer"
           >
-            <Wallet className="w-3.5 h-3.5 text-sky-600" />
+            <Wallet className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
             <span>New Wallet</span>
           </button>
 
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200/80 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-[#131b2e] hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer"
             title="Import Transactions from CSV or Excel"
           >
-            <Upload className="w-3.5 h-3.5 text-indigo-600" />
+            <Upload className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             <span>Import CSV/XLS</span>
           </button>
           <input
@@ -547,18 +547,18 @@ export default function FinancialOverview() {
 
           <button
             onClick={exportFinanceData}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200/80 transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-[#131b2e] hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer"
             title="Export Month Data to Excel"
           >
-            <Download className="w-3.5 h-3.5 text-amber-600" />
+            <Download className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
             <span>Export</span>
           </button>
 
           <button
             onClick={() => navigate("/finance/budget")}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs rounded-xl transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-bold text-xs rounded-xl transition-all cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Budget Planner &rarr;</span>
           </button>
         </div>
@@ -567,57 +567,57 @@ export default function FinancialOverview() {
       {/* TOP HUD KPI CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Net Worth */}
-        <div className="bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/40 border border-emerald-200/80 p-5 rounded-2xl shadow-xs backdrop-blur-md hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/50 dark:from-emerald-950/40 dark:via-[#0e131f] dark:to-teal-950/30 border border-emerald-200/80 dark:border-emerald-500/30 p-5 rounded-2xl shadow-xs dark:shadow-emerald-950/20 backdrop-blur-md hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Total Net Worth</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700">
+            <span className="text-[11px] font-bold text-slate-600 dark:text-emerald-400/90 uppercase tracking-wider">Total Net Worth</span>
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-300">
               <Landmark className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight font-serif">
+            <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight font-serif">
               ${Number(metrics.netWorth || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-              <span className="text-emerald-700 font-bold">${Number(metrics.liquidSavings || 0).toLocaleString()}</span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
+              <span className="text-emerald-700 dark:text-emerald-400 font-bold">${Number(metrics.liquidSavings || 0).toLocaleString()}</span>
               <span>liquid savings</span>
             </p>
           </div>
         </div>
 
         {/* Monthly Income */}
-        <div className="bg-gradient-to-br from-teal-50/80 via-white to-sky-50/40 border border-teal-200/80 p-5 rounded-2xl shadow-xs backdrop-blur-md hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-teal-50/90 via-white to-sky-50/50 dark:from-teal-950/40 dark:via-[#0e131f] dark:to-sky-950/30 border border-teal-200/80 dark:border-teal-500/30 p-5 rounded-2xl shadow-xs dark:shadow-teal-950/20 backdrop-blur-md hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Monthly Income</span>
-            <div className="w-8 h-8 rounded-xl bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-700">
+            <span className="text-[11px] font-bold text-slate-600 dark:text-teal-400/90 uppercase tracking-wider">Monthly Income</span>
+            <div className="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 flex items-center justify-center text-teal-700 dark:text-teal-300">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <h3 className="text-2xl font-extrabold text-teal-700 tracking-tight font-serif">
+            <h3 className="text-2xl font-extrabold text-teal-700 dark:text-teal-300 tracking-tight font-serif">
               +${Number(metrics.monthlyIncome || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Active cash inflows this month
             </p>
           </div>
         </div>
 
         {/* Monthly Expense */}
-        <div className="bg-gradient-to-br from-rose-50/80 via-white to-orange-50/40 border border-rose-200/80 p-5 rounded-2xl shadow-xs backdrop-blur-md hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-rose-50/90 via-white to-orange-50/50 dark:from-rose-950/40 dark:via-[#0e131f] dark:to-orange-950/30 border border-rose-200/80 dark:border-rose-500/30 p-5 rounded-2xl shadow-xs dark:shadow-rose-950/20 backdrop-blur-md hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Monthly Expenses</span>
-            <div className="w-8 h-8 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-700">
+            <span className="text-[11px] font-bold text-slate-600 dark:text-rose-400/90 uppercase tracking-wider">Monthly Expenses</span>
+            <div className="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 flex items-center justify-center text-rose-700 dark:text-rose-300">
               <TrendingDown className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <h3 className="text-2xl font-extrabold text-rose-600 tracking-tight font-serif">
+            <h3 className="text-2xl font-extrabold text-rose-600 dark:text-rose-400 tracking-tight font-serif">
               -${Number(metrics.monthlyExpense || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Net savings:{" "}
-              <span className={metrics.netSavings >= 0 ? "text-emerald-700 font-bold" : "text-rose-600 font-bold"}>
+              <span className={metrics.netSavings >= 0 ? "text-emerald-700 dark:text-emerald-400 font-bold" : "text-rose-600 dark:text-rose-400 font-bold"}>
                 {metrics.netSavings >= 0 ? "+" : ""}${Number(metrics.netSavings || 0).toLocaleString()}
               </span>
             </p>
@@ -625,35 +625,34 @@ export default function FinancialOverview() {
         </div>
 
         {/* Financial Runway & Savings Rate */}
-        <div className="bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/40 border border-indigo-200/80 p-5 rounded-2xl shadow-xs backdrop-blur-md hover:shadow-md transition-all">
+        <div className="bg-gradient-to-br from-indigo-50/90 via-white to-purple-50/50 dark:from-indigo-950/40 dark:via-[#0e131f] dark:to-purple-950/30 border border-indigo-200/80 dark:border-indigo-500/30 p-5 rounded-2xl shadow-xs dark:shadow-indigo-950/20 backdrop-blur-md hover:shadow-md transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Runway & Rate</span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700">
+            <span className="text-[11px] font-bold text-slate-600 dark:text-indigo-400/90 uppercase tracking-wider">Runway & Rate</span>
+            <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300">
               <PiggyBank className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
             <div className="flex items-baseline gap-2">
-              <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight font-serif">
-                {metrics.runwayMonths} <span className="text-xs font-normal text-slate-500 font-sans">months</span>
+              <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight font-serif">
+                {metrics.runwayMonths} <span className="text-xs font-normal text-slate-500 dark:text-slate-400 font-sans">months</span>
               </h3>
-              <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold rounded-full">
+              <span className="px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-bold rounded-full">
                 {metrics.savingsRate}% Saved
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Runway based on avg ${metrics.avgMonthlyExpense}/mo burn
             </p>
           </div>
         </div>
       </div>
-
       {/* WALLETS & ACCOUNTS GRID */}
-      <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 p-5 rounded-2xl shadow-xs space-y-4">
+      <div className="bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md border border-slate-200/80 dark:border-white/10 p-5 rounded-2xl shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-sm font-bold text-slate-800 tracking-wide">Wallets & Financial Accounts</h3>
+            <Wallet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white tracking-wide">Wallets & Financial Accounts</h3>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -667,9 +666,9 @@ export default function FinancialOverview() {
                 });
                 setIsAccountModalOpen(true);
               }}
-              className="text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="text-xs bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors"
             >
-              <PiggyBank className="w-3.5 h-3.5 text-indigo-600" />
+              <PiggyBank className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span>+ Add Savings Vault</span>
             </button>
             <button
@@ -677,7 +676,7 @@ export default function FinancialOverview() {
                 setAccountForm(initialAccountForm);
                 setIsAccountModalOpen(true);
               }}
-              className="text-xs text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border border-slate-200 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
+              className="text-xs text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white bg-slate-100 dark:bg-[#131b2e] hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 cursor-pointer transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>New Wallet</span>
@@ -692,7 +691,7 @@ export default function FinancialOverview() {
             return (
               <div
                 key={acc._id}
-                className="bg-slate-50/70 border border-slate-200/80 hover:border-indigo-300 p-4 rounded-xl transition-all relative overflow-hidden shadow-2xs flex flex-col justify-between gap-3"
+                className="bg-slate-50/90 dark:bg-[#131b2e] border border-slate-200/80 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 p-4 rounded-xl transition-all relative overflow-hidden shadow-2xs flex flex-col justify-between gap-3"
               >
                 <div
                   className="absolute top-0 left-0 bottom-0 w-1"
@@ -700,27 +699,27 @@ export default function FinancialOverview() {
                 />
                 <div className="flex items-start justify-between pl-1">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                       {acc.type === "savings" ? "Savings Vault" : acc.type}
                     </span>
-                    <h4 className="text-sm font-bold text-slate-800 truncate max-w-[140px]">
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-white truncate max-w-[140px]">
                       {acc.name}
                     </h4>
                   </div>
-                  <div className="p-2 rounded-lg bg-white border border-slate-200 text-slate-600">
+                  <div className="p-2 rounded-lg bg-white dark:bg-[#1a233a] border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300">
                     {acc.type === "bank" ? (
-                      <Landmark className="w-3.5 h-3.5 text-sky-600" />
+                      <Landmark className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
                     ) : acc.type === "credit" ? (
-                      <CreditCard className="w-3.5 h-3.5 text-rose-600" />
+                      <CreditCard className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
                     ) : acc.type === "savings" ? (
-                      <PiggyBank className="w-3.5 h-3.5 text-indigo-600" />
+                      <PiggyBank className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                     ) : (
-                      <Wallet className="w-3.5 h-3.5 text-emerald-600" />
+                      <Wallet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     )}
                   </div>
                 </div>
                 <div className="pl-1 flex items-center justify-between">
-                  <p className={`text-base font-extrabold font-serif ${isCredit ? "text-rose-600" : "text-slate-900"}`}>
+                  <p className={`text-base font-extrabold font-serif ${isCredit ? "text-rose-600 dark:text-rose-400" : "text-slate-900 dark:text-white"}`}>
                     {isCredit ? "-" : ""}${Number(acc.balance || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </p>
                   {isSavings && (
@@ -737,7 +736,7 @@ export default function FinancialOverview() {
                         });
                         setIsTxModalOpen(true);
                       }}
-                      className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
+                      className="text-[11px] font-bold text-indigo-600 dark:text-indigo-300 hover:text-indigo-800 dark:hover:text-indigo-200 bg-indigo-50 dark:bg-indigo-500/20 hover:bg-indigo-100 dark:hover:bg-indigo-500/30 border border-indigo-200 dark:border-indigo-500/30 px-2 py-0.5 rounded-lg transition-colors cursor-pointer"
                       title="Deposit money into this savings vault"
                     >
                       ⚡ Deposit
@@ -753,13 +752,13 @@ export default function FinancialOverview() {
       {/* 2-COLUMN SECTION: 6-MONTH TREND & CATEGORY BREAKDOWN */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 6-Month Cash Flow Trend Card */}
-        <div className="lg:col-span-2 bg-white/80 backdrop-blur-md border border-slate-200/80 p-5 rounded-2xl shadow-xs space-y-4">
+        <div className="lg:col-span-2 bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md border border-slate-200/80 dark:border-white/10 p-5 rounded-2xl shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-sky-600" />
-              <h3 className="text-sm font-bold text-slate-800 tracking-wide">6-Month Cash Flow Momentum</h3>
+              <BarChart3 className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              <h3 className="text-sm font-bold text-slate-800 dark:text-white tracking-wide">6-Month Cash Flow Momentum</h3>
             </div>
-            <span className="text-xs font-semibold text-slate-500">Income vs Expense</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Income vs Expense</span>
           </div>
 
           <div className="grid grid-cols-6 gap-2 pt-4">
@@ -774,7 +773,7 @@ export default function FinancialOverview() {
               return (
                 <div key={idx} className="flex flex-col items-center gap-2">
                   {/* Bars Container */}
-                  <div className="h-32 w-full flex items-end justify-center gap-1.5 bg-slate-50 rounded-xl p-1.5 border border-slate-200/80">
+                  <div className="h-32 w-full flex items-end justify-center gap-1.5 bg-slate-50 dark:bg-[#131b2e] rounded-xl p-1.5 border border-slate-200/80 dark:border-white/10">
                     {/* Income Bar */}
                     <div
                       style={{ height: `${incomeHeight}px` }}
@@ -789,13 +788,13 @@ export default function FinancialOverview() {
                     />
                   </div>
                   {/* Month Label */}
-                  <span className="text-[11px] font-bold text-slate-700">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
                     {m.month}
                   </span>
                   {/* Net indicator */}
                   <span
                     className={`text-[9px] font-mono font-bold ${
-                      m.net >= 0 ? "text-emerald-700" : "text-rose-600"
+                      m.net >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
                     }`}
                   >
                     {m.net >= 0 ? `+$${m.net}` : `-$${Math.abs(m.net)}`}
@@ -805,7 +804,7 @@ export default function FinancialOverview() {
             })}
           </div>
 
-          <div className="flex items-center justify-center gap-6 pt-2 border-t border-slate-100 text-xs text-slate-600 font-medium">
+          <div className="flex items-center justify-center gap-6 pt-2 border-t border-slate-100 dark:border-white/10 text-xs text-slate-600 dark:text-slate-400 font-medium">
             <div className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
               <span>Income</span>
@@ -818,13 +817,13 @@ export default function FinancialOverview() {
         </div>
 
         {/* Category Expense Breakdown */}
-        <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 p-5 rounded-2xl shadow-xs space-y-4">
+        <div className="bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md border border-slate-200/80 dark:border-white/10 p-5 rounded-2xl shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <PieChart className="w-4 h-4 text-emerald-600" />
-              <h3 className="text-sm font-bold text-slate-800 tracking-wide">Category Distribution</h3>
+              <PieChart className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-sm font-bold text-slate-800 dark:text-white tracking-wide">Category Distribution</h3>
             </div>
-            <span className="text-xs font-bold text-slate-700 font-mono">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 font-mono">
               ${metrics.monthlyExpense.toLocaleString()}
             </span>
           </div>
@@ -843,18 +842,18 @@ export default function FinancialOverview() {
                 return (
                   <div key={idx} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-slate-700 font-semibold truncate max-w-[140px]">
+                      <span className="text-slate-700 dark:text-slate-300 font-semibold truncate max-w-[140px]">
                         {cat._id}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-500 text-[11px]">{percent}%</span>
-                        <span className="text-slate-900 font-bold font-mono">
+                        <span className="text-slate-500 dark:text-slate-400 text-[11px]">{percent}%</span>
+                        <span className="text-slate-900 dark:text-white font-bold font-mono">
                           ${cat.total.toLocaleString()}
                         </span>
                       </div>
                     </div>
                     {/* Progress bar */}
-                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-slate-100 dark:bg-[#131b2e] rounded-full h-2 overflow-hidden border border-transparent dark:border-white/5">
                       <div
                         className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
                         style={{ width: `${percent}%` }}
@@ -869,13 +868,13 @@ export default function FinancialOverview() {
       </div>
 
       {/* TRANSACTIONS MANAGEMENT STUDIO */}
-      <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 p-5 rounded-2xl shadow-xs space-y-4">
+      <div className="bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md border border-slate-200/80 dark:border-white/10 p-5 rounded-2xl shadow-xs space-y-4">
         {/* Header & Filter Controls */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-indigo-600" />
-            <h3 className="text-sm font-bold text-slate-800 tracking-wide">Transaction Studio</h3>
-            <span className="px-2.5 py-0.5 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-full border border-slate-200">
+            <Layers className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white tracking-wide">Transaction Studio</h3>
+            <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-[#131b2e] text-slate-600 dark:text-slate-300 text-[10px] font-bold rounded-full border border-slate-200 dark:border-white/10">
               {pagination.total} Records
             </span>
           </div>
@@ -889,7 +888,7 @@ export default function FinancialOverview() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search description, merchant..."
-                className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20 w-48 sm:w-56"
+                className="pl-8 pr-3 py-1.5 bg-slate-50 dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 w-48 sm:w-56"
               />
             </div>
 
@@ -897,7 +896,7 @@ export default function FinancialOverview() {
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-600"
+              className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-400"
             >
               <option value="all">All Types</option>
               <option value="expense">Expenses Only</option>
@@ -909,7 +908,7 @@ export default function FinancialOverview() {
             <select
               value={accountFilter}
               onChange={(e) => setAccountFilter(e.target.value)}
-              className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 focus:outline-none focus:border-emerald-600"
+              className="px-2.5 py-1.5 bg-slate-50 dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-700 dark:text-slate-200 focus:outline-none focus:border-emerald-600 dark:focus:border-emerald-400"
             >
               <option value="all">All Accounts</option>
               {accounts.map((a) => (
@@ -922,9 +921,9 @@ export default function FinancialOverview() {
         </div>
 
         {/* Transactions Table */}
-        <div className="overflow-x-auto rounded-xl border border-slate-200/80 bg-white">
+        <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#0e131f]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+            <thead className="bg-slate-50 dark:bg-[#131b2e] text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200 dark:border-white/10 text-[10px]">
               <tr>
                 <th className="py-3 px-4">Date</th>
                 <th className="py-3 px-4">Merchant / Payee</th>
@@ -934,10 +933,10 @@ export default function FinancialOverview() {
                 <th className="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-white/5">
               {loadingTx ? (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                  <td colSpan={6} className="py-8 text-center text-slate-500 dark:text-slate-400">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
                       <span>Loading transactions...</span>
@@ -958,10 +957,10 @@ export default function FinancialOverview() {
                   return (
                     <tr
                       key={tx._id}
-                      className="hover:bg-slate-50/70 transition-colors group"
+                      className="hover:bg-slate-50/70 dark:hover:bg-white/[0.03] transition-colors group"
                     >
                       {/* Date */}
-                      <td className="py-3 px-4 text-slate-600 font-mono text-[11px] whitespace-nowrap">
+                      <td className="py-3 px-4 text-slate-600 dark:text-slate-400 font-mono text-[11px] whitespace-nowrap">
                         {new Date(tx.date).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -971,16 +970,16 @@ export default function FinancialOverview() {
 
                       {/* Merchant & Description */}
                       <td className="py-3 px-4">
-                        <div className="font-bold text-slate-800 flex items-center gap-1.5">
+                        <div className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5">
                           <span>{tx.merchant || tx.description || "Untitled Transaction"}</span>
                           {tx.isRecurring && (
-                            <span className="px-1.5 py-0.2 text-[9px] bg-indigo-50 text-indigo-700 rounded border border-indigo-200 font-bold">
+                            <span className="px-1.5 py-0.2 text-[9px] bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-500/30 font-bold">
                               Recurring
                             </span>
                           )}
                         </div>
                         {tx.description && tx.merchant && (
-                          <div className="text-[11px] text-slate-500 truncate max-w-xs">
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-xs">
                             {tx.description}
                           </div>
                         )}
@@ -988,14 +987,14 @@ export default function FinancialOverview() {
 
                       {/* Category Badge */}
                       <td className="py-3 px-4">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-lg border border-slate-200 text-[11px] font-medium">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-slate-100 dark:bg-[#131b2e] text-slate-700 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-white/10 text-[11px] font-medium">
                           <Tag className="w-2.5 h-2.5 text-slate-400" />
                           {tx.category}
                         </span>
                       </td>
 
                       {/* Account */}
-                      <td className="py-3 px-4 text-slate-700 font-medium">
+                      <td className="py-3 px-4 text-slate-700 dark:text-slate-300 font-medium">
                         {isTransfer ? (
                           <div className="flex items-center gap-1 text-[11px]">
                             <span>{tx.account}</span>
@@ -1012,10 +1011,10 @@ export default function FinancialOverview() {
                         <span
                           className={
                             isIncome
-                              ? "text-emerald-600"
+                              ? "text-emerald-600 dark:text-emerald-400"
                               : isTransfer
-                              ? "text-sky-600"
-                              : "text-rose-600"
+                              ? "text-sky-600 dark:text-sky-400"
+                              : "text-rose-600 dark:text-rose-400"
                           }
                         >
                           {isIncome ? "+" : isTransfer ? "⇄ " : "-"}${Number(tx.amount || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
@@ -1027,7 +1026,7 @@ export default function FinancialOverview() {
                         <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleEditClick(tx)}
-                            className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                            className="p-1.5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors cursor-pointer"
                             title="Edit Transaction"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -1041,7 +1040,7 @@ export default function FinancialOverview() {
                                 amount: tx.amount,
                               })
                             }
-                            className="p-1.5 hover:bg-rose-50 rounded-lg text-slate-500 hover:text-rose-600 transition-colors cursor-pointer"
+                            className="p-1.5 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 transition-colors cursor-pointer"
                             title="Delete Transaction"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1059,21 +1058,21 @@ export default function FinancialOverview() {
         {/* Pagination Controls */}
         {pagination.pages > 1 && (
           <div className="flex items-center justify-between pt-2">
-            <span className="text-xs text-slate-500 font-medium">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
               Page {pagination.page} of {pagination.pages}
             </span>
             <div className="flex items-center gap-2">
               <button
                 disabled={pagination.page <= 1}
                 onClick={() => fetchTransactions(pagination.page - 1)}
-                className="px-3 py-1 bg-slate-100 disabled:opacity-40 text-slate-700 hover:bg-slate-200 text-xs font-semibold rounded-lg border border-slate-200 cursor-pointer disabled:cursor-not-allowed"
+                className="px-3 py-1 bg-slate-100 dark:bg-[#131b2e] disabled:opacity-40 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 cursor-pointer disabled:cursor-not-allowed"
               >
                 Previous
               </button>
               <button
                 disabled={pagination.page >= pagination.pages}
                 onClick={() => fetchTransactions(pagination.page + 1)}
-                className="px-3 py-1 bg-slate-100 disabled:opacity-40 text-slate-700 hover:bg-slate-200 text-xs font-semibold rounded-lg border border-slate-200 cursor-pointer disabled:cursor-not-allowed"
+                className="px-3 py-1 bg-slate-100 dark:bg-[#131b2e] disabled:opacity-40 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/10 text-xs font-semibold rounded-lg border border-slate-200 dark:border-white/10 cursor-pointer disabled:cursor-not-allowed"
               >
                 Next
               </button>
@@ -1084,26 +1083,26 @@ export default function FinancialOverview() {
 
       {/* RECORD / EDIT TRANSACTION MODAL */}
       {isTxModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/70">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#0e131f]">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-300">
                   <DollarSign className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-800">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-white">
                     {txModalMode === "edit" ? "Edit Transaction" : "Record Transaction"}
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Keep your real-time cash flow and accounts up to date.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsTxModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1112,7 +1111,7 @@ export default function FinancialOverview() {
             {/* Modal Form */}
             <form onSubmit={handleSaveTransaction} className="p-5 space-y-4">
               {/* Type Switcher */}
-              <div className="grid grid-cols-3 gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
+              <div className="grid grid-cols-3 gap-2 bg-slate-100 dark:bg-[#0e131f] p-1 rounded-xl border border-slate-200 dark:border-white/10">
                 {[
                   { id: "expense", label: "Expense", active: "bg-rose-600 text-white shadow-xs" },
                   { id: "income", label: "Income", active: "bg-emerald-600 text-white shadow-xs" },
@@ -1125,7 +1124,7 @@ export default function FinancialOverview() {
                     className={`py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
                       txForm.type === tab.id
                         ? tab.active
-                        : "text-slate-600 hover:text-slate-900"
+                        : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     {tab.label}
@@ -1136,7 +1135,7 @@ export default function FinancialOverview() {
               {/* Amount & Date */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Amount ($) *
                   </label>
                   <input
@@ -1146,12 +1145,12 @@ export default function FinancialOverview() {
                     value={txForm.amount}
                     onChange={(e) => setTxForm({ ...txForm, amount: e.target.value })}
                     placeholder="0.00"
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-mono text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Date *
                   </label>
                   <input
@@ -1159,7 +1158,7 @@ export default function FinancialOverview() {
                     required
                     value={txForm.date}
                     onChange={(e) => setTxForm({ ...txForm, date: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-600"
                   />
                 </div>
               </div>
@@ -1167,16 +1166,16 @@ export default function FinancialOverview() {
               {/* Category (if not transfer) */}
               {txForm.type !== "transfer" && (
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Category *
                   </label>
                   <select
                     value={txForm.category}
                     onChange={(e) => setTxForm({ ...txForm, category: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-600"
                   >
                     {(txForm.type === "income" ? incomeCategories : expenseCategories).map((c) => (
-                      <option key={c} value={c}>
+                      <option key={c} value={c} className="dark:bg-[#131b2e] dark:text-white">
                         {c}
                       </option>
                     ))}
@@ -1187,16 +1186,16 @@ export default function FinancialOverview() {
               {/* Account Selection */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     {txForm.type === "transfer" ? "From Account *" : "Account *"}
                   </label>
                   <select
                     value={txForm.account}
                     onChange={(e) => setTxForm({ ...txForm, account: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-600"
                   >
                     {accounts.map((a) => (
-                      <option key={a._id} value={a.name}>
+                      <option key={a._id} value={a.name} className="dark:bg-[#131b2e] dark:text-white">
                         {a.name} (${a.balance})
                       </option>
                     ))}
@@ -1205,19 +1204,19 @@ export default function FinancialOverview() {
 
                 {txForm.type === "transfer" && (
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                       To Account *
                     </label>
                     <select
                       value={txForm.toAccount}
                       onChange={(e) => setTxForm({ ...txForm, toAccount: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-emerald-600"
+                      className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-600"
                     >
-                      <option value="">Select Destination</option>
+                      <option value="" className="dark:bg-[#131b2e] dark:text-white">Select Destination</option>
                       {accounts
                         .filter((a) => a.name !== txForm.account)
                         .map((a) => (
-                          <option key={a._id} value={a.name}>
+                          <option key={a._id} value={a.name} className="dark:bg-[#131b2e] dark:text-white">
                             {a.name} (${a.balance})
                           </option>
                         ))}
@@ -1228,7 +1227,7 @@ export default function FinancialOverview() {
 
               {/* Merchant / Payee */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Merchant / Payee / Source
                 </label>
                 <input
@@ -1236,13 +1235,13 @@ export default function FinancialOverview() {
                   value={txForm.merchant}
                   onChange={(e) => setTxForm({ ...txForm, merchant: e.target.value })}
                   placeholder="e.g. Amazon, Uber, Employer, Landlord"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600"
                 />
               </div>
 
               {/* Description & Notes */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Notes / Description
                 </label>
                 <input
@@ -1250,15 +1249,15 @@ export default function FinancialOverview() {
                   value={txForm.description}
                   onChange={(e) => setTxForm({ ...txForm, description: e.target.value })}
                   placeholder="Optional memo or transaction note"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-600"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-600"
                 />
               </div>
 
               {/* Recurring Switch */}
-              <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-[#0e131f] rounded-xl border border-slate-200 dark:border-white/10">
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block">Recurring Transaction</span>
-                  <span className="text-[10px] text-slate-500">Repeats every month (e.g. rent, subscription)</span>
+                  <span className="text-xs font-bold text-slate-800 dark:text-white block">Recurring Transaction</span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400">Repeats every month (e.g. rent, subscription)</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1275,11 +1274,11 @@ export default function FinancialOverview() {
               </div>
 
               {/* Submit Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsTxModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#0e131f] hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1297,18 +1296,18 @@ export default function FinancialOverview() {
 
       {/* CREATE ACCOUNT / WALLET MODAL */}
       {isAccountModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#0e131f]">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-sky-100 border border-sky-200 flex items-center justify-center text-sky-700">
+                <div className="w-9 h-9 rounded-xl bg-sky-100 dark:bg-sky-500/20 border border-sky-200 dark:border-sky-500/30 flex items-center justify-center text-sky-700 dark:text-sky-300">
                   <Wallet className="w-4 h-4" />
                 </div>
-                <h3 className="text-base font-bold text-slate-800">Create New Wallet / Account</h3>
+                <h3 className="text-base font-bold text-slate-800 dark:text-white">Create New Wallet / Account</h3>
               </div>
               <button
                 onClick={() => setIsAccountModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1317,7 +1316,7 @@ export default function FinancialOverview() {
             <form onSubmit={handleCreateAccount} className="p-5 space-y-4">
               {/* Quick Preset Chips */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Quick Savings Templates
                 </label>
                 <div className="flex flex-wrap gap-1.5">
@@ -1338,7 +1337,7 @@ export default function FinancialOverview() {
                           color: preset.color,
                         }))
                       }
-                      className="text-[11px] font-medium bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 px-2.5 py-1 rounded-lg border border-slate-200 transition-colors cursor-pointer"
+                      className="text-[11px] font-medium bg-slate-100 dark:bg-[#0e131f] hover:bg-indigo-50 dark:hover:bg-indigo-500/20 hover:text-indigo-700 dark:hover:text-indigo-300 text-slate-700 dark:text-slate-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/10 transition-colors cursor-pointer"
                     >
                       {preset.name}
                     </button>
@@ -1347,7 +1346,7 @@ export default function FinancialOverview() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Account Name *
                 </label>
                 <input
@@ -1356,30 +1355,30 @@ export default function FinancialOverview() {
                   value={accountForm.name}
                   onChange={(e) => setAccountForm({ ...accountForm, name: e.target.value })}
                   placeholder="e.g. Chase Freedom, Emergency Fund, Crypto Wallet"
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-600"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-sky-600"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Account Type
                   </label>
                   <select
                     value={accountForm.type}
                     onChange={(e) => setAccountForm({ ...accountForm, type: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:border-sky-600"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white focus:outline-none focus:border-sky-600"
                   >
-                    <option value="bank">Bank Account</option>
-                    <option value="cash">Cash Wallet</option>
-                    <option value="savings">Savings Vault</option>
-                    <option value="credit">Credit Card (Liability)</option>
-                    <option value="investment">Investment Portfolio</option>
+                    <option value="bank" className="dark:bg-[#131b2e] dark:text-white">Bank Account</option>
+                    <option value="cash" className="dark:bg-[#131b2e] dark:text-white">Cash Wallet</option>
+                    <option value="savings" className="dark:bg-[#131b2e] dark:text-white">Savings Vault</option>
+                    <option value="credit" className="dark:bg-[#131b2e] dark:text-white">Credit Card (Liability)</option>
+                    <option value="investment" className="dark:bg-[#131b2e] dark:text-white">Investment Portfolio</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Starting Balance ($)
                   </label>
                   <input
@@ -1387,13 +1386,13 @@ export default function FinancialOverview() {
                     step="0.01"
                     value={accountForm.balance}
                     onChange={(e) => setAccountForm({ ...accountForm, balance: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:border-sky-600"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-sky-600"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Color Tag
                 </label>
                 <div className="flex items-center gap-2 pt-1">
@@ -1405,7 +1404,7 @@ export default function FinancialOverview() {
                         onClick={() => setAccountForm({ ...accountForm, color: col })}
                         style={{ backgroundColor: col }}
                         className={`w-6 h-6 rounded-full cursor-pointer transition-transform ${
-                          accountForm.color === col ? "scale-125 ring-2 ring-slate-800" : "opacity-70 hover:opacity-100"
+                          accountForm.color === col ? "scale-125 ring-2 ring-slate-800 dark:ring-white" : "opacity-70 hover:opacity-100"
                         }`}
                       />
                     )
@@ -1413,11 +1412,11 @@ export default function FinancialOverview() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsAccountModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#0e131f] hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1435,25 +1434,25 @@ export default function FinancialOverview() {
 
       {/* SMART CSV/EXCEL BULK IMPORT MODAL */}
       {isImportModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#0e131f]">
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700">
+                <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300">
                   <FileSpreadsheet className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-800">
+                  <h3 className="text-base font-bold text-slate-800 dark:text-white">
                     Bulk Import Preview ({importPreviewData.length} Rows)
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     Review parsed transactions before committing them to your ledger.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsImportModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1461,21 +1460,21 @@ export default function FinancialOverview() {
 
             <div className="p-5 space-y-4">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-600 font-medium">
-                  Ready to import <strong className="text-emerald-700">{importPreviewData.length}</strong> transactions
+                <span className="text-slate-600 dark:text-slate-400 font-medium">
+                  Ready to import <strong className="text-emerald-700 dark:text-emerald-400">{importPreviewData.length}</strong> transactions
                 </span>
                 <button
                   onClick={downloadSampleTemplate}
-                  className="text-indigo-600 hover:text-indigo-700 font-bold underline"
+                  className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-bold underline"
                 >
                   Download Format Template
                 </button>
               </div>
 
               {/* Table Preview */}
-              <div className="max-h-60 overflow-y-auto rounded-xl border border-slate-200">
+              <div className="max-h-60 overflow-y-auto rounded-xl border border-slate-200 dark:border-white/10">
                 <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-bold">
+                  <thead className="bg-slate-50 dark:bg-[#0e131f] text-slate-600 dark:text-slate-400 uppercase text-[10px] font-bold">
                     <tr>
                       <th className="py-2 px-3">Date</th>
                       <th className="py-2 px-3">Type</th>
@@ -1484,22 +1483,22 @@ export default function FinancialOverview() {
                       <th className="py-2 px-3">Merchant</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                     {importPreviewData.slice(0, 8).map((row, i) => (
-                      <tr key={i} className="hover:bg-slate-50">
-                        <td className="py-2 px-3 text-slate-600 font-mono text-[11px]">{row.date}</td>
+                      <tr key={i} className="hover:bg-slate-50 dark:hover:bg-white/[0.04]">
+                        <td className="py-2 px-3 text-slate-600 dark:text-slate-400 font-mono text-[11px]">{row.date}</td>
                         <td className="py-2 px-3">
                           <span
                             className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                              row.type === "income" ? "text-emerald-700 bg-emerald-100" : "text-rose-700 bg-rose-100"
+                              row.type === "income" ? "text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-500/20" : "text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-500/20"
                             }`}
                           >
                             {row.type}
                           </span>
                         </td>
-                        <td className="py-2 px-3 font-mono font-bold text-slate-900">${row.amount}</td>
-                        <td className="py-2 px-3 text-slate-700">{row.category}</td>
-                        <td className="py-2 px-3 text-slate-500 truncate max-w-[120px]">{row.merchant || "-"}</td>
+                        <td className="py-2 px-3 font-mono font-bold text-slate-900 dark:text-white">${row.amount}</td>
+                        <td className="py-2 px-3 text-slate-700 dark:text-slate-300">{row.category}</td>
+                        <td className="py-2 px-3 text-slate-500 dark:text-slate-400 truncate max-w-[120px]">{row.merchant || "-"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -1507,16 +1506,16 @@ export default function FinancialOverview() {
               </div>
 
               {importPreviewData.length > 8 && (
-                <p className="text-[11px] text-slate-500 text-center">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 text-center">
                   + {importPreviewData.length - 8} more transactions will be imported
                 </p>
               )}
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsImportModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#0e131f] hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -1535,21 +1534,21 @@ export default function FinancialOverview() {
 
       {/* DELETE CONFIRMATION MODAL */}
       {deleteModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="w-11 h-11 rounded-full bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+            <div className="w-11 h-11 rounded-full bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 flex items-center justify-center text-rose-600 dark:text-rose-400 mx-auto">
               <AlertCircle className="w-6 h-6" />
             </div>
             <div className="text-center">
-              <h3 className="text-base font-bold text-slate-800">Delete Transaction?</h3>
-              <p className="text-xs text-slate-500 mt-1">
+              <h3 className="text-base font-bold text-slate-800 dark:text-white">Delete Transaction?</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Are you sure you want to delete &quot;{deleteModal.description}&quot; (${deleteModal.amount})? Your wallet balance will be restored.
               </p>
             </div>
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setDeleteModal({ isOpen: false, id: null, description: "", amount: 0 })}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2 bg-slate-100 dark:bg-[#0e131f] hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>

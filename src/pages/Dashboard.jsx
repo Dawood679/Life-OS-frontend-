@@ -6,6 +6,7 @@ import SmartOnboardingModal from "../components/SmartOnboardingModal";
 import SkillCelebrationModal from "../components/SkillCelebrationModal";
 import AIAssistantDashboard from "../components/AIAssistantDashboard";
 import LifeJourneyFlow from "../components/LifeJourneyFlow";
+import DeleteModal from "../components/DeleteModal";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -244,20 +245,33 @@ export default function Dashboard() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this task?")) return;
+  const [todoToDelete, setTodoToDelete] = useState(null);
+  const [isDeletingTodo, setIsDeletingTodo] = useState(false);
+
+  const openDeleteModal = (todo) => {
+    setTodoToDelete(todo);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!todoToDelete) return;
     try {
-      const res = await fetch(`${API_URL}/to-dos/${id}`, {
+      setIsDeletingTodo(true);
+      const res = await fetch(`${API_URL}/to-dos/${todoToDelete._id || todoToDelete}`, {
         method: "DELETE",
         credentials: "include",
       });
       const data = await res.json();
       if (data.success) {
         toast.success("Task deleted successfully");
-        setTodos((prev) => prev.filter((t) => t._id !== id));
+        setTodos((prev) => prev.filter((t) => t._id !== (todoToDelete._id || todoToDelete)));
+        setTodoToDelete(null);
+      } else {
+        toast.error(data.message || "Failed to delete task.");
       }
     } catch {
       toast.error("Unable to delete task.");
+    } finally {
+      setIsDeletingTodo(false);
     }
   };
 
@@ -330,17 +344,17 @@ export default function Dashboard() {
 
         {/* VERIFIED SKILLS & ACHIEVEMENTS TROPHY SHOWCASE */}
         {verifiedSkills?.length > 0 && (
-          <div className="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-indigo-100 shadow-xs space-y-4">
+          <div className="bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md p-6 rounded-3xl border border-indigo-100 dark:border-white/10 shadow-xs space-y-4 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <span className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-amber-300 text-slate-950 flex items-center justify-center text-lg font-bold shadow-xs">
                   🏆
                 </span>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                     Verified Competencies & Trophies ({verifiedSkills.length})
                   </h3>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
                     Official LifeOS verified credentials & badges earned through skill mastery
                   </p>
                 </div>
@@ -348,7 +362,7 @@ export default function Dashboard() {
 
               <button
                 onClick={() => navigate("/learning/quiz")}
-                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition flex items-center gap-1 cursor-pointer"
               >
                 <span>+ Test New Skill</span>
                 <span>➔</span>
@@ -378,8 +392,8 @@ export default function Dashboard() {
                     }
                     className={`p-4 rounded-2xl border transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between group hover:scale-[1.02] ${
                       isToday
-                        ? "bg-gradient-to-br from-amber-500/10 via-indigo-500/10 to-sky-500/10 border-amber-300 ring-2 ring-amber-400/30 shadow-md"
-                        : "bg-slate-50/70 hover:bg-white border-slate-200 hover:border-indigo-300 shadow-xs"
+                        ? "bg-gradient-to-br from-amber-500/10 via-indigo-500/10 to-sky-500/10 border-amber-300 dark:border-amber-500/50 ring-2 ring-amber-400/30 shadow-md"
+                        : "bg-slate-50/70 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800 border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 shadow-xs"
                     }`}
                   >
                     {isToday && (
@@ -392,17 +406,17 @@ export default function Dashboard() {
                       <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-sky-500 text-white flex items-center justify-center text-base font-bold shadow-xs">
                         🛡️
                       </div>
-                      <h4 className="text-xs font-bold text-slate-800 group-hover:text-indigo-600 transition truncate">
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition truncate">
                         {sk.skill}
                       </h4>
-                      <p className="text-[10px] text-slate-500">
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">
                         {sk.score ? `${sk.score}% Mastery` : "Verified Specialist"}
                       </p>
                     </div>
 
-                    <div className="pt-3 mt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400">
+                    <div className="pt-3 mt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-400">
                       <span>Click to view credential</span>
-                      <span className="text-indigo-600 font-bold">Inspect ➔</span>
+                      <span className="text-indigo-600 dark:text-indigo-400 font-bold">Inspect ➔</span>
                     </div>
                   </div>
                 );
@@ -430,6 +444,17 @@ export default function Dashboard() {
             state: { goal: `Build a production-grade portfolio project using ${skill}` },
           });
         }}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={Boolean(todoToDelete)}
+        onClose={() => setTodoToDelete(null)}
+        onDelete={handleConfirmDelete}
+        isDeleting={isDeletingTodo}
+        title={`Delete "${todoToDelete?.title || "Task"}"?`}
+        description="Are you sure you want to delete this task? This action cannot be undone and will remove it from your agenda."
+        confirmText="Delete Task"
       />
     </Layout>
   );

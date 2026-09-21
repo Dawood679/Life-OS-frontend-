@@ -464,8 +464,8 @@ export default function ProjectGenerator() {
             }}
             className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between cursor-pointer group ${
               isSelected
-                ? "bg-indigo-50/70 border-indigo-200/80 shadow-xs ring-2 ring-indigo-200/50"
-                : "bg-white/60 border-slate-200/80 hover:bg-slate-50 text-slate-600"
+                ? "bg-gradient-to-r from-indigo-500/15 to-sky-500/10 dark:from-indigo-500/25 dark:to-sky-500/15 border-indigo-400 dark:border-indigo-500 shadow-md ring-2 ring-indigo-400/30"
+                : "bg-white/90 dark:bg-[#131b2e] border-slate-200/80 dark:border-white/10 hover:bg-indigo-50/50 dark:hover:bg-[#1a243d] text-slate-700 dark:text-slate-200 shadow-2xs"
             }`}
           >
             <div className="flex items-center gap-3 pr-2 min-w-0">
@@ -473,20 +473,20 @@ export default function ProjectGenerator() {
                 className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-xs font-extrabold transition-colors ${
                   isSelected
                     ? "bg-indigo-600 text-white shadow-xs"
-                    : "bg-indigo-100/70 text-indigo-800"
+                    : "bg-indigo-100/80 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300"
                 }`}
               >
                 🚀
               </span>
               <div className="truncate">
-                <p className="text-sm font-bold text-slate-800 truncate">
+                <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
                   {item.planTitle || item.projectTitle}
                 </p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[10px] text-slate-400 capitalize">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-400 capitalize">
                     {item.category || "General"}
                   </span>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.2 rounded border border-emerald-200 dark:border-emerald-800">
                     {pct}% done
                   </span>
                 </div>
@@ -501,7 +501,7 @@ export default function ProjectGenerator() {
                   e
                 )
               }
-              className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 transition cursor-pointer shrink-0 rounded-lg hover:bg-rose-50"
+              className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 transition cursor-pointer shrink-0 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50"
               title="Delete Plan"
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -524,8 +524,8 @@ export default function ProjectGenerator() {
     if (fetchingDetail) {
       return (
         <div className="py-12 flex flex-col items-center justify-center space-y-3">
-          <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-xs font-semibold text-slate-400 animate-pulse">
+          <div className="w-8 h-8 border-3 border-indigo-200 dark:border-indigo-900 border-t-indigo-600 rounded-full animate-spin" />
+          <p className="text-xs font-semibold text-slate-400 dark:text-slate-400 animate-pulse">
             Loading action milestones...
           </p>
         </div>
@@ -538,11 +538,11 @@ export default function ProjectGenerator() {
     if (activeTab === "milestones") {
       return (
         <div className="space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-            <h4 className="text-sm font-bold text-slate-800">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/10">
+            <h4 className="text-sm font-bold text-slate-800 dark:text-white">
               Execution Roadmap ({completedCount} of {milestones.length} Done)
             </h4>
-            <span className="text-xs text-indigo-600 font-semibold">
+            <span className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold">
               Click milestone to mark progress & boost Life Score
             </span>
           </div>
@@ -553,8 +553,8 @@ export default function ProjectGenerator() {
                 key={m.stepNumber}
                 className={`p-5 md:p-6 rounded-2xl border transition-all shadow-xs space-y-3 ${
                   m.isCompleted
-                    ? "bg-emerald-50/40 border-emerald-200/80"
-                    : "bg-white border-slate-200/80 hover:border-slate-300"
+                    ? "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/80 dark:border-emerald-800/60"
+                    : "bg-white/95 dark:bg-[#131b2e] border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-slate-700"
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">

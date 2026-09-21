@@ -1,3 +1,4 @@
+import Layout from "./Layout";
 import DeleteModal from "./DeleteModal";
 
 export default function FeatureLayout({
@@ -42,28 +43,31 @@ export default function FeatureLayout({
   // INITIAL FETCHING STATE
   if (initialFetching) {
     return (
-      <div className="w-full h-96 flex flex-col items-center justify-center space-y-4">
-        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p className="text-xs font-semibold text-slate-500 animate-pulse">
-          Loading {title || "content"}...
-        </p>
-      </div>
+      <Layout>
+        <div className="w-full h-96 flex flex-col items-center justify-center space-y-4">
+          <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+          <p className="text-xs font-semibold text-slate-500 animate-pulse">
+            Loading {title || "content"}...
+          </p>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-surface-pink/30 p-4 md:p-8 font-sans text-slate-800 relative">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* TOP HEADER SECTION */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-sky-50/80 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-start md:items-center gap-4">
+    <Layout>
+      <div className="w-full font-sans text-slate-800 dark:text-slate-100 relative">
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* TOP HEADER SECTION */}
+          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-sky-50/80 dark:bg-[#0e131f]/90 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-xs transition-colors">
+            <div className="flex items-start md:items-center gap-4">
             {/* BACK BUTTON */}
             {typeof onBack === "function" && (
               <button
                 type="button"
                 onClick={onBack}
                 title={backTooltip}
-                className="p-2.5 rounded-2xl bg-white border border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-600 hover:text-slate-900 transition shadow-2xs cursor-pointer shrink-0 mt-1 md:mt-0"
+                className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition shadow-2xs cursor-pointer shrink-0 mt-1 md:mt-0"
               >
                 <svg
                   className="w-5 h-5"
@@ -84,15 +88,15 @@ export default function FeatureLayout({
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-ping"></span>
-                <span className="text-base font-bold tracking-wider text-indigo-600">
+                <span className="text-base font-bold tracking-wider text-indigo-600 dark:text-indigo-400">
                   {badgeText}
                 </span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">
+              <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 dark:text-white">
                 {title}
               </h1>
               {subtitle && (
-                <p className="text-xs text-slate-500 mt-1">{subtitle}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{subtitle}</p>
               )}
             </div>
           </div>
@@ -274,11 +278,11 @@ export default function FeatureLayout({
                   <div
                     className={`${
                       renderSidebar ? "lg:col-span-8" : "lg:col-span-12"
-                    } bg-sky-50/10 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 md:p-8 shadow-xs space-y-6`}
+                    } bg-sky-50/10 dark:bg-[#0e131f]/90 backdrop-blur-md rounded-3xl border border-slate-200/80 dark:border-white/10 p-6 md:p-8 shadow-xs space-y-6 transition-colors`}
                   >
                     {/* TAB HEADERS */}
                     {tabs.length > 0 && (
-                      <div className="flex border-b border-slate-200/80 gap-2 overflow-x-auto">
+                      <div className="flex border-b border-slate-200/80 dark:border-white/10 gap-2 overflow-x-auto">
                         {tabs.map((tab) => (
                           <button
                             key={tab.key}
@@ -286,8 +290,8 @@ export default function FeatureLayout({
                             onClick={() => setActiveTab?.(tab.key)}
                             className={`pb-3 px-4 text-base font-bold transition border-b-2 cursor-pointer whitespace-nowrap ${
                               activeTab === tab.key
-                                ? "border-orange-500 text-orange-600"
-                                : "border-transparent text-slate-400 hover:text-slate-600"
+                                ? "border-orange-500 text-orange-600 dark:text-orange-400"
+                                : "border-transparent text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
                             }`}
                           >
                             {tab.label}
@@ -320,5 +324,6 @@ export default function FeatureLayout({
         confirmText="Delete Now"
       />
     </div>
+    </Layout>
   );
 }

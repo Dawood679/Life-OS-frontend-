@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { deleteStudyPlan, getStudyPlan } from './StudyPlanService';
 import Button from '../../src/components/ui/Button';
+import Layout from '../../src/components/Layout';
 
 
 
@@ -48,29 +49,33 @@ export default function StudyPlanDetail() {
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-10 space-y-4 animate-pulse">
-        <div className="h-6 w-2/3 bg-ink-100 rounded" />
-        <div className="h-4 w-1/3 bg-ink-100 rounded" />
-        <div className="h-24 w-full bg-ink-100 rounded-2xl" />
-        <div className="h-40 w-full bg-ink-100 rounded-2xl" />
-      </div>
+      <Layout>
+        <div className="max-w-3xl mx-auto px-4 py-10 space-y-4 animate-pulse">
+          <div className="h-6 w-2/3 bg-ink-100 rounded" />
+          <div className="h-4 w-1/3 bg-ink-100 rounded" />
+          <div className="h-24 w-full bg-ink-100 rounded-2xl" />
+          <div className="h-40 w-full bg-ink-100 rounded-2xl" />
+        </div>
+      </Layout>
     );
   }
 
   if (error || !plan) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-10">
-        <div className="rounded-lg border border-danger-border bg-danger-bg px-4 py-3 text-sm text-danger-text">
-          {error || 'Study plan not found.'}
+      <Layout>
+        <div className="max-w-3xl mx-auto px-4 py-10">
+          <div className="rounded-lg border border-danger-border bg-danger-bg px-4 py-3 text-sm text-danger-text">
+            {error || 'Study plan not found.'}
+          </div>
+          <Button
+            variant="outline"
+            className="mt-4 sm:w-auto px-6"
+            onClick={() => navigate(-1)}
+          >
+            Back
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          className="mt-4 sm:w-auto px-6"
-          onClick={() => navigate(-1)}
-        >
-          Back
-        </Button>
-      </div>
+      </Layout>
     );
   }
 
@@ -79,7 +84,8 @@ export default function StudyPlanDetail() {
   const tips = Array.isArray(plan.tips) ? plan.tips : [];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+    <Layout>
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
       {/* Back link */}
       <button
         onClick={() => navigate(-1)}
@@ -202,5 +208,6 @@ export default function StudyPlanDetail() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }

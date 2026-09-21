@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* =========================================================
      1. EXACT ORIGINAL BRAND PALETTE (Light Mode Preserved)
@@ -60,6 +62,123 @@
   --color-dark-card-hover: #1c2642;
   --color-dark-border: rgba(255, 255, 255, 0.08);
   --color-dark-border-glow: rgba(99, 102, 241, 0.3);
+}
+
+/* Base theme transitions and global resets */
+html {
+  scroll-behavior: smooth;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+body {
+  overflow-x: clip;
+  max-width: 100%;
+  width: 100%;
+}
+
+#root {
+  max-width: 100%;
+  width: 100%;
+}
+
+html.dark {
+  color-scheme: dark;
+  background-color: #07090e;
+  color: #f1f5f9;
+}
+
+html.dark body {
+  background-color: #07090e;
+  color: #f1f5f9;
+}
+
+html.light {
+  color-scheme: light;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+html.light body {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+/* =========================================================
+   VIBRANT & ULTRA-PREMIUM DARK MODE GLOBAL CARD & SURFACE RULES
+   Prevents any washed-out / muddy grayish opacity blending
+   ========================================================= */
+html.dark [class*="bg-white/"],
+html.dark .bg-white {
+  background-color: #0f172a !important;
+  color: #f8fafc;
+}
+
+html.dark [class*="bg-slate-50/"],
+html.dark [class*="bg-slate-100/"],
+html.dark .bg-slate-50,
+html.dark .bg-slate-100 {
+  background-color: #141e33 !important;
+}
+
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-slate-100"] {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f8fafc !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+html.dark [class*="bg-sky-50"] {
+  background-color: rgba(14, 165, 233, 0.12) !important;
+}
+
+html.dark [class*="bg-indigo-50"] {
+  background-color: rgba(99, 102, 241, 0.12) !important;
+}
+
+html.dark [class*="bg-purple-50"] {
+  background-color: rgba(168, 85, 247, 0.12) !important;
+}
+
+html.dark [class*="bg-emerald-50"] {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+}
+
+html.dark [class*="bg-rose-50"],
+html.dark [class*="bg-red-50"] {
+  background-color: rgba(244, 63, 94, 0.12) !important;
+}
+
+html.dark [class*="bg-amber-50"],
+html.dark [class*="bg-orange-50"] {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+}
+
+html.dark input:not([type="checkbox"]):not([type="radio"]),
+html.dark select,
+html.dark textarea {
+  background-color: #141e33 !important;
+  color: #f8fafc !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b !important;
 }
 
 /* =========================================================

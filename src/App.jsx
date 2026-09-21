@@ -14,6 +14,12 @@ import ResetPassword from "./auth/ResetPassword";
 import VerifyEmail from "./auth/VerifyEmail";
 import VerifyOtp from "./auth/VerifyOtp";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminAiAnalytics from "./pages/admin/AdminAiAnalytics";
+import AdminProductAnalytics from "./pages/admin/AdminProductAnalytics";
+import AdminSystem from "./pages/admin/AdminSystem";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
 // import StudyPlanList from "../features/studyPlan/StudyPlanList";
@@ -339,6 +345,56 @@ export default function App() {
             <ProtectedRoute>
               <BudgetTracker />
             </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Portal Protected Routes */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/dashboard"
+          element={
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <AdminUsers />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/ai-analytics"
+          element={
+            <AdminRoute>
+              <AdminAiAnalytics />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/product-metrics"
+          element={
+            <AdminRoute>
+              <AdminProductAnalytics />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/system"
+          element={
+            <AdminRoute>
+              <AdminSystem />
+            </AdminRoute>
           }
         />
       </Routes>

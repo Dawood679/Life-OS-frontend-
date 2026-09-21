@@ -2,9 +2,10 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect, useState, useRef } from 'react';
 import Button from '../components/ui/Button';
 import NotificationDropdown from './ui/NotificationDropdown';
+import ThemeToggle from './ui/ThemeToggle';
 import SidebarFeatureTooltip from './ui/SidebarFeatureTooltip';
 import { SIDEBAR_FEATURE_DATA } from '../data/sidebarFeatureData';
-import { X, Flame, LogOut, Settings } from 'lucide-react';
+import { X, Flame, LogOut, Settings, ShieldCheck } from 'lucide-react';
 
 export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const location = useLocation();
@@ -134,16 +135,16 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const renderSidebarContent = () => (
     <div className="flex flex-col h-full p-3.5 select-none overflow-hidden">
       {/* 1. TOP BRAND HEADER (Always pinned at top, shrink-0) */}
-      <div className="shrink-0 px-1 py-1.5 flex items-center justify-between border-b border-slate-100 pb-3">
+      <div className="shrink-0 px-1 py-1.5 flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-3">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-brand-indigo via-sky-500 to-sky-400 flex items-center justify-center text-white font-bold text-xs shadow-md">
             ✦
           </div>
           <div>
-            <h1 className="font-serif font-bold text-slate-900 text-base leading-none tracking-tight">
+            <h1 className="font-serif font-bold text-slate-900 dark:text-white text-base leading-none tracking-tight">
               life<span className="text-brand-indigo">OS</span>
             </h1>
-            <p className="text-[9px] text-slate-400 font-medium tracking-wide mt-0.5">
+            <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium tracking-wide mt-0.5">
               AI Life Operating System
             </p>
           </div>
@@ -154,8 +155,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
             <span
               className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
                 role === 'admin'
-                  ? 'bg-purple-50 text-purple-600 border-purple-200'
-                  : 'bg-indigo-50 text-brand-indigo border-indigo-200'
+                  ? 'bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                  : 'bg-indigo-50 dark:bg-indigo-950 text-brand-indigo dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
               }`}
             >
               {role}
@@ -166,7 +167,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           {setIsMobileOpen && (
             <button
               onClick={() => setIsMobileOpen(false)}
-              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 cursor-pointer"
+              className="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
               title="Close menu"
             >
               <X className="w-5 h-5" />
@@ -183,7 +184,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           className={`flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all duration-150 ${
             isActive('/dashboard')
               ? 'bg-gradient-to-r from-brand-indigo via-sky-500 to-sky-400 text-white shadow-xs font-semibold'
-              : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -192,18 +193,34 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           <span>Home</span>
         </Link>
 
+        {/* Admin Control HQ Link (Prominent for Admin Users) */}
+        {role === 'admin' && (
+          <Link
+            to="/admin"
+            className="flex items-center justify-between px-3 py-2 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 transition font-bold shadow-2xs group"
+          >
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
+              <span>Admin HQ</span>
+            </div>
+            <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-purple-200/70 dark:bg-purple-800/80 text-purple-800 dark:text-purple-200 font-extrabold">
+              Portal
+            </span>
+          </Link>
+        )}
+
         {/* HealthOS Dropdown */}
         <div>
           <button
             type="button"
             onClick={() => toggleDropdown('health')}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              <span className="font-semibold text-slate-900">HealthOS</span>
+              <span className="font-semibold text-slate-900 dark:text-slate-100">HealthOS</span>
             </div>
             <svg className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${openDropdowns.health ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -236,7 +253,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           <button
             type="button"
             onClick={() => toggleDropdown('learning')}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <svg className="w-4 h-4 text-brand-indigo" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -250,7 +267,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           </button>
 
           {openDropdowns.learning && (
-            <div className="ml-3 mt-1 pl-2.5 border-l-2 border-indigo-200 space-y-0.5">
+            <div className="ml-3 mt-1 pl-2.5 border-l-2 border-indigo-200 dark:border-indigo-800 space-y-0.5">
               {learningSubLinks.map((sub) => (
                 <Link
                   key={sub.path}
@@ -259,8 +276,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                   onMouseLeave={handleLinkMouseLeave}
                   className={`block px-2.5 py-1.5 rounded-lg text-[11px] transition ${
                     isActive(sub.path)
-                      ? 'bg-indigo-50 text-brand-indigo font-semibold'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-indigo-50 dark:bg-indigo-950 text-brand-indigo dark:text-indigo-300 font-semibold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60'
                   }`}
                 >
                   {sub.label}
@@ -275,7 +292,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           <button
             type="button"
             onClick={() => toggleDropdown('career')}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <svg className="w-4 h-4 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -289,7 +306,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           </button>
 
           {openDropdowns.career && (
-            <div className="ml-3 mt-1 pl-2.5 border-l-2 border-sky-200 space-y-0.5">
+            <div className="ml-3 mt-1 pl-2.5 border-l-2 border-sky-200 dark:border-sky-800 space-y-0.5">
               {careerSubLinks.map((sub) => (
                 <Link
                   key={sub.path}
@@ -298,8 +315,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                   onMouseLeave={handleLinkMouseLeave}
                   className={`block px-2.5 py-1.5 rounded-lg text-[11px] transition ${
                     isActive(sub.path)
-                      ? 'bg-sky-50 text-sky-700 font-semibold'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-sky-50 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-semibold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60'
                   }`}
                 >
                   {sub.label}
@@ -314,7 +331,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           <button
             type="button"
             onClick={() => toggleDropdown('finance')}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
               <svg className="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -328,7 +345,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           </button>
 
           {openDropdowns.finance && (
-            <div className="ml-3 mt-1 pl-2.5 border-l-2 border-emerald-200 space-y-0.5">
+            <div className="ml-3 mt-1 pl-2.5 border-l-2 border-emerald-200 dark:border-emerald-800 space-y-0.5">
               {financeSubLinks.map((sub) => (
                 <Link
                   key={sub.path}
@@ -337,8 +354,8 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
                   onMouseLeave={handleLinkMouseLeave}
                   className={`block px-2.5 py-1.5 rounded-lg text-[11px] transition ${
                     isActive(sub.path)
-                      ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                      : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
+                      ? 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-semibold'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60'
                   }`}
                 >
                   {sub.label}
@@ -350,48 +367,50 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
       </nav>
 
       {/* 3. BOTTOM PINNED FOOTER (Always 100% visible on laptop screens, shrink-0) */}
-      <div className="shrink-0 pt-2.5 border-t border-slate-200/80 space-y-1.5 bg-white/40">
+      <div className="shrink-0 pt-2.5 border-t border-slate-200/80 dark:border-white/10 space-y-1.5 bg-white/40 dark:bg-slate-900/40">
         {/* Compact Live Life Score Mini Strip */}
         <Link
           to="/dashboard"
-          className="block p-2 rounded-xl bg-gradient-to-br from-indigo-50/90 via-sky-50/50 to-white border border-indigo-100/80 shadow-2xs hover:border-indigo-300 transition-all duration-200 group"
+          className="block p-2 rounded-xl bg-gradient-to-br from-indigo-50/90 via-sky-50/50 to-white dark:from-slate-900 dark:via-slate-900/90 dark:to-[#0e131f] border border-indigo-100/80 dark:border-white/10 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-500 transition-all duration-200 group"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-[11px] font-bold text-slate-800 tracking-tight">Life Score</span>
+              <span className="text-[11px] font-bold text-slate-800 dark:text-slate-200 tracking-tight">Life Score</span>
             </div>
-            <span className="text-xs font-black text-brand-indigo font-mono">
+            <span className="text-xs font-black text-brand-indigo dark:text-indigo-400 font-mono">
               {lifeScoreData ? `${lifeScoreData.totalScore}/100` : '--/100'}
             </span>
           </div>
-          <div className="mt-1.5 w-full bg-indigo-100/60 rounded-full h-1 overflow-hidden">
+          <div className="mt-1.5 w-full bg-indigo-100/60 dark:bg-slate-800 rounded-full h-1 overflow-hidden">
             <div
               className="bg-gradient-to-r from-brand-indigo via-sky-500 to-emerald-400 h-full rounded-full transition-all duration-500"
               style={{ width: `${Math.max(5, lifeScoreData?.totalScore || 20)}%` }}
             ></div>
           </div>
-          <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500 font-medium">
+          <div className="mt-1 flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-medium">
             <span className="flex items-center gap-1">
               <Flame className="w-3 h-3 text-amber-500 fill-amber-500" />
               {lifeScoreData?.streak?.current || 0}d Streak
             </span>
-            <span className="text-brand-indigo group-hover:underline font-bold">View ➔</span>
+            <span className="text-brand-indigo dark:text-indigo-400 group-hover:underline font-bold">View ➔</span>
           </div>
         </Link>
 
-        {/* Notifications & Profile Compact Row */}
+        {/* Notifications & Profile & Theme Row */}
         <div className="flex items-center gap-1.5">
           <div className="flex-1">
             <NotificationDropdown />
           </div>
 
+          <ThemeToggle />
+
           <Link
             to="/profile"
-            className={`p-2 rounded-xl border border-slate-200/80 transition flex items-center justify-center ${
+            className={`p-2 rounded-xl border border-slate-200/80 dark:border-white/10 transition flex items-center justify-center ${
               isActive('/profile') 
-                ? 'bg-indigo-50 text-brand-indigo border-indigo-200' 
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 bg-white'
+                ? 'bg-indigo-50 dark:bg-indigo-950 text-brand-indigo dark:text-indigo-400 border-indigo-200 dark:border-indigo-800' 
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white bg-white dark:bg-slate-800'
             }`}
             title="Settings & Profile"
           >
@@ -417,7 +436,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   return (
     <>
       {/* 1. DESKTOP DOCKED SIDEBAR (Visible on lg >= 1024px, fixed viewport height h-screen) */}
-      <aside className="hidden lg:flex w-64 h-screen sticky top-0 bg-white/85 backdrop-blur-md border-r border-slate-200/80 flex-col justify-between font-sans text-slate-700 shadow-sm z-30 shrink-0 overflow-hidden">
+      <aside className="hidden lg:flex w-64 h-screen sticky top-0 bg-white/85 dark:bg-[#0b0f19]/95 backdrop-blur-md border-r border-slate-200/80 dark:border-white/10 flex-col justify-between font-sans text-slate-700 dark:text-slate-200 shadow-sm z-30 shrink-0 overflow-hidden transition-colors">
         {renderSidebarContent()}
       </aside>
 
@@ -435,11 +454,11 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           {/* Backdrop Blur Overlay */}
           <div
             onClick={() => setIsMobileOpen(false)}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity animate-fadeIn cursor-pointer"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fadeIn cursor-pointer"
           />
 
           {/* Drawer Content */}
-          <div className="relative w-72 max-w-[85vw] h-full bg-white shadow-2xl border-r border-slate-200 flex flex-col z-10 animate-slideRight overflow-hidden">
+          <div className="relative w-72 max-w-[85vw] h-full bg-white dark:bg-[#0b0f19] shadow-2xl border-r border-slate-200 dark:border-white/10 flex flex-col z-10 animate-slideRight overflow-hidden transition-colors">
             {renderSidebarContent()}
           </div>
         </div>

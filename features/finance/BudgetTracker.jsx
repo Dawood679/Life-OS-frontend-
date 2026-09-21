@@ -166,17 +166,17 @@ export default function BudgetTracker() {
       backTooltip="Back to Financial Overview"
     >
       {/* HEADER & MONTH SELECTOR */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white/80 backdrop-blur-md border border-slate-200/80 p-4 rounded-2xl shadow-xs">
-        <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl">
+      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md border border-slate-200/80 dark:border-white/10 p-4 rounded-2xl shadow-xs">
+        <div className="flex items-center gap-2 bg-slate-50 dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-xl shadow-2xs">
           <button
             onClick={() => changeMonth(-1)}
-            className="p-1 hover:bg-slate-200/70 rounded-lg text-slate-600 transition-colors"
+            className="p-1 hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-300 transition-colors"
             title="Previous Month"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <div className="flex items-center gap-2 px-2 text-xs md:text-sm font-bold text-slate-800 tracking-wide">
-            <Calendar className="w-4 h-4 text-emerald-600" />
+          <div className="flex items-center gap-2 px-2 text-xs md:text-sm font-bold text-slate-800 dark:text-white tracking-wide">
+            <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             <span>
               {new Date(`${selectedMonth}-01T00:00:00Z`).toLocaleString("en-US", {
                 month: "long",
@@ -187,7 +187,7 @@ export default function BudgetTracker() {
           </div>
           <button
             onClick={() => changeMonth(1)}
-            className="p-1 hover:bg-slate-200/70 rounded-lg text-slate-600 transition-colors"
+            className="p-1 hover:bg-slate-200/70 dark:hover:bg-white/10 rounded-lg text-slate-600 dark:text-slate-300 transition-colors"
             title="Next Month"
           >
             <ChevronRight className="w-4 h-4" />
@@ -197,9 +197,9 @@ export default function BudgetTracker() {
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => navigate("/finance/analytics")}
-            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200/80 transition-colors cursor-pointer flex items-center gap-1.5"
+            className="px-3.5 py-2 bg-slate-100 dark:bg-[#131b2e] hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 font-semibold text-xs rounded-xl border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer flex items-center gap-1.5"
           >
-            <PieChart className="w-3.5 h-3.5 text-sky-600" />
+            <PieChart className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
             <span>Financial Overview</span>
           </button>
 
@@ -305,36 +305,36 @@ export default function BudgetTracker() {
         {/* Safe Daily Burn Rate & Savings Goal Cards */}
         <div className="space-y-4">
           {/* Daily Burn Rate Card */}
-          <div className="bg-gradient-to-br from-amber-50/80 via-white to-orange-50/40 border border-amber-200/80 p-5 rounded-2xl shadow-xs backdrop-blur-md">
-            <div className="flex items-center justify-between text-[11px] text-slate-600 font-bold">
+          <div className="bg-gradient-to-br from-amber-50/90 via-white to-orange-50/50 dark:from-amber-950/40 dark:via-[#0e131f] dark:to-orange-950/30 border border-amber-200/80 dark:border-amber-500/30 p-5 rounded-2xl shadow-xs dark:shadow-amber-950/20 backdrop-blur-md">
+            <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-amber-400 font-bold">
               <span className="uppercase tracking-wider">Safe Daily Burn Rate</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700">
+              <div className="w-8 h-8 rounded-xl bg-amber-100 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center text-amber-700 dark:text-amber-300">
                 <Flame className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2">
-              <h4 className="text-2xl font-extrabold text-slate-900 font-serif">
-                ${safeDailyBurn} <span className="text-xs font-normal text-slate-500 font-sans">/ day</span>
+              <h4 className="text-2xl font-extrabold text-slate-900 dark:text-white font-serif">
+                ${safeDailyBurn} <span className="text-xs font-normal text-slate-500 dark:text-slate-400 font-sans">/ day</span>
               </h4>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 To stay on budget for the remaining {daysRemaining} days
               </p>
             </div>
           </div>
 
           {/* Savings Target Goal Card */}
-          <div className="bg-gradient-to-br from-teal-50/80 via-white to-sky-50/40 border border-teal-200/80 p-5 rounded-2xl shadow-xs backdrop-blur-md">
-            <div className="flex items-center justify-between text-[11px] text-slate-600 font-bold">
+          <div className="bg-gradient-to-br from-teal-50/90 via-white to-sky-50/50 dark:from-teal-950/40 dark:via-[#0e131f] dark:to-sky-950/30 border border-teal-200/80 dark:border-teal-500/30 p-5 rounded-2xl shadow-xs dark:shadow-teal-950/20 backdrop-blur-md">
+            <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-teal-400 font-bold">
               <span className="uppercase tracking-wider">Target Monthly Savings</span>
-              <div className="w-8 h-8 rounded-xl bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-700">
+              <div className="w-8 h-8 rounded-xl bg-teal-100 dark:bg-teal-500/20 border border-teal-200 dark:border-teal-500/30 flex items-center justify-center text-teal-700 dark:text-teal-300">
                 <TrendingUp className="w-4 h-4" />
               </div>
             </div>
             <div className="mt-2">
-              <h4 className="text-2xl font-extrabold text-teal-700 font-serif">
+              <h4 className="text-2xl font-extrabold text-teal-700 dark:text-teal-300 font-serif">
                 ${(budgetData?.savingsGoal || 0).toLocaleString()}
               </h4>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Target wealth retention allocation
               </p>
             </div>
@@ -343,15 +343,15 @@ export default function BudgetTracker() {
       </div>
 
       {/* CATEGORY SPENDING CAPS & THRESHOLDS */}
-      <div className="bg-white/80 backdrop-blur-md border border-slate-200/80 p-5 rounded-2xl shadow-xs space-y-4">
+      <div className="bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md border border-slate-200/80 dark:border-white/10 p-5 rounded-2xl shadow-xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-emerald-600" />
-            <h3 className="text-sm font-bold text-slate-800 tracking-wide">Category Spending Caps & Limits</h3>
+            <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white tracking-wide">Category Spending Caps & Limits</h3>
           </div>
           <button
             onClick={() => setIsEditModalOpen(true)}
-            className="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 cursor-pointer"
+            className="text-xs text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer"
           >
             <Edit3 className="w-3.5 h-3.5" />
             <span>Adjust Caps</span>
@@ -368,7 +368,7 @@ export default function BudgetTracker() {
             return (
               <div
                 key={idx}
-                className="bg-slate-50/70 border border-slate-200/80 hover:border-slate-300 p-4 rounded-xl space-y-3 transition-all relative overflow-hidden shadow-2xs"
+                className="bg-slate-50/90 dark:bg-[#131b2e] border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 p-4 rounded-xl space-y-3 transition-all relative overflow-hidden shadow-2xs"
               >
                 <div
                   className="absolute top-0 left-0 bottom-0 w-1"
@@ -377,10 +377,10 @@ export default function BudgetTracker() {
 
                 <div className="flex items-start justify-between pl-1">
                   <div>
-                    <h4 className="text-sm font-bold text-slate-800 truncate max-w-[150px]">
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-white truncate max-w-[150px]">
                       {cat.category}
                     </h4>
-                    <span className="text-[11px] text-slate-500 font-mono">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
                       ${cat.spent.toLocaleString()} of ${cat.budgeted.toLocaleString()}
                     </span>
                   </div>
@@ -388,10 +388,10 @@ export default function BudgetTracker() {
                   <span
                     className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
                       isOver
-                        ? "bg-rose-100 text-rose-700 border border-rose-200"
+                        ? "bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-500/30"
                         : catPercent > 80
-                        ? "bg-amber-100 text-amber-800 border border-amber-200"
-                        : "bg-emerald-100 text-emerald-800 border border-emerald-200"
+                        ? "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30"
+                        : "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30"
                     }`}
                   >
                     {catPercent}%
@@ -400,7 +400,7 @@ export default function BudgetTracker() {
 
                 {/* Progress bar */}
                 <div className="pl-1 space-y-1">
-                  <div className="w-full bg-slate-200/80 rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-slate-200/80 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
                         isOver
@@ -412,10 +412,10 @@ export default function BudgetTracker() {
                       style={{ width: `${Math.min(100, catPercent)}%` }}
                     />
                   </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+                  <div className="flex items-center justify-between text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                     <span>
                       {isOver ? (
-                        <span className="text-rose-600 font-bold">
+                        <span className="text-rose-600 dark:text-rose-400 font-bold">
                           Over by ${Math.abs(remaining).toLocaleString()}
                         </span>
                       ) : (
@@ -432,16 +432,16 @@ export default function BudgetTracker() {
 
       {/* CONFIGURE BUDGET MODAL */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white border border-slate-200 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] flex flex-col">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 dark:border-white/10 bg-slate-50/70 dark:bg-[#0e131f]">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-emerald-600" />
-                <h3 className="text-base font-bold text-slate-800">Configure Monthly Budget Plan</h3>
+                <Sparkles className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="text-base font-bold text-slate-800 dark:text-white">Configure Monthly Budget Plan</h3>
               </div>
               <button
                 onClick={() => setIsEditModalOpen(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-200 text-slate-500"
+                className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -451,7 +451,7 @@ export default function BudgetTracker() {
               {/* Overall Budget & Savings Goal */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Overall Monthly Budget ($) *
                   </label>
                   <input
@@ -459,19 +459,19 @@ export default function BudgetTracker() {
                     required
                     value={editForm.overallBudget}
                     onChange={(e) => setEditForm({ ...editForm, overallBudget: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:border-emerald-600"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-emerald-600"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                     Target Monthly Savings ($) *
                   </label>
                   <input
                     type="number"
                     value={editForm.savingsGoal}
                     onChange={(e) => setEditForm({ ...editForm, savingsGoal: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 font-mono focus:outline-none focus:border-emerald-600"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-[#0e131f] border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-emerald-600"
                   />
                 </div>
               </div>
@@ -479,13 +479,13 @@ export default function BudgetTracker() {
               {/* Category Spending Caps */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                     Category Spending Caps
                   </label>
                   <button
                     type="button"
                     onClick={handleAddCategory}
-                    className="text-xs text-emerald-700 hover:text-emerald-800 font-bold flex items-center gap-1 cursor-pointer"
+                    className="text-xs text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Category</span>
@@ -496,7 +496,7 @@ export default function BudgetTracker() {
                   {editForm.categories.map((c, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200"
+                      className="flex items-center gap-2 bg-slate-50 dark:bg-[#0e131f] p-2.5 rounded-xl border border-slate-200 dark:border-white/10"
                     >
                       <input
                         type="text"
@@ -510,7 +510,7 @@ export default function BudgetTracker() {
                           });
                         }}
                         placeholder="Category Name"
-                        className="flex-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 focus:outline-none focus:border-emerald-600"
+                        className="flex-1 px-2.5 py-1.5 bg-white dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-lg text-xs text-slate-800 dark:text-white focus:outline-none focus:border-emerald-600"
                       />
 
                       <div className="relative w-28">
@@ -520,14 +520,14 @@ export default function BudgetTracker() {
                           value={c.budgeted}
                           onChange={(e) => handleCategoryBudgetChange(idx, e.target.value)}
                           placeholder="Budget"
-                          className="w-full pl-6 pr-2 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-800 font-mono focus:outline-none focus:border-emerald-600"
+                          className="w-full pl-6 pr-2 py-1.5 bg-white dark:bg-[#131b2e] border border-slate-200 dark:border-white/10 rounded-lg text-xs text-slate-800 dark:text-white font-mono focus:outline-none focus:border-emerald-600"
                         />
                       </div>
 
                       <button
                         type="button"
                         onClick={() => handleRemoveCategory(idx)}
-                        className="p-1.5 hover:bg-rose-100 text-slate-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg transition-colors cursor-pointer"
                         title="Remove Category"
                       >
                         <X className="w-4 h-4" />
@@ -537,11 +537,11 @@ export default function BudgetTracker() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl cursor-pointer"
+                  className="px-4 py-2 bg-slate-100 dark:bg-[#0e131f] hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold rounded-xl cursor-pointer"
                 >
                   Cancel
                 </button>

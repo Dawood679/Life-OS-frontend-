@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
 import SkillCelebrationModal from "../components/SkillCelebrationModal";
 
 export default function Profile() {
@@ -283,18 +284,21 @@ export default function Profile() {
 
   if (initialLoading) {
     return (
-      <div className="w-full h-96 flex flex-col items-center justify-center space-y-4">
-        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-        <p className="text-xs font-semibold text-slate-500 animate-pulse">
-          Loading user profile...
-        </p>
-      </div>
+      <Layout>
+        <div className="w-full h-96 flex flex-col items-center justify-center space-y-4">
+          <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+          <p className="text-xs font-semibold text-slate-500 animate-pulse">
+            Loading user profile...
+          </p>
+        </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen w-full bg-surface-pink/30 p-4 md:p-8 font-sans text-slate-800">
-      <div className="max-w-5xl mx-auto space-y-6">
+    <Layout>
+      <div className="w-full font-sans text-slate-800">
+        <div className="max-w-5xl mx-auto space-y-6">
 
         {/* PROFILE HEADER & COVER BANNER */}
         <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-3xl shadow-xl overflow-hidden">
@@ -894,6 +898,7 @@ export default function Profile() {
         />
       </div>
     </div>
+    </Layout>
   );
 }
 

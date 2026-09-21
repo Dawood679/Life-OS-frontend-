@@ -673,8 +673,8 @@ export default function Quiz() {
               }}
               className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between cursor-pointer group ${
                 isSelected
-                  ? "bg-orange-50/70 border-orange-200/80 shadow-xs ring-2 ring-orange-200/50"
-                  : "bg-white/60 border-slate-200/80 hover:bg-orange-50/30 text-slate-600"
+                  ? "bg-gradient-to-r from-orange-500/15 to-amber-500/10 dark:from-orange-500/25 dark:to-amber-500/15 border-orange-400 dark:border-orange-500 shadow-md ring-2 ring-orange-400/30"
+                  : "bg-white/90 dark:bg-[#131b2e] border-slate-200/80 dark:border-white/10 hover:bg-orange-50/50 dark:hover:bg-[#1a243d] text-slate-700 dark:text-slate-200 shadow-2xs"
               }`}
             >
               <div className="flex items-center gap-3 pr-2 min-w-0">
@@ -682,16 +682,16 @@ export default function Quiz() {
                   className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-xs font-extrabold transition-colors ${
                     isSelected
                       ? "bg-orange-500 text-white shadow-xs"
-                      : "bg-orange-100/70 text-orange-800"
+                      : "bg-orange-100/80 dark:bg-orange-950/80 text-orange-800 dark:text-orange-300"
                   }`}
                 >
                   📝
                 </span>
                 <div className="truncate">
-                  <p className="text-sm font-bold text-slate-800 truncate">
+                  <p className="text-sm font-bold text-slate-800 dark:text-white truncate">
                     {item.quizTitle || item.topic}
                   </p>
-                  <p className="text-[10px] text-slate-400 truncate mt-0.5 capitalize">
+                  <p className="text-[10px] text-slate-400 dark:text-slate-400 truncate mt-0.5 capitalize">
                     {item.difficulty} • {item.numberOfQuestions} Questions
                   </p>
                 </div>
@@ -701,7 +701,7 @@ export default function Quiz() {
                 onClick={(e) =>
                   openDeleteModal(item._id, item.quizTitle || item.topic, e)
                 }
-                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 transition cursor-pointer shrink-0 rounded-lg hover:bg-rose-50"
+                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 transition cursor-pointer shrink-0 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50"
                 title="Delete Quiz"
               >
                 <svg
@@ -729,10 +729,10 @@ export default function Quiz() {
   const renderTabContent = () => {
     if (fetchingDetail) {
       return (
-        <div className="py-12 flex flex-col items-center justify-center space-y-3">
-          <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
-          <p className="text-xs font-semibold text-slate-400 animate-pulse">
-            Loading quiz questions & options...
+        <div className="p-12 text-center space-y-3">
+          <div className="w-8 h-8 border-3 border-indigo-200 dark:border-indigo-900 border-t-indigo-600 rounded-full animate-spin mx-auto" />
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            Loading assessment details...
           </p>
         </div>
       );
@@ -752,16 +752,16 @@ export default function Quiz() {
 
       return (
         <div className="space-y-6">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
-            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/10">
+            <h4 className="text-sm font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
               Questions ({totalQuestions})
             </h4>
             {!isSubmitted ? (
-              <span className="text-xs font-semibold text-indigo-600">
+              <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
                 {Object.keys(userAnswers).length} of {totalQuestions} Answered
               </span>
             ) : (
-              <span className="text-xs font-semibold text-emerald-600 flex items-center gap-1">
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                 <span>✓</span> Review Answers & Explanations Below
               </span>
             )}
@@ -777,13 +777,13 @@ export default function Quiz() {
               return (
                 <div
                   key={globalIdx}
-                  className="p-5 md:p-6 rounded-2xl bg-white/80 border border-slate-200/80 shadow-xs space-y-4"
+                  className="p-5 md:p-6 rounded-2xl bg-white/95 dark:bg-[#131b2e] border border-slate-200/80 dark:border-white/10 shadow-sm space-y-4 transition-colors"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="w-7 h-7 rounded-xl bg-indigo-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs mt-0.5">
+                    <span className="w-7 h-7 rounded-xl bg-gradient-to-tr from-brand-indigo to-sky-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs mt-0.5">
                       {globalIdx + 1}
                     </span>
-                    <h5 className="text-sm md:text-base font-bold text-slate-800 leading-snug">
+                    <h5 className="text-sm md:text-base font-bold text-slate-800 dark:text-white leading-snug">
                       {q.question}
                     </h5>
                   </div>
@@ -801,21 +801,21 @@ export default function Quiz() {
                       const isCorrect = q.correctAnswer === key;
 
                       let btnStyle =
-                        "bg-slate-50/70 border-slate-200/80 text-slate-700 hover:bg-orange-50/40";
+                        "bg-slate-50 dark:bg-[#0e1424] border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-indigo-50/60 dark:hover:bg-indigo-950/40 hover:border-indigo-300 dark:hover:border-indigo-500/60 shadow-2xs";
                       if (isSelected) {
                         btnStyle =
-                          "bg-orange-500 text-white border-orange-500 shadow-xs";
+                          "bg-gradient-to-r from-orange-500 via-amber-500 to-amber-600 text-white border-orange-400 shadow-md ring-2 ring-orange-400/40 font-bold";
                       }
 
                       if (isSubmitted) {
                         if (isCorrect) {
                           btnStyle =
-                            "bg-emerald-500 text-white border-emerald-500 font-bold";
+                            "bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-emerald-400 shadow-md font-bold";
                         } else if (isSelected && !isCorrect) {
-                          btnStyle = "bg-rose-500 text-white border-rose-500";
+                          btnStyle = "bg-rose-600 text-white border-rose-400 shadow-md";
                         } else {
                           btnStyle =
-                            "bg-slate-50 border-slate-200 text-slate-400 opacity-60";
+                            "bg-slate-50/50 dark:bg-[#0e1424]/50 border-slate-200/50 dark:border-white/5 text-slate-400 dark:text-slate-600 opacity-60";
                         }
                       }
 
@@ -831,7 +831,7 @@ export default function Quiz() {
                             className={`w-6 h-6 rounded-lg text-xs font-extrabold flex items-center justify-center shrink-0 ${
                               isSelected || (isSubmitted && isCorrect)
                                 ? "bg-white/20 text-white"
-                                : "bg-slate-200/70 text-slate-600"
+                                : "bg-slate-200/80 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
                             }`}
                           >
                             {key}
@@ -843,7 +843,7 @@ export default function Quiz() {
                   </div>
 
                   {isSubmitted && q.explanation && (
-                    <div className="mt-3 p-3.5 rounded-xl bg-amber-50/60 border border-amber-200/70 text-xs text-amber-900 leading-relaxed flex items-start gap-2">
+                    <div className="mt-3 p-3.5 rounded-xl bg-amber-50/60 dark:bg-amber-950/40 border border-amber-200/70 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 leading-relaxed flex items-start gap-2">
                       <span className="text-sm">💡</span>
                       <div>
                         <span className="font-bold">Explanation: </span>
