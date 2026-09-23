@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import loginHeroImg from '../assets/login.png';
+import useAuthStore from '../lib/authStore';
+import { triggerGoogleSignIn } from '../lib/googleAuth';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const setUser = useAuthStore((state) => state.setUser);
 
   const successMessage = location.state?.message || '';
 
@@ -16,6 +20,7 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const validate = () => {
     const newErrors = {};
@@ -63,6 +68,38 @@ export default function Login() {
       setServerError('Unable to connect to server. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setServerError('');
+    setGoogleLoading(true);
+
+    try {
+      const authPayload = await triggerGoogleSignIn();
+
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(authPayload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setServerError(data.message || 'Google sign-in failed');
+        return;
+      }
+
+      setUser(data.user);
+      toast.success(data.message || `Welcome to LifeOS, ${data.user?.name || ''}!`);
+      navigate('/dashboard');
+    } catch (err) {
+      console.error('Google login error:', err);
+      setServerError(err.message || 'Unable to connect to Google Sign-In.');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -195,6 +232,9 @@ export default function Login() {
             <Button
               type="button"
               variant="outline"
+              onClick={handleGoogleLogin}
+              loading={googleLoading}
+              loadingText="Connecting to Google..."
               leftIcon={
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
