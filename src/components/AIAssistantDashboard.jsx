@@ -36,6 +36,7 @@ import {
   RotateCcw
 } from "lucide-react";
 import WeeklyReportModal from "./WeeklyReportModal";
+import ThemeToggle from "./ui/ThemeToggle";
 
 export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, onOpenOnboarding }) {
   const navigate = useNavigate();
@@ -534,14 +535,14 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
 
   if (loading) {
     return (
-      <div className="w-full bg-white/80 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-slate-200/80 animate-pulse space-y-4 shadow-xs text-left">
+      <div className="w-full bg-white/80 dark:bg-[#0e131f]/80 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-white/10 animate-pulse space-y-4 shadow-xs text-left">
         <div className="flex items-center justify-between">
-          <div className="h-5 w-48 bg-slate-200 rounded-full" />
-          <div className="h-5 w-24 bg-slate-200 rounded-full" />
+          <div className="h-5 w-48 bg-slate-200 dark:bg-slate-700 rounded-full" />
+          <div className="h-5 w-24 bg-slate-200 dark:bg-slate-700 rounded-full" />
         </div>
-        <div className="h-7 w-2/3 bg-slate-200 rounded-xl" />
-        <div className="h-4 w-full bg-slate-100 rounded-lg" />
-        <div className="h-16 w-full bg-slate-100 rounded-2xl" />
+        <div className="h-7 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-xl" />
+        <div className="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-lg" />
+        <div className="h-16 w-full bg-slate-100 dark:bg-slate-800 rounded-2xl" />
       </div>
     );
   }
@@ -554,25 +555,25 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
   const isActionCompletedToday = (stats.todosCompleted || 0) > 0 || (stats.waterConsumedMl || 0) > 0;
 
   return (
-    <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border transition-all shadow-xs backdrop-blur-md text-left bg-gradient-to-br from-white/95 via-sky-50/40 to-indigo-50/30 text-slate-800 border-slate-200/90">
+    <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border transition-all shadow-xs backdrop-blur-md text-left bg-gradient-to-br from-white/95 via-sky-50/40 to-indigo-50/30 dark:from-[#0b0f19]/95 dark:via-[#111827]/90 dark:to-[#07090e]/95 text-slate-800 dark:text-slate-100 border-slate-200/90 dark:border-white/10">
       {/* Decorative Ambient Subtle Glow */}
-      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-30 bg-sky-200/60 pointer-events-none" />
-      <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-25 bg-indigo-200/50 pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl opacity-30 dark:opacity-15 bg-sky-200/60 dark:bg-sky-500/20 pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl opacity-25 dark:opacity-15 bg-indigo-200/50 dark:bg-indigo-500/20 pointer-events-none" />
 
       {/* TOP HEADER: TIME BADGE, MODE PILL, VIEW SWITCHER & AUDIO CONTROLS */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200/70 relative z-10">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-slate-200/70 dark:border-white/10 relative z-10">
         <div className="flex items-center gap-2.5 flex-wrap">
           <span className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider border shadow-2xs ${timeBadge.style}`}>
             {timeBadge.icon}
             <span>AI Chief of Staff • {timeBadge.text}</span>
           </span>
 
-          <span className="px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold tracking-wide">
-            Mode: <strong className="text-indigo-900 capitalize">{lifeScore?.focusMode?.replace("_", " ") || "Career Sprint"}</strong>
+          <span className="px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-bold tracking-wide">
+            Mode: <strong className="text-indigo-900 dark:text-indigo-200 capitalize">{lifeScore?.focusMode?.replace("_", " ") || "Career Sprint"}</strong>
           </span>
 
-          <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-            <Clock className="w-3 h-3 text-slate-400" />
+          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1">
+            <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500" />
             {briefing.date}
           </span>
         </div>
@@ -583,82 +584,85 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
           {speechState === "idle" && (
             <button
               onClick={handlePlayVoice}
-              className="px-3.5 py-1.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold border border-slate-200/90 shadow-2xs transition cursor-pointer flex items-center gap-1.5 hover:text-indigo-600 active:scale-95"
+              className="px-3.5 py-1.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold border border-slate-200/90 dark:border-white/10 shadow-2xs transition cursor-pointer flex items-center gap-1.5 hover:text-indigo-600 dark:hover:text-indigo-400 active:scale-95"
               title="Listen to Executive Briefing"
             >
-              <Volume2 className="w-3.5 h-3.5 text-indigo-600" />
+              <Volume2 className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
               <span>Listen</span>
             </button>
           )}
 
           {speechState === "playing" && (
-            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-indigo-200 shadow-2xs">
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-indigo-200 dark:border-indigo-800 shadow-2xs">
               <button
                 onClick={handlePauseVoice}
-                className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition cursor-pointer"
+                className="p-1.5 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950 rounded-lg transition cursor-pointer"
                 title="Pause voice"
               >
                 <Pause className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={handleStopVoice}
-                className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition cursor-pointer"
                 title="Stop voice"
               >
                 <VolumeX className="w-3.5 h-3.5" />
               </button>
-              <span className="text-[10px] font-bold text-indigo-600 pr-2 animate-pulse">Playing...</span>
+              <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 pr-2 animate-pulse">Playing...</span>
             </div>
           )}
 
           {speechState === "paused" && (
-            <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-amber-200 shadow-2xs">
+            <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-xl border border-amber-200 dark:border-amber-800 shadow-2xs">
               <button
                 onClick={handlePlayVoice}
-                className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition cursor-pointer"
+                className="p-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950 rounded-lg transition cursor-pointer"
                 title="Resume voice"
               >
                 <Play className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={handleStopVoice}
-                className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg transition cursor-pointer"
+                className="p-1.5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition cursor-pointer"
                 title="Stop voice"
               >
                 <VolumeX className="w-3.5 h-3.5" />
               </button>
-              <span className="text-[10px] font-bold text-amber-600 pr-2">Paused</span>
+              <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 pr-2">Paused</span>
             </div>
           )}
 
           <button
             onClick={handleRegenerate}
             disabled={refreshing}
-            className="p-2 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 rounded-xl border border-slate-200/90 shadow-2xs transition cursor-pointer disabled:opacity-50"
+            className="p-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-200/90 dark:border-white/10 shadow-2xs transition cursor-pointer disabled:opacity-50"
             title="Refresh narrative with latest actions"
           >
-            <RotateCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-indigo-600" : ""}`} />
+            <RotateCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin text-indigo-600 dark:text-indigo-400" : ""}`} />
           </button>
+
+          {/* Theme Mode Toggle (Light/Dark) */}
+          <ThemeToggle variant="pill" />
         </div>
       </div>
 
       {/* HERO HEADLINE & MONTHLY FOCUS */}
       <div className="mt-5 space-y-2 relative z-10">
-        <h2 className="text-2xl sm:text-3xl font-serif font-black text-slate-900 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl font-serif font-black text-slate-900 dark:text-white tracking-tight">
           {getTimeAwareGreeting()}
         </h2>
 
         {/* Monthly Focus Pill */}
         {user?.focusGoal ? (
           <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-            <span className="text-xs text-slate-500 font-semibold">🎯 Monthly Focus:</span>
-            <span className="text-xs font-bold text-indigo-700 bg-indigo-50/90 px-3 py-1 rounded-xl border border-indigo-200/90 shadow-2xs">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">🎯 Monthly Focus:</span>
+            <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50/90 dark:bg-indigo-950/60 px-3 py-1 rounded-xl border border-indigo-200/90 dark:border-indigo-800 shadow-2xs">
               {user.focusGoal}
             </span>
             {onOpenOnboarding && (
               <button
                 onClick={onOpenOnboarding}
-                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer flex items-center gap-0.5"
+                className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 underline cursor-pointer flex items-center gap-0.5"
               >
                 <Edit3 className="w-3 h-3" />
                 <span>Edit Goal</span>
@@ -667,7 +671,7 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
           </div>
         ) : null}
 
-        <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl font-normal pt-1">
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-w-4xl font-normal pt-1">
           {briefing.executiveSummary}
         </p>
       </div>
@@ -675,13 +679,13 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
       {/* 🌟 INTEGRATED 4-PILLAR LIFE SCORE COMMAND HUB (Full Rich Aesthetics & Zero-Scroll) */}
       <div className="mt-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 relative z-10 items-stretch">
         {/* Pillar 1: Total Life Score Orbit Gauge (Enlarged Hero Ring) */}
-        <div className="p-4.5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-sky-50/40 to-white border border-indigo-100/90 shadow-2xs flex flex-col items-center justify-between text-center space-y-2">
-          <div className="w-full flex items-center justify-between pb-1.5 border-b border-indigo-100/60">
-            <span className="text-[11px] font-extrabold text-indigo-950 uppercase tracking-wider">
+        <div className="p-4.5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-sky-50/40 to-white dark:from-slate-900/90 dark:via-slate-900/60 dark:to-[#0e131f] border border-indigo-100/90 dark:border-white/10 shadow-2xs flex flex-col items-center justify-between text-center space-y-2 transition-colors">
+          <div className="w-full flex items-center justify-between pb-1.5 border-b border-indigo-100/60 dark:border-white/10">
+            <span className="text-[11px] font-extrabold text-indigo-950 dark:text-indigo-200 uppercase tracking-wider">
               Total Score
             </span>
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 shadow-2xs">
+              <span className="text-[10px] font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-lg border border-amber-200 dark:border-amber-800 shadow-2xs">
                 🔥 {streak}d
               </span>
             </div>
@@ -694,7 +698,7 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
                 cx="50"
                 cy="50"
                 r="40"
-                className="stroke-slate-200/80"
+                className="stroke-slate-200/80 dark:stroke-slate-700/60"
                 strokeWidth="7"
                 fill="transparent"
               />
@@ -702,7 +706,7 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
                 cx="50"
                 cy="50"
                 r="40"
-                className="stroke-indigo-600 transition-all duration-1000 ease-out"
+                className="stroke-indigo-600 dark:stroke-indigo-400 transition-all duration-1000 ease-out"
                 strokeWidth="7"
                 strokeDasharray="251.2"
                 strokeDashoffset={251.2 - (251.2 * totalScore) / 100}
@@ -712,64 +716,64 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
             </svg>
 
             <div className="absolute flex flex-col items-center">
-              <span className="text-3xl sm:text-3.5xl font-serif font-black text-slate-900 leading-none">
+              <span className="text-3xl sm:text-3.5xl font-serif font-black text-slate-900 dark:text-white leading-none">
                 {totalScore}
               </span>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
+              <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">
                 out of 100
               </span>
             </div>
           </div>
 
-          <div className="w-full pt-1.5 border-t border-indigo-100/60">
-            <p className="text-xs font-bold text-indigo-900 bg-indigo-50/80 py-1.5 px-3 rounded-xl border border-indigo-100/80 shadow-2xs">
+          <div className="w-full pt-1.5 border-t border-indigo-100/60 dark:border-white/10">
+            <p className="text-xs font-bold text-indigo-900 dark:text-indigo-200 bg-indigo-50/80 dark:bg-indigo-950/50 py-1.5 px-3 rounded-xl border border-indigo-100/80 dark:border-indigo-800 shadow-2xs">
               {totalScore >= 80 ? "🌟 Peak Momentum!" : totalScore >= 50 ? "⚡ Good Progress" : "🌱 Build Momentum"}
             </p>
           </div>
         </div>
 
         {/* Pillar 2: Health & Wellness */}
-        <div className="p-4.5 rounded-2xl bg-rose-50/50 border border-rose-100/90 shadow-2xs flex flex-col justify-between space-y-3">
+        <div className="p-4.5 rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-100/90 dark:border-rose-900/40 shadow-2xs flex flex-col justify-between space-y-3 transition-colors">
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between pb-1 border-b border-rose-100/60">
-              <span className="text-xs font-extrabold text-rose-950 flex items-center gap-1.5">
+            <div className="flex items-center justify-between pb-1 border-b border-rose-100/60 dark:border-rose-900/30">
+              <span className="text-xs font-extrabold text-rose-950 dark:text-rose-200 flex items-center gap-1.5">
                 <span>💚 Health</span>
-                <span className="text-[10px] font-bold text-rose-600 font-mono">({Math.round((lifeScore?.weights?.health || 0.35) * 100)}%)</span>
+                <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 font-mono">({Math.round((lifeScore?.weights?.health || 0.35) * 100)}%)</span>
               </span>
-              <span className="text-xs font-black text-rose-700 font-mono bg-white px-2 py-0.5 rounded-lg border border-rose-200 shadow-2xs">
+              <span className="text-xs font-black text-rose-700 dark:text-rose-300 font-mono bg-white dark:bg-rose-900/50 px-2 py-0.5 rounded-lg border border-rose-200 dark:border-rose-800 shadow-2xs">
                 {healthScore}/100
               </span>
             </div>
 
-            <div className="w-full bg-rose-200/50 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-rose-200/50 dark:bg-rose-900/40 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-rose-500 h-full rounded-full transition-all duration-500"
                 style={{ width: `${healthScore}%` }}
               ></div>
             </div>
 
-            <div className="space-y-1.5 text-[11px] text-slate-600 pt-1">
+            <div className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 pt-1">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">⚡ Energy Score:</span>
-                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.energyScore || healthScore}/100</span>
+                <span className="text-slate-500 dark:text-slate-400">⚡ Energy Score:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{lifeScore?.breakdown?.energyScore || healthScore}/100</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">💧 Water Target:</span>
-                <span className="font-bold text-slate-800">
+                <span className="text-slate-500 dark:text-slate-400">💧 Water Target:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">
                   {Math.min(lifeScore?.breakdown?.waterConsumedMl || 0, 2000)} / 2000ml
                   {(lifeScore?.breakdown?.waterConsumedMl || 0) >= 2000 && (
-                    <span className="ml-1 text-[9px] text-emerald-700 font-extrabold bg-emerald-50 px-1 py-0.2 rounded">✓ Met</span>
+                    <span className="ml-1 text-[9px] text-emerald-700 dark:text-emerald-400 font-extrabold bg-emerald-50 dark:bg-emerald-950/60 px-1 py-0.2 rounded">✓ Met</span>
                   )}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">😴 Sleep Duration:</span>
-                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.sleepHours || 0}h</span>
+                <span className="text-slate-500 dark:text-slate-400">😴 Sleep Duration:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{lifeScore?.breakdown?.sleepHours || 0}h</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-rose-100/60">
+          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-rose-100/60 dark:border-rose-900/30">
             <button
               type="button"
               disabled={(lifeScore?.breakdown?.waterConsumedMl || 0) >= 2000}
@@ -786,7 +790,7 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
                   if (onDataRefresh) onDataRefresh();
                 }
               }}
-              className="flex-1 py-1.5 px-2 rounded-xl bg-white hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold transition shadow-2xs cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 py-1.5 px-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-rose-100 dark:hover:bg-slate-700 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-white/10 font-bold transition shadow-2xs cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {(lifeScore?.breakdown?.waterConsumedMl || 0) >= 2000 ? "Goal Met 🎉" : "+250ml Water"}
             </button>
@@ -801,46 +805,46 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         </div>
 
         {/* Pillar 3: Learning & Skills */}
-        <div className="p-4.5 rounded-2xl bg-indigo-50/50 border border-indigo-100/90 shadow-2xs flex flex-col justify-between space-y-3">
+        <div className="p-4.5 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100/90 dark:border-indigo-900/40 shadow-2xs flex flex-col justify-between space-y-3 transition-colors">
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between pb-1 border-b border-indigo-100/60">
-              <span className="text-xs font-extrabold text-indigo-950 flex items-center gap-1.5">
+            <div className="flex items-center justify-between pb-1 border-b border-indigo-100/60 dark:border-indigo-900/30">
+              <span className="text-xs font-extrabold text-indigo-950 dark:text-indigo-200 flex items-center gap-1.5">
                 <span>🧠 Learning</span>
-                <span className="text-[10px] font-bold text-indigo-600 font-mono">({Math.round((lifeScore?.weights?.learning || 0.40) * 100)}%)</span>
+                <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 font-mono">({Math.round((lifeScore?.weights?.learning || 0.40) * 100)}%)</span>
               </span>
-              <span className="text-xs font-black text-indigo-700 font-mono bg-white px-2 py-0.5 rounded-lg border border-indigo-200 shadow-2xs">
+              <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 font-mono bg-white dark:bg-indigo-900/50 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-800 shadow-2xs">
                 {learningScore}/100
               </span>
             </div>
 
-            <div className="w-full bg-indigo-200/50 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-indigo-200/50 dark:bg-indigo-900/40 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-indigo-600 h-full rounded-full transition-all duration-500"
                 style={{ width: `${learningScore}%` }}
               ></div>
             </div>
 
-            <div className="space-y-1.5 text-[11px] text-slate-600 pt-1">
+            <div className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 pt-1">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">🧠 Quizzes Done:</span>
-                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.quizzesCompleted || 0}</span>
+                <span className="text-slate-500 dark:text-slate-400">🧠 Quizzes Done:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{lifeScore?.breakdown?.quizzesCompleted || 0}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">📚 Study Tasks:</span>
-                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.studyTasksCompleted || 0} / {lifeScore?.breakdown?.studyTasksTotal || 1}</span>
+                <span className="text-slate-500 dark:text-slate-400">📚 Study Tasks:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{lifeScore?.breakdown?.studyTasksCompleted || 0} / {lifeScore?.breakdown?.studyTasksTotal || 1}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">🏆 Points Earned:</span>
-                <span className="font-bold text-indigo-700">+{lifeScore?.breakdown?.studyTasksEarnedPoints || (lifeScore?.breakdown?.studyTasksCompleted || 0) * 25} pts</span>
+                <span className="text-slate-500 dark:text-slate-400">🏆 Points Earned:</span>
+                <span className="font-bold text-indigo-700 dark:text-indigo-300">+{lifeScore?.breakdown?.studyTasksEarnedPoints || (lifeScore?.breakdown?.studyTasksCompleted || 0) * 25} pts</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-indigo-100/60">
+          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-indigo-100/60 dark:border-indigo-900/30">
             <button
               type="button"
               onClick={() => navigate("/learning/study-plan")}
-              className="flex-1 py-1.5 px-2 rounded-xl bg-white hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-bold transition shadow-2xs cursor-pointer text-center"
+              className="flex-1 py-1.5 px-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-indigo-100 dark:hover:bg-slate-700 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-white/10 font-bold transition shadow-2xs cursor-pointer text-center"
             >
               Study Plan
             </button>
@@ -855,46 +859,46 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         </div>
 
         {/* Pillar 4: Career & Action */}
-        <div className="p-4.5 rounded-2xl bg-emerald-50/50 border border-emerald-100/90 shadow-2xs flex flex-col justify-between space-y-3">
+        <div className="p-4.5 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100/90 dark:border-emerald-900/40 shadow-2xs flex flex-col justify-between space-y-3 transition-colors">
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between pb-1 border-b border-emerald-100/60">
-              <span className="text-xs font-extrabold text-emerald-950 flex items-center gap-1.5">
+            <div className="flex items-center justify-between pb-1 border-b border-emerald-100/60 dark:border-emerald-900/30">
+              <span className="text-xs font-extrabold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
                 <span>💼 Career</span>
-                <span className="text-[10px] font-bold text-emerald-600 font-mono">({Math.round((lifeScore?.weights?.career || 0.25) * 100)}%)</span>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 font-mono">({Math.round((lifeScore?.weights?.career || 0.25) * 100)}%)</span>
               </span>
-              <span className="text-xs font-black text-emerald-700 font-mono bg-white px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+              <span className="text-xs font-black text-emerald-700 dark:text-emerald-300 font-mono bg-white dark:bg-emerald-900/50 px-2 py-0.5 rounded-lg border border-emerald-200 dark:border-emerald-800 shadow-2xs">
                 {careerScore}/100
               </span>
             </div>
 
-            <div className="w-full bg-emerald-200/50 rounded-full h-2 overflow-hidden">
+            <div className="w-full bg-emerald-200/50 dark:bg-emerald-900/40 rounded-full h-2 overflow-hidden">
               <div
                 className="bg-emerald-600 h-full rounded-full transition-all duration-500"
                 style={{ width: `${careerScore}%` }}
               ></div>
             </div>
 
-            <div className="space-y-1.5 text-[11px] text-slate-600 pt-1">
+            <div className="space-y-1.5 text-[11px] text-slate-600 dark:text-slate-300 pt-1">
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">✓ Todos Done:</span>
-                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.todosCompleted || 0} / {lifeScore?.breakdown?.todosTotal || 0}</span>
+                <span className="text-slate-500 dark:text-slate-400">✓ Todos Done:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{lifeScore?.breakdown?.todosCompleted || 0} / {lifeScore?.breakdown?.todosTotal || 0}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">🚀 Milestones:</span>
-                <span className="font-bold text-slate-800">{lifeScore?.breakdown?.actionMilestonesCompleted || 0}</span>
+                <span className="text-slate-500 dark:text-slate-400">🚀 Milestones:</span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{lifeScore?.breakdown?.actionMilestonesCompleted || 0}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-slate-500">💼 Interviews:</span>
-                <span className="font-bold text-emerald-700">{lifeScore?.breakdown?.interviewsCompleted || 0}</span>
+                <span className="text-slate-500 dark:text-slate-400">💼 Interviews:</span>
+                <span className="font-bold text-emerald-700 dark:text-emerald-400">{lifeScore?.breakdown?.interviewsCompleted || 0}</span>
               </div>
             </div>
           </div>
 
-          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-emerald-100/60">
+          <div className="pt-2 flex items-center gap-1.5 text-[11px] border-t border-emerald-100/60 dark:border-emerald-900/30">
             <button
               type="button"
               onClick={() => navigate("/create-todo")}
-              className="flex-1 py-1.5 px-2 rounded-xl bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold transition shadow-2xs cursor-pointer text-center"
+              className="flex-1 py-1.5 px-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-white/10 font-bold transition shadow-2xs cursor-pointer text-center"
             >
               + Add Task
             </button>
@@ -982,69 +986,69 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
 
       {/* 🌟 NEW USER STARTER QUEST (Instant Day-1 Hook) */}
       {isStarterUser && (
-        <div className="mt-5 p-4 rounded-2xl bg-white/90 border border-sky-200 shadow-xs space-y-3 relative z-10">
+        <div className="mt-5 p-4 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-sky-200 dark:border-sky-800/60 shadow-xs space-y-3 relative z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-amber-500" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100">
                 Day-1 Starter Quest: Unlock Level 1 Pioneer
               </h3>
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
               3 Quick Steps
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-            <div className="p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200 flex items-center justify-between">
+            <div className="p-2.5 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="font-semibold text-emerald-900">1. Set Focus Goal</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="font-semibold text-emerald-900 dark:text-emerald-200">1. Set Focus Goal</span>
               </div>
-              <span className="text-[10px] text-emerald-700 font-bold">Done ✅</span>
+              <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold">Done ✅</span>
             </div>
 
             <button
               onClick={() => navigate("/wellness/tracker")}
-              className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-sky-300 hover:bg-sky-50/50 flex items-center justify-between transition cursor-pointer text-left shadow-2xs"
+              className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 hover:border-sky-300 dark:hover:border-sky-500 hover:bg-sky-50/50 dark:hover:bg-slate-700 flex items-center justify-between transition cursor-pointer text-left shadow-2xs"
             >
               <div className="flex items-center gap-2">
                 <Droplets className="w-4 h-4 text-sky-500 shrink-0" />
-                <span className="font-semibold text-slate-700">2. Track Hydration</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">2. Track Hydration</span>
               </div>
-              <span className="text-[10px] font-bold text-sky-600">Open 💧</span>
+              <span className="text-[10px] font-bold text-sky-600 dark:text-sky-400">Open 💧</span>
             </button>
 
             <button
               onClick={() => setShowTaskInput(true)}
-              className="p-2.5 rounded-xl bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 flex items-center justify-between transition cursor-pointer text-left shadow-2xs"
+              className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-slate-700 flex items-center justify-between transition cursor-pointer text-left shadow-2xs"
             >
               <div className="flex items-center gap-2">
                 <Target className="w-4 h-4 text-indigo-500 shrink-0" />
-                <span className="font-semibold text-slate-700">3. Add 1st Task/Job</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">3. Add 1st Task/Job</span>
               </div>
-              <span className="text-[10px] font-bold text-indigo-600">+15 pts 🔥</span>
+              <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400">+15 pts 🔥</span>
             </button>
           </div>
         </div>
       )}
 
       {/* 🚀 WORK & PLANNING HUB: TODAY'S AGENDA | 7-DAY SCHEDULE | WEEKLY LIFE REPORT */}
-      <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200/80 relative z-10">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 rounded-2xl border border-slate-200/80 shadow-2xs text-xs font-bold w-fit">
+      <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-slate-200/80 dark:border-white/10 relative z-10">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100/90 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-white/10 shadow-2xs text-xs font-bold w-fit">
           <button
             onClick={() => setActiveView("today")}
             className={`px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-2 ${
               activeView === "today"
-                ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60 font-black"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-300 shadow-xs border border-slate-200/60 dark:border-white/10 font-black"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <ListTodo className="w-4 h-4 text-indigo-600" />
+            <ListTodo className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>Today's Agenda</span>
             {agendaTasks.length > 0 && (
               <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-black ${
-                activeView === "today" ? "bg-indigo-100 text-indigo-800" : "bg-slate-200 text-slate-700"
+                activeView === "today" ? "bg-indigo-100 dark:bg-indigo-950 text-indigo-800 dark:text-indigo-300" : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
               }`}>
                 {agendaTasks.length}
               </span>
@@ -1055,22 +1059,22 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
             onClick={() => setActiveView("horizon")}
             className={`px-3.5 py-2 rounded-xl transition cursor-pointer flex items-center gap-2 ${
               activeView === "horizon"
-                ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60 font-black"
-                : "text-slate-600 hover:text-slate-900"
+                ? "bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-300 shadow-xs border border-slate-200/60 dark:border-white/10 font-black"
+                : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <CalendarDays className="w-4 h-4 text-indigo-600" />
+            <CalendarDays className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
             <span>7-Day Schedule</span>
           </button>
 
           <button
             onClick={() => setIsWeeklyReportOpen(true)}
-            className="px-3.5 py-2 rounded-xl text-purple-700 hover:text-purple-900 hover:bg-purple-50 transition cursor-pointer flex items-center gap-2 border border-transparent hover:border-purple-200"
+            className="px-3.5 py-2 rounded-xl text-purple-700 dark:text-purple-300 hover:text-purple-900 dark:hover:text-purple-200 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition cursor-pointer flex items-center gap-2 border border-transparent hover:border-purple-200 dark:hover:border-purple-800"
             title="Open Universal 7-Day Weekly Life Audit"
           >
-            <Award className="w-4 h-4 text-purple-600" />
+            <Award className="w-4 h-4 text-purple-600 dark:text-purple-400" />
             <span>Weekly Report</span>
-            <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-purple-100 text-purple-800 border border-purple-200">
+            <span className="px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-md bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
               Audit
             </span>
           </button>

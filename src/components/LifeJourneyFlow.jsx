@@ -204,23 +204,23 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
   const currentJourney = JOURNEYS[activeTab];
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden transition-all duration-300">
+    <div className="bg-white/95 dark:bg-[#0e131f]/90 backdrop-blur-md rounded-3xl border border-slate-200/90 dark:border-white/10 shadow-xs overflow-hidden transition-all duration-300">
       {/* Header Bar */}
-      <div className="p-5 sm:p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+      <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/40">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-indigo to-sky-500 text-white flex items-center justify-center font-bold text-lg shadow-xs">
             <Layers className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight">
                 LifeOS Master Growth Playbook
               </h3>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                 Connected Lifecycles
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Follow the recommended step-by-step lifecycle flow to maximize momentum & career velocity
             </p>
           </div>
@@ -228,13 +228,13 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
 
         {/* Tab Selector & Collapse Toggle */}
         <div className="flex items-center gap-2 flex-wrap self-start sm:self-auto">
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200/80 shadow-2xs text-xs font-bold">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-2xs text-xs font-bold">
             <button
               onClick={() => setActiveTab("learning")}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "learning"
-                  ? "bg-white text-purple-700 shadow-xs border border-slate-200/60 font-black"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-900 text-purple-700 dark:text-purple-300 shadow-xs border border-slate-200/60 dark:border-white/10 font-black"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span>📚 Learning Flow</span>
@@ -244,8 +244,8 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
               onClick={() => setActiveTab("career")}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "career"
-                  ? "bg-white text-indigo-700 shadow-xs border border-slate-200/60 font-black"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-300 shadow-xs border border-slate-200/60 dark:border-white/10 font-black"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span>💼 Career Flow</span>
@@ -255,8 +255,8 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
               onClick={() => setActiveTab("health")}
               className={`px-3 py-1.5 rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
                 activeTab === "health"
-                  ? "bg-white text-rose-700 shadow-xs border border-slate-200/60 font-black"
-                  : "text-slate-600 hover:text-slate-900"
+                  ? "bg-white dark:bg-slate-900 text-rose-700 dark:text-rose-300 shadow-xs border border-slate-200/60 dark:border-white/10 font-black"
+                  : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
               }`}
             >
               <span>💚 Health Flow</span>
@@ -265,7 +265,7 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
 
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-500 hover:text-slate-800 border border-slate-200 transition cursor-pointer"
+            className="p-2 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white border border-slate-200 dark:border-white/10 transition cursor-pointer"
             title={isCollapsed ? "Expand Master Journey" : "Collapse Master Journey"}
           >
             {isCollapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
@@ -277,11 +277,11 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
       {!isCollapsed && (
         <div className="p-5 sm:p-6 space-y-5 animate-fadeIn">
           {/* Strategy Tip Banner */}
-          <div className="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-100/80 flex items-start gap-2.5 text-xs text-indigo-900">
-            <Sparkles className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/40 border border-indigo-100/80 dark:border-indigo-800/60 flex items-start gap-2.5 text-xs text-indigo-900 dark:text-indigo-200">
+            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
             <div>
-              <span className="font-bold text-indigo-950">Lifecycle Strategy: </span>
-              <span className="text-indigo-800/90 font-medium leading-relaxed">{currentJourney.strategyTip}</span>
+              <span className="font-bold text-indigo-950 dark:text-indigo-100">Lifecycle Strategy: </span>
+              <span className="text-indigo-800/90 dark:text-indigo-300 font-medium leading-relaxed">{currentJourney.strategyTip}</span>
             </div>
           </div>
 
@@ -302,10 +302,10 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
                   key={idx}
                   className={`relative p-4 sm:p-5 rounded-2xl border transition-all flex flex-col justify-between space-y-4 group ${
                     step.isNextAction
-                      ? "bg-gradient-to-br from-indigo-50/90 via-sky-50/50 to-white border-indigo-400 ring-2 ring-indigo-500/20 shadow-md scale-[1.01]"
+                      ? "bg-gradient-to-br from-indigo-50/90 via-sky-50/50 to-white dark:from-indigo-950/40 dark:via-slate-900 dark:to-[#0e131f] border-indigo-400 dark:border-indigo-500/60 ring-2 ring-indigo-500/20 shadow-md scale-[1.01]"
                       : step.isCompleted
-                      ? "bg-slate-50/80 border-slate-200/90 hover:bg-white"
-                      : "bg-white border-slate-200/80 hover:border-slate-300 shadow-2xs"
+                      ? "bg-slate-50/80 dark:bg-slate-800/40 border-slate-200/90 dark:border-white/10 hover:bg-white dark:hover:bg-slate-800/70"
+                      : "bg-white dark:bg-slate-900/60 border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-slate-700 shadow-2xs"
                   }`}
                 >
                   {/* Next Best Action Glow Badge */}
@@ -320,35 +320,35 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="w-6 h-6 rounded-lg bg-slate-900 text-white text-[11px] font-black flex items-center justify-center font-mono shadow-2xs">
+                        <span className="w-6 h-6 rounded-lg bg-slate-900 dark:bg-indigo-600 text-white text-[11px] font-black flex items-center justify-center font-mono shadow-2xs">
                           {step.number}
                         </span>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                           Stage 0{step.number}
                         </span>
                       </div>
 
                       {step.isCompleted ? (
-                        <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
                           <span>Done</span>
                         </span>
                       ) : (
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                           {step.status}
                         </span>
                       )}
                     </div>
 
                     <div className="flex items-start gap-2.5 pt-1">
-                      <div className="p-2 rounded-xl bg-slate-100 text-slate-800 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition shrink-0 mt-0.5">
+                      <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-950/60 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition shrink-0 mt-0.5">
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition">
+                        <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
                           {step.title}
                         </h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed mt-1">
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
                           {step.description}
                         </p>
                       </div>
@@ -356,13 +356,13 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
                   </div>
 
                   {/* Step Action Launcher */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+                  <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between">
                     <button
                       onClick={() => navigate(step.path)}
                       className={`w-full py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                         step.isNextAction
                           ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs"
-                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900"
+                          : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
                       <span>{step.actionLabel}</span>
@@ -375,15 +375,15 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
           </div>
 
           {/* Companion Power Tools Chips */}
-          <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2 text-slate-500">
-              <span className="font-bold text-slate-700">⚡ Companion Tools:</span>
+          <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+              <span className="font-bold text-slate-700 dark:text-slate-300">⚡ Companion Tools:</span>
               <div className="flex items-center gap-1.5 flex-wrap">
                 {currentJourney.companionTools.map((tool, i) => (
                   <button
                     key={i}
                     onClick={() => navigate(tool.path)}
-                    className="px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-semibold transition cursor-pointer flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 text-[11px] font-semibold transition cursor-pointer flex items-center gap-1"
                   >
                     <span>{tool.icon}</span>
                     <span>{tool.name}</span>
@@ -392,7 +392,7 @@ export default function LifeJourneyFlow({ user, lifeScore, todos = [], verifiedS
               </div>
             </div>
 
-            <span className="text-[11px] text-slate-400 font-medium">
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
               1-Click bridge navigation active
             </span>
           </div>

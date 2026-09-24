@@ -1,4 +1,5 @@
 import React from "react";
+import { AlertTriangle, Trash2 } from "lucide-react";
 
 export default function DeleteModal({
   isOpen = false,
@@ -26,25 +27,25 @@ export default function DeleteModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 max-w-md w-full shadow-2xl space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl font-bold">
-          ⚠️
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+      <div className="bg-white dark:bg-[#131b2e] rounded-3xl border border-slate-200 dark:border-white/10 p-6 md:p-8 max-w-md w-full shadow-2xl space-y-4 animate-scaleUp text-left transition-colors">
+        <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl font-bold shadow-xs">
+          <AlertTriangle className="w-6 h-6" />
         </div>
         
-        <div>
-          <h3 className="text-lg font-bold text-slate-900">{title}</h3>
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             {description}
           </p>
         </div>
 
-        <div className="flex gap-3 justify-end pt-2">
+        <div className="flex gap-3 justify-end pt-3 border-t border-slate-100 dark:border-white/10">
           <button
             type="button"
             onClick={handleClose}
             disabled={isDeleting}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+            className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
           >
             Cancel
           </button>
@@ -53,9 +54,10 @@ export default function DeleteModal({
             type="button"
             onClick={handleConfirm}
             disabled={isDeleting}
-            className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold shadow-md transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md hover:shadow-rose-600/30 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            {isDeleting ? "Deleting..." : confirmText}
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>{isDeleting ? "Deleting..." : confirmText}</span>
           </button>
         </div>
       </div>

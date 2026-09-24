@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import DeleteModal from "../../src/components/DeleteModal";
 import { useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -54,6 +55,14 @@ export default function Todos() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview"); // "overview" | "notifications" | "details"
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+
+  // Delete Modal State
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    todoId: null,
+    todoTitle: "",
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
@@ -243,34 +252,47 @@ export default function Todos() {
     }
   };
 
-  const handleDelete = async (id, e) => {
+  const openDeleteModal = (id, title, e) => {
     e?.stopPropagation();
-    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    setDeleteModal({
+      isOpen: true,
+      todoId: id,
+      todoTitle: title || "Selected Task",
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.todoId) return;
 
     try {
-      const res = await fetch(`${BACKEND_URL}/to-dos/${id}`, {
+      setIsDeleting(true);
+      const res = await fetch(`${BACKEND_URL}/to-dos/${deleteModal.todoId}`, {
         method: "DELETE",
         credentials: "include",
       });
 
       if (res.ok) {
-        const updated = todos.filter((item) => item._id !== id);
+        const deletedId = deleteModal.todoId;
+        const updated = todos.filter((item) => item._id !== deletedId);
         setTodos(updated);
-        if (selectedTodo?._id === id) {
+        if (selectedTodo?._id === deletedId) {
           if (updated.length > 0) {
             fetchTodoDetail(updated[0]._id);
           } else {
             setSelectedTodo(null);
           }
         }
-        toast.success("Task deleted.");
+        toast.success("Task deleted successfully");
+        setDeleteModal({ isOpen: false, todoId: null, todoTitle: "" });
         window.dispatchEvent(new Event("lifeos-data-refresh"));
       } else {
         const data = await res.json();
-        setError(data.message || "Failed to delete task.");
+        toast.error(data.message || "Failed to delete task.");
       }
     } catch {
-      setError("Error attempting to delete task.");
+      toast.error("Error attempting to delete task.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -718,7 +740,7 @@ export default function Todos() {
                 </span>
 
                 <button
-                  onClick={(e) => handleDelete(item._id, e)}
+                  onClick={(e) => openDeleteModal(item._id, item.title, e)}
                   className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 transition cursor-pointer"
                   title="Delete Task"
                 >
@@ -1005,26 +1027,40 @@ export default function Todos() {
   };
 
   return (
-    <FeatureLayout
-      badgeText="TaskOS Hub"
-      title="To-Do & Workflow Manager"
-      subtitle="Organize, schedule, and track target deadlines with custom recurring days"
-      onBack={() => navigate(-1)}
-      backTooltip="Go Back"
-      loading={loading}
-      initialFetching={initialFetching}
-      error={error}
-      setError={setError}
-      isCreatingNew={isCreatingNew}
-      setIsCreatingNew={setIsCreatingNew}
-      hasItems={todos.length > 0}
-      renderForm={renderForm}
-      renderHero={renderHero}
-      renderSidebar={renderSidebar}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      renderTabContent={renderTabContent}
-    />
+    <>
+      <FeatureLayout
+        badgeText="TaskOS Hub"
+        title="To-Do & Workflow Manager"
+        subtitle="Organize, schedule, and track target deadlines with custom recurring days"
+        onBack={() => navigate(-1)}
+        backTooltip="Go Back"
+        loading={loading}
+        initialFetching={initialFetching}
+        error={error}
+        setError={setError}
+        isCreatingNew={isCreatingNew}
+        setIsCreatingNew={setIsCreatingNew}
+        hasItems={todos.length > 0}
+        onDelete={selectedTodo ? () => openDeleteModal(selectedTodo._id, selectedTodo.title) : undefined}
+        renderForm={renderForm}
+        renderHero={renderHero}
+        renderSidebar={renderSidebar}
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        renderTabContent={renderTabContent}
+      />
+
+      {/* Reusable Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, todoId: null, todoTitle: "" })}
+        onDelete={handleConfirmDelete}
+        isDeleting={isDeleting}
+        title={`Delete "${deleteModal.todoTitle || "Task"}"?`}
+        description="Are you sure you want to delete this task? This action cannot be undone and will remove it from your agenda and active schedule."
+        confirmText="Delete Task"
+      />
+    </>
   );
 }

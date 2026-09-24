@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import * as XLSX from "xlsx";
+import Layout from "../../src/components/Layout";
 import {
   Briefcase,
   Calendar,
@@ -708,7 +709,8 @@ export default function JobTracker() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-16 font-sans text-slate-800 text-left">
+    <Layout>
+      <div className="space-y-6 animate-fadeIn pb-16 font-sans text-slate-800 text-left">
       {/* Hidden File Input for Excel (.xlsx, .xls) and CSV Import */}
       <input
         type="file"
@@ -1842,5 +1844,6 @@ export default function JobTracker() {
         </div>
       )}
     </div>
+    </Layout>
   );
 }
