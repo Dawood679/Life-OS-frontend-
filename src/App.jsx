@@ -27,6 +27,7 @@ import PrescriptionScanner from "../features/health/PrescriptionScanner";
 import MedicineTracker from "../features/health/MedicineTracker";
 import MedicalHistory from "../features/health/MedicalHistory";
 import InterviewStudio from "../features/interview/InterviewStudio";
+import JobTracker from "../features/jobTracker/JobTracker";
 
 export default function App() {
   return (
@@ -156,6 +157,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <InterviewStudio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/career/applications"
+          element={
+            <ProtectedRoute>
+              <JobTracker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/career/job-tracker"
+          element={
+            <ProtectedRoute>
+              <JobTracker />
             </ProtectedRoute>
           }
         />

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import FeatureLayout from "../../src/components/FeatureLayout";
 
 export default function JobMatch() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [jobDescription, setJobDescription] = useState("");
   const [jobMatches, setJobMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
@@ -29,6 +30,17 @@ export default function JobMatch() {
 
   const BACKEND_URL =
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+
+  // Pre-fill state if navigated from Job Tracker / Kanban
+  useEffect(() => {
+    if (location.state?.jobDescription || location.state?.jobTitle) {
+      if (location.state.jobDescription) {
+        setJobDescription(location.state.jobDescription);
+      }
+      setSelectedMatch(null);
+      setIsCreatingNew(true);
+    }
+  }, [location.state]);
 
   // Fetch job matches on initial mount
   useEffect(() => {
@@ -68,8 +80,15 @@ export default function JobMatch() {
           hasPrevPage: hasPrev,
         });
 
-        if (data.jobMatches.length > 0) {
+        // If navigated with location.state to create new analysis, keep form open
+        if (location.state?.jobDescription || location.state?.jobTitle) {
+          setSelectedMatch(null);
+          setIsCreatingNew(true);
+        } else if (data.jobMatches.length > 0) {
           fetchJobMatchDetail(data.jobMatches[0]._id);
+        } else {
+          setSelectedMatch(null);
+          setIsCreatingNew(true);
         }
       }
     } catch (err) {
@@ -662,7 +681,8 @@ export default function JobMatch() {
         badgeText="CareerOS Hub"
         title="AI Job Match & Gap Analyzer"
         subtitle="Powered by Gemini 2.5 Flash • Intelligent Profile-to-Job Qualification Scoring"
-        onBack={() => navigate("/dashboard")}
+        onBack={() => navigate(-1)}
+        backTooltip="Go Back"
         loading={loading}
         initialFetching={initialFetching}
         error={error}

@@ -178,7 +178,8 @@ export default function PrescriptionScanner() {
       badgeText="Health OS"
       title="Prescription Scanner"
       subtitle="AI-assisted prescription ingestion and routine extraction"
-      onBack={() => navigate('/dashboard')}
+      onBack={() => navigate(-1)}
+      backTooltip="Go Back"
       error={error}
       setError={setError}
       hasItems={true}

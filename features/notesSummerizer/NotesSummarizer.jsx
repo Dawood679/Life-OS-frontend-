@@ -434,7 +434,8 @@ export default function NotesSummarizer() {
       badgeText="LearningOS Hub"
       title="AI Notes & Lecture Summarizer"
       subtitle="Powered by Gemini 2.5 Flash • Smart Summaries, Key Points & Study Flashcards"
-      onBack={() => navigate("/dashboard")}
+      onBack={() => navigate(-1)}
+      backTooltip="Go Back"
       loading={loading}
       initialFetching={initialFetching}
       error={error}

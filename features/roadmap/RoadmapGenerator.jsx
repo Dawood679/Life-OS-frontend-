@@ -327,7 +327,8 @@ export default function RoadmapGenerator() {
         initialFetching={initialFetching}
         error={error}
         setError={setError}
-        onBack={() => navigate("/dashboard")}
+        onBack={() => navigate(-1)}
+        backTooltip="Go Back"
         isCreatingNew={isCreatingNew}
         setIsCreatingNew={setIsCreatingNew}
         hasItems={totalRoadmaps > 0}

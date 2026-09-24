@@ -443,7 +443,8 @@ export default function Chat() {
         badgeText="AI Assistant"
         title="Gemini AI Chat"
         subtitle="Interactive conversational assistant powered by Gemini 2.5 Flash"
-        onBack={() => navigate("/dashboard")}
+        onBack={() => navigate(-1)}
+        backTooltip="Go Back"
         loading={loading}
         initialFetching={initialFetching}
         error={error}
