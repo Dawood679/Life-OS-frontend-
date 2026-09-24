@@ -449,9 +449,13 @@ export default function Dashboard() {
                     style={{ width: `${careerScore}%` }}
                   ></div>
                 </div>
-                <p className="text-[10px] text-slate-500">
-                  Tasks ({lifeScore?.breakdown?.todosCompleted || 0}) • Milestones ({lifeScore?.breakdown?.actionMilestonesCompleted || 0}) • Daily Target Reached
-                </p>
+                <div className="flex items-center justify-between text-[10px] text-slate-500">
+                  <span>Tasks ({lifeScore?.breakdown?.todosCompleted || 0})</span>
+                  <span>•</span>
+                  <span>Milestones ({lifeScore?.breakdown?.actionMilestonesCompleted || 0})</span>
+                  <span>•</span>
+                  <span className="font-semibold text-emerald-700">Interviews ({lifeScore?.breakdown?.interviewsCompleted || 0})</span>
+                </div>
               </div>
             </div>
           </div>
@@ -516,9 +520,18 @@ export default function Dashboard() {
                     {!d.isCompleted && d.id === "quiz" && (
                       <button
                         onClick={() => navigate("/learning/quiz")}
-                        className="px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-[10px] font-bold rounded-lg transition shrink-0"
+                        className="px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-[10px] font-bold rounded-lg transition shrink-0 cursor-pointer"
                       >
-                        Start ➔
+                        Quiz ➔
+                      </button>
+                    )}
+
+                    {!d.isCompleted && d.id === "todos" && (
+                      <button
+                        onClick={() => navigate("/career/mock-interview")}
+                        className="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-[10px] font-bold rounded-lg transition shrink-0 cursor-pointer"
+                      >
+                        Interview ➔
                       </button>
                     )}
                   </div>

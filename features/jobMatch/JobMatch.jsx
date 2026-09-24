@@ -308,34 +308,51 @@ export default function JobMatch() {
             </p>
           </div>
 
-          <div className="bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-2xl flex items-center gap-5 self-start md:self-auto shrink-0">
-            <div className="text-center">
-              <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">
-                Match Score
-              </p>
-              <div className="flex items-center justify-center gap-1 mt-0.5">
-                <span
-                  className={`text-xl font-extrabold px-2 py-0.5 rounded-lg ${getScoreBadgeColor(score)}`}
-                >
-                  {score}%
-                </span>
+          <div className="flex flex-col sm:flex-row items-center gap-3 self-start md:self-auto shrink-0">
+            <div className="bg-white/10 backdrop-blur-md border border-white/20 px-5 py-3 rounded-2xl flex items-center gap-5">
+              <div className="text-center">
+                <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">
+                  Match Score
+                </p>
+                <div className="flex items-center justify-center gap-1 mt-0.5">
+                  <span
+                    className={`text-xl font-extrabold px-2 py-0.5 rounded-lg ${getScoreBadgeColor(score)}`}
+                  >
+                    {score}%
+                  </span>
+                </div>
+              </div>
+              <div className="h-8 w-px bg-white/20"></div>
+              <div className="text-center">
+                <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">
+                  Matched / Missing
+                </p>
+                <p className="text-base font-bold text-white mt-0.5">
+                  <span className="text-emerald-300">
+                    {selectedMatch.matchedSkills?.length || 0}
+                  </span>
+                  <span className="text-white/60 mx-1">/</span>
+                  <span className="text-rose-300">
+                    {selectedMatch.missingSkills?.length || 0}
+                  </span>
+                </p>
               </div>
             </div>
-            <div className="h-8 w-px bg-white/20"></div>
-            <div className="text-center">
-              <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">
-                Matched / Missing
-              </p>
-              <p className="text-base font-bold text-white mt-0.5">
-                <span className="text-emerald-300">
-                  {selectedMatch.matchedSkills?.length || 0}
-                </span>
-                <span className="text-white/60 mx-1">/</span>
-                <span className="text-rose-300">
-                  {selectedMatch.missingSkills?.length || 0}
-                </span>
-              </p>
-            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/career/mock-interview", {
+                  state: {
+                    roleTitle: selectedMatch.jobTitle || "Target Role",
+                    jobDescription: selectedMatch.jobDescription || "",
+                  },
+                })
+              }
+              className="w-full sm:w-auto px-4 py-3 rounded-2xl bg-white text-indigo-700 hover:bg-indigo-50 text-xs font-bold transition shadow-md cursor-pointer flex items-center justify-center gap-1.5 active:scale-[0.98]"
+            >
+              <span>🎙️ Practice Interview ➔</span>
+            </button>
           </div>
         </div>
       </div>
@@ -435,6 +452,34 @@ export default function JobMatch() {
             <p className="text-base text-slate-700 leading-relaxed p-5 rounded-2xl bg-orange-50/30 border border-slate-200/70">
               {selectedMatch.matchSummary || "No summary available."}
             </p>
+          </div>
+
+          {/* 1-Click Launch Mock Interview CTA Banner */}
+          <div className="p-5 rounded-3xl bg-gradient-to-r from-indigo-50 via-sky-50 to-emerald-50 border border-indigo-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-xs">
+            <div className="space-y-1">
+              <h5 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                <span>🎙️</span>
+                <span>Simulate Interview for this Specific Circular</span>
+              </h5>
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Launch an AI Mock Interview with questions tailored directly to this job description and required competencies.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                navigate("/career/mock-interview", {
+                  state: {
+                    roleTitle: selectedMatch.jobTitle || "Target Role",
+                    jobDescription: selectedMatch.jobDescription || "",
+                  },
+                })
+              }
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:opacity-95 text-white text-xs font-bold transition shadow-sm cursor-pointer shrink-0 active:scale-[0.98]"
+            >
+              Launch Mock Interview ➔
+            </button>
           </div>
 
           {selectedMatch.jobDescription && (

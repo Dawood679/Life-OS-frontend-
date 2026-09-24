@@ -64,6 +64,7 @@ export default function Sidebar() {
   ];
 
   const careerSubLinks = [
+    { path: '/career/mock-interview', label: 'AI Mock Interview' },
     { path: '/learning/job-match', label: 'Job Matcher' },
     { path: '/career/resume', label: 'Profile & Pitch Analyzer' },
     { path: '/learning/action-plan', label: 'Action Plan Generator' },
