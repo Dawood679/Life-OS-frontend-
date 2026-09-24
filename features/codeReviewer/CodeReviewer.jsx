@@ -1,66 +1,86 @@
 import { useEffect, useState } from "react";
-import FeatureLayout from "../../src/components/FeatureLayout";
 import { useNavigate } from "react-router-dom";
+import FeatureLayout from "../../src/components/FeatureLayout";
 
-const TAB_KEYS = {
-  OVERVIEW: "overview",
-  BUGS: "bugs",
-  PERFORMANCE: "performance",
-  SECURITY: "security",
-  BEST_PRACTICES: "bestPractices",
-  IMPROVED_CODE: "improvedCode",
-};
+const DOMAIN_OPTIONS = [
+  { id: "auto", label: "✨ Auto Detect" },
+  { id: "code", label: "💻 Code & Architecture" },
+  { id: "writing", label: "📝 Essay & Writing" },
+  { id: "business", label: "💼 Business Pitch" },
+  { id: "academic", label: "🎓 Academic Research" },
+];
 
 export default function CodeReviewer() {
   const navigate = useNavigate();
-  const [code, setCode] = useState("");
-  const [language, setLanguage] = useState("javascript");
+
+  // State Management
+  const [content, setContent] = useState("");
+  const [selectedDomain, setSelectedDomain] = useState("auto");
   const [reviews, setReviews] = useState([]);
   const [selectedReview, setSelectedReview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [initialFetching, setInitialFetching] = useState(true);
+  const [fetchingDetail, setFetchingDetail] = useState(false);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState(TAB_KEYS.OVERVIEW);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  // Pagination State
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [pagination, setPagination] = useState(null);
+  // Tabs: Technical, Business, Improved
+  const [activeTab, setActiveTab] = useState("technical");
 
-  const BACKEND_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+  // Server Pagination State
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
 
-  // Re-fetch when page changes
+  // Delete Modal State
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    id: null,
+    title: "",
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+  const BACKEND_URL = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
+
   useEffect(() => {
-    fetchReviews(page);
-  }, [page]);
+    fetchReviews(1);
+  }, []);
 
-  const fetchReviews = async (pageNum = 1) => {
+  const fetchReviews = async (page = 1) => {
     try {
       setInitialFetching(true);
-      const res = await fetch(
-        `${BACKEND_URL}/code-review?page=${pageNum}&limit=${limit}`,
-        { credentials: "include" }
-      );
+      const res = await fetch(`${BACKEND_URL}/code-review?page=${page}&limit=10`, {
+        credentials: "include",
+      });
       const data = await res.json();
 
       if (res.ok && data.reviews) {
         setReviews(data.reviews);
-        setPagination(data.pagination);
-
+        if (data.pagination) {
+          setPagination({
+            page: data.pagination.page,
+            totalPages: data.pagination.totalPages,
+            total: data.pagination.totalReviews,
+            hasNextPage: data.pagination.page < data.pagination.totalPages,
+            hasPrevPage: data.pagination.page > 1,
+          });
+        }
         if (data.reviews.length > 0) {
-          // Load full detail for first item in current page
-          await fetchReviewDetail(data.reviews[0]._id);
+          fetchReviewDetail(data.reviews[0]._id);
         } else {
           setSelectedReview(null);
         }
       } else {
-        setError(data.message || "Failed to load code reviews.");
+        setError(data.message || "Failed to load reviews.");
       }
-    } catch (err) {
-      console.error("Error fetching reviews:", err);
-      setError("Unable to connect to server to load code reviews.");
+    } catch {
+      setError("Unable to connect to server.");
     } finally {
       setInitialFetching(false);
     }
@@ -68,24 +88,43 @@ export default function CodeReviewer() {
 
   const fetchReviewDetail = async (id) => {
     try {
+      setFetchingDetail(true);
+      setError("");
+
       const res = await fetch(`${BACKEND_URL}/code-review/${id}`, {
         credentials: "include",
       });
       const data = await res.json();
+
       if (res.ok && data.review) {
         setSelectedReview(data.review);
+        // If technical is not applicable but business is, default to business tab
+        const techApplicable = data.review.perspectives?.technical?.applicable ?? true;
+        const bizApplicable = data.review.perspectives?.business?.applicable ?? false;
+        if (!techApplicable && bizApplicable) {
+          setActiveTab("business");
+        } else {
+          setActiveTab("technical");
+        }
       } else {
-        setError(data.message || "Failed to fetch complete review details.");
+        setError(data.message || "Failed to load review details.");
       }
-    } catch (err) {
-      console.error(`Error fetching review detail for ID ${id}:`, err);
-      setError("Failed to fetch complete review details.");
+    } catch {
+      setError("Error loading selected review details.");
+    } finally {
+      setFetchingDetail(false);
     }
   };
 
-  const handleReviewCode = async (e) => {
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      fetchReviews(newPage);
+    }
+  };
+
+  const handleGenerate = async (e) => {
     e?.preventDefault();
-    if (!code.trim()) return;
+    if (!content.trim()) return;
 
     setError("");
     setLoading(true);
@@ -95,406 +134,589 @@ export default function CodeReviewer() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ code, language }),
+        body: JSON.stringify({
+          content: content.trim(),
+          code: content.trim(),
+          domain: selectedDomain,
+          forcedDomain: selectedDomain !== "auto" ? selectedDomain : undefined,
+        }),
       });
 
       const data = await res.json();
 
-      if (!res.ok) {
-        setError(data.message || "Failed to analyze code.");
-        return;
-      }
-
-      // Reset back to page 1 to show newly submitted review
-      if (page !== 1) {
-        setPage(1);
+      if (res.ok && data.codeReview) {
+        setContent("");
+        setIsCreatingNew(false);
+        setSelectedReview(data.codeReview);
+        fetchReviews(1);
       } else {
-        await fetchReviews(1);
+        setError(data.message || "Failed to analyze asset.");
       }
-
-      setIsCreatingNew(false);
-      setCode("");
-      setActiveTab(TAB_KEYS.OVERVIEW);
-    } catch (err) {
-      console.error("Error reviewing code:", err);
-      setError("Unable to connect to AI review engine. Please try again.");
+    } catch {
+      setError("Server connection failed.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id, e) => {
+  const openDeleteModal = (id, title, e) => {
     e?.stopPropagation();
-    if (!window.confirm("Are you sure you want to delete this code review?")) return;
+    setDeleteModal({ isOpen: true, id, title });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ isOpen: false, id: null, title: "" });
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteModal.id) return;
+    setIsDeleting(true);
 
     try {
-      const res = await fetch(`${BACKEND_URL}/code-review/${id}`, {
+      const res = await fetch(`${BACKEND_URL}/code-review/${deleteModal.id}`, {
         method: "DELETE",
         credentials: "include",
       });
 
       if (res.ok) {
-        // Re-fetch current page after deletion
-        fetchReviews(page);
+        closeDeleteModal();
+        fetchReviews(pagination.page);
       } else {
-        const data = await res.json();
-        setError(data.message || "Failed to delete review.");
+        setError("Failed to delete review.");
       }
-    } catch (err) {
-      console.error(`Error deleting review with ID ${id}:`, err);
-      setError("Error attempting to delete review.");
+    } catch {
+      setError("Error deleting review.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
-  const tabs = [
-    { key: TAB_KEYS.OVERVIEW, label: "Overview" },
-    {
-      key: TAB_KEYS.BUGS,
-      label: `Bugs (${selectedReview?.bugs?.length || 0})`,
-    },
-    {
-      key: TAB_KEYS.PERFORMANCE,
-      label: `Performance (${selectedReview?.performanceIssues?.length || 0})`,
-    },
-    {
-      key: TAB_KEYS.SECURITY,
-      label: `Security (${selectedReview?.securityIssues?.length || 0})`,
-    },
-    { key: TAB_KEYS.BEST_PRACTICES, label: "Best Practices" },
-    { key: TAB_KEYS.IMPROVED_CODE, label: "Improved Code" },
-  ];
-
-  const getScoreBadge = (score) => {
-    if (score >= 80) return "bg-emerald-500/20 text-emerald-300 border-emerald-400/30";
-    if (score >= 60) return "bg-amber-500/20 text-amber-300 border-amber-400/30";
-    return "bg-rose-500/20 text-rose-300 border-rose-400/30";
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
+  // Tabs configuration
+  const tabs = [
+    { key: "technical", label: "💻 Technical Lens" },
+    { key: "business", label: "💼 Business & Strategy Lens" },
+    { key: "improved", label: "✨ Polished Asset Draft" },
+  ];
+
+  // SECTION 1: FORM (renderForm)
   const renderForm = () => (
-    <div className="bg-white/90 backdrop-blur-md border border-slate-200/80 rounded-3xl p-6 md:p-10 shadow-xl relative overflow-hidden transition-all">
-      <div className="absolute top-10 right-10 w-48 h-48 bg-indigo-100/40 rounded-full blur-3xl pointer-events-none"></div>
-
-      <div className="max-w-3xl mx-auto text-center space-y-3 relative z-10">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 via-sky-500 to-sky-400 mx-auto flex items-center justify-center text-white text-xl shadow-md">
-          💻
+    <div className="bg-white/80 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-slate-200 shadow-xl space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-bold text-slate-800">
+            Submit Asset for Multi-Lens Review
+          </h3>
+          <p className="text-xs text-slate-500 mt-1">
+            Evaluate code architecture, essays, business proposals, and action plans from both technical and business angles in a single AI pass.
+          </p>
         </div>
-        <h2 className="text-xl md:text-2xl font-serif font-bold text-slate-800">
-          Paste your snippet for automated AI code review
-        </h2>
-        <p className="text-xs text-slate-500 leading-relaxed">
-          Get instantaneous feedback on critical bugs, runtime performance bottlenecks, security vulnerabilities, and cleaner refactoring solutions.
-        </p>
 
-        <form onSubmit={handleReviewCode} className="mt-6 space-y-4 text-left">
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider px-1">
-              Source Code
-            </label>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold text-slate-400 uppercase">Language:</span>
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="px-3 py-1.5 text-xs bg-slate-100 border border-slate-200 rounded-xl font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-              >
-                <option value="javascript">JavaScript</option>
-                <option value="typescript">TypeScript</option>
-                <option value="python">Python</option>
-                <option value="java">Java</option>
-                <option value="cpp">C++</option>
-                <option value="go">Go</option>
-                <option value="html/css">HTML / CSS</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <textarea
-              rows={10}
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Paste raw code function, class, or module here..."
-              disabled={loading}
-              className="w-full p-4 text-xs font-mono bg-slate-900 text-slate-100 border border-slate-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition resize-y"
-            />
-          </div>
-
-          <div className="flex gap-2 justify-end pt-2">
-            {reviews.length > 0 && isCreatingNew && (
-              <button
-                type="button"
-                onClick={() => setIsCreatingNew(false)}
-                className="px-5 py-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition cursor-pointer"
-              >
-                Cancel
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={loading || !code.trim()}
-              className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 via-sky-500 to-sky-400 hover:opacity-95 text-white font-semibold text-xs shadow-md disabled:opacity-50 transition flex items-center justify-center gap-2 cursor-pointer"
-            >
-              {loading ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin"></div>
-                  Analyzing Code Architecture...
-                </>
-              ) : (
-                <>
-                  <span>Review Code</span>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </>
-              )}
-            </button>
-          </div>
-        </form>
+        <span className="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100 hidden sm:inline">
+          Gemini 2.5 Dual-Pass
+        </span>
       </div>
+
+      {/* Domain Selector Pills */}
+      <div className="space-y-1.5">
+        <label className="text-xs font-bold text-slate-700">Domain Category</label>
+        <div className="flex flex-wrap gap-2">
+          {DOMAIN_OPTIONS.map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setSelectedDomain(opt.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                selectedDomain === opt.id
+                  ? "bg-slate-900 text-white shadow-xs"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <form onSubmit={handleGenerate} className="space-y-4">
+        <div className="space-y-1 relative">
+          <label className="text-xs font-bold text-slate-700">
+            Source Content / Work Draft
+          </label>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Paste your source code snippet, technical design, essay draft, business proposal, marketing copy, or strategy outline..."
+            rows={10}
+            className="w-full p-4 rounded-2xl bg-slate-50/70 border border-slate-200 text-slate-800 font-mono text-xs focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-600 outline-none transition resize-none leading-relaxed"
+          />
+          {content && (
+            <span className="absolute bottom-4 right-4 text-[10px] font-mono text-slate-400 bg-white/90 px-2 py-0.5 rounded border border-slate-200">
+              {content.length} chars
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3 pt-2">
+          {reviews.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setIsCreatingNew(false)}
+              className="px-5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !content.trim()}
+            className={`px-6 py-2.5 rounded-xl font-bold text-xs text-white shadow-md transition-all flex items-center gap-2 cursor-pointer ${
+              loading || !content.trim()
+                ? "bg-slate-300 cursor-not-allowed"
+                : "bg-gradient-to-r from-indigo-500 via-indigo-600 to-sky-500 hover:opacity-95 active:scale-[0.98]"
+            }`}
+          >
+            {loading ? (
+              <>
+                <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                Evaluating Multi-Perspectives...
+              </>
+            ) : (
+              <>
+                <span>✦ Analyze Work & Asset</span>
+              </>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 
+  // SECTION 2: HERO BANNER (renderHero)
   const renderHero = () => {
     if (!selectedReview) return null;
-    const score = selectedReview.overallScore ?? "--";
 
     return (
-      <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-sky-500 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute -right-10 -bottom-10 w-52 h-52 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-[10px] font-bold tracking-wider uppercase inline-block">
-                Language: {selectedReview.language || "javascript"}
-              </span>
-              <span className="text-xs text-indigo-200">
-                • {new Date(selectedReview.createdAt).toLocaleDateString(undefined, { dateStyle: "medium" })}
-              </span>
-            </div>
-            <h2 className="text-xl md:text-2xl font-serif font-bold line-clamp-2">
-              {selectedReview.summary || "Code Audit Summary"}
-            </h2>
+      <div className="bg-gradient-to-r from-indigo-600 via-sky-600 to-sky-500 text-white rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-2 z-10">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold uppercase tracking-wider">
+              {selectedReview.domain || "Asset"}
+            </span>
+            <span className="text-xs text-sky-100">
+              {new Date(selectedReview.createdAt).toLocaleDateString()}
+            </span>
           </div>
 
-          <div className="flex items-center gap-4 self-start md:self-auto shrink-0 bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-2xl">
-            <div className="text-center">
-              <p className="text-[10px] text-sky-200 uppercase font-bold tracking-wider">Overall Quality</p>
-              <div className="flex items-baseline gap-1 justify-center">
-                <span className="text-3xl font-black text-white">{score}</span>
-                <span className="text-xs text-sky-200">/100</span>
-              </div>
-            </div>
-            <div className={`px-3 py-1 rounded-xl text-xs font-bold border ${getScoreBadge(score)}`}>
-              {score >= 80 ? "Pass" : score >= 60 ? "Warning" : "Critical"}
-            </div>
+          <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+            {selectedReview.summary || "Asset Quality Analysis"}
+          </h2>
+          <p className="text-xs text-sky-100 max-w-xl line-clamp-2 leading-relaxed">
+            Multi-angle evaluation combining code reliability, structural clarity, and strategic business impact.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-4 z-10 shrink-0">
+          <div className="text-right bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20">
+            <p className="text-[10px] uppercase font-bold text-sky-200 tracking-wider">
+              Overall Score
+            </p>
+            <p className="text-2xl font-extrabold text-white font-serif">
+              {selectedReview.overallScore}
+              <span className="text-xs text-sky-200 font-sans">/100</span>
+            </p>
           </div>
+
+          <button
+            type="button"
+            onClick={(e) =>
+              openDeleteModal(
+                selectedReview._id,
+                selectedReview.summary || "Asset Review",
+                e
+              )
+            }
+            className="p-3 rounded-2xl bg-white/10 hover:bg-rose-500/30 text-white border border-white/20 transition cursor-pointer"
+            title="Delete Review"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              />
+            </svg>
+          </button>
         </div>
       </div>
     );
   };
 
+  // SECTION 3: SIDEBAR (renderSidebar)
   const renderSidebar = () => (
-    <>
-      <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider px-2">
-        Recent Audits ({pagination?.total || reviews.length})
-      </h3>
+    <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
+      {reviews.map((item) => {
+        const isSelected = selectedReview?._id === item._id;
 
-      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-        {reviews.map((rev) => {
-          const isSelected = selectedReview?._id === rev._id;
-
-          return (
-            <div
-              key={rev._id}
-              onClick={async () => {
-                setIsCreatingNew(false);
-                await fetchReviewDetail(rev._id);
-              }}
-              className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between cursor-pointer group ${
-                isSelected
-                  ? "bg-indigo-50/80 border-indigo-200/80 shadow-xs ring-2 ring-indigo-200/50"
-                  : "bg-white/60 border-slate-200/80 hover:bg-indigo-50/30 text-slate-600"
-              }`}
-            >
-              <div className="flex items-center gap-3 pr-2 min-w-0">
-                <span
-                  className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-xs font-bold transition-colors ${
-                    isSelected
-                      ? "bg-indigo-600 text-white shadow-xs"
-                      : "bg-indigo-100 text-indigo-800"
-                  }`}
-                >
-                  {rev.overallScore ?? "—"}
-                </span>
-                <div className="truncate">
-                  <p className="text-sm font-bold text-slate-800 truncate">
-                    {rev.summary ? rev.summary.slice(0, 32) + "..." : "Code Review"}
-                  </p>
-                  <p className="text-[10px] text-slate-400 truncate mt-0.5 uppercase font-medium">
-                    {rev.language || "js"} • {new Date(rev.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={(e) => handleDelete(rev._id, e)}
-                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 p-1.5 transition cursor-pointer shrink-0"
-                title="Delete Code Review"
+        return (
+          <div
+            key={item._id}
+            onClick={() => {
+              fetchReviewDetail(item._id);
+              setIsCreatingNew(false);
+            }}
+            className={`w-full text-left p-4 rounded-2xl border transition-all duration-200 flex items-center justify-between cursor-pointer group ${
+              isSelected
+                ? "bg-indigo-50/70 border-indigo-200/80 shadow-xs ring-2 ring-indigo-200/50"
+                : "bg-white/60 border-slate-200/80 hover:bg-slate-50 text-slate-600"
+            }`}
+          >
+            <div className="flex items-center gap-3 pr-2 min-w-0">
+              <span
+                className={`w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-xs font-extrabold transition-colors ${
+                  isSelected
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "bg-indigo-100/70 text-indigo-800"
+                }`}
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
+                ✦
+              </span>
+              <div className="truncate">
+                <p className="text-sm font-bold text-slate-800 truncate">
+                  {item.summary || item.domain || "Asset Review"}
+                </p>
+                <p className="text-[10px] text-slate-400 truncate mt-0.5 uppercase font-medium">
+                  {item.domain} • Score: {item.overallScore}/100
+                </p>
+              </div>
             </div>
-          );
-        })}
-      </div>
-    </>
+
+            <button
+              onClick={(e) =>
+                openDeleteModal(item._id, item.summary || "Asset Review", e)
+              }
+              className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1.5 transition cursor-pointer shrink-0 rounded-lg hover:bg-rose-50"
+              title="Delete Review"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          </div>
+        );
+      })}
+    </div>
   );
 
-  const renderIssuesList = (items, emptyMessage, badgeColor) => {
-    if (!Array.isArray(items) || items.length === 0) {
-      return <p className="text-sm text-slate-500 italic p-4">{emptyMessage}</p>;
+  // SECTION 4: TAB CONTENT (renderTabContent)
+  const renderTabContent = () => {
+    if (fetchingDetail) {
+      return (
+        <div className="py-12 flex flex-col items-center justify-center space-y-3">
+          <div className="w-8 h-8 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+          <p className="text-xs font-semibold text-slate-400 animate-pulse">
+            Loading review perspectives...
+          </p>
+        </div>
+      );
     }
 
-    return (
-      <div className="space-y-3">
-        {items.map((item, idx) => (
-          <div
-            key={item.id || idx}
-            className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-3"
-          >
-            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase shrink-0 mt-0.5 ${badgeColor}`}>
-              #{idx + 1}
-            </span>
-            <div className="space-y-1 text-xs text-slate-700 leading-relaxed">
-              {item.line && <p className="font-bold text-slate-900">Line: {item.line}</p>}
-              {item.issue && <p>{item.issue}</p>}
-              {item.suggestion && (
-                <p className="text-indigo-600 font-medium mt-1">💡 Suggestion: {item.suggestion}</p>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
-
-  const renderTabContent = () => {
     if (!selectedReview) return null;
 
-    if (activeTab === TAB_KEYS.OVERVIEW) {
+    const technicalData = selectedReview.perspectives?.technical || {
+      applicable: true,
+      score: selectedReview.overallScore || 0,
+      summary: selectedReview.summary || "",
+      issues: selectedReview.bugs || [],
+      bestPractices: selectedReview.bestPractices || [],
+    };
+
+    const businessData = selectedReview.perspectives?.business || {
+      applicable: false,
+      score: selectedReview.overallScore || 0,
+      summary: "Business analysis available for proposals and strategic drafts.",
+      marketClarity: "High Viability",
+      suggestions: [],
+      actionItems: [],
+    };
+
+    // 1. Technical Tab
+    if (activeTab === "technical") {
       return (
         <div className="space-y-6">
-          <div className="space-y-2">
-            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-              Executive Summary
-            </h4>
-            <p className="text-sm text-slate-700 leading-relaxed p-5 rounded-2xl bg-indigo-50/40 border border-slate-200/70">
-              {selectedReview.summary || "No detailed summary available for this code."}
-            </p>
-          </div>
-
-          {selectedReview.code && (
-            <div className="space-y-2 pt-2">
-              <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-                Submitted Snippet
-              </h4>
-              <pre className="p-4 rounded-2xl bg-slate-900 text-slate-100 font-mono text-xs overflow-x-auto border border-slate-800 max-h-60">
-                <code>{selectedReview.code}</code>
-              </pre>
+          {!technicalData.applicable ? (
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-600 text-xs">
+              ⚠️ Technical lens is not applicable for this conceptual / non-code submission.
             </div>
+          ) : (
+            <>
+              {/* Technical Score Banner */}
+              <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-800">
+                    Technical Quality Score
+                  </p>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    Evaluates architectural integrity, maintainability, and security.
+                  </p>
+                </div>
+                <span className="text-2xl font-bold font-serif text-indigo-600">
+                  {technicalData.score}/100
+                </span>
+              </div>
+
+              {/* Detected Issues */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold text-slate-800">
+                  Detected Issues & Optimizations ({technicalData.issues?.length || 0})
+                </h4>
+
+                {(!technicalData.issues || technicalData.issues.length === 0) ? (
+                  <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-4 rounded-2xl font-medium">
+                    ✓ Clean pass! No critical bugs or security risks detected.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {technicalData.issues.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-900">
+                            {item.lineOrSection || item.line || `Issue #${idx + 1}`}
+                          </span>
+                          <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
+                            Needs Attention
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-600 leading-relaxed">
+                          {item.issue}
+                        </p>
+                        {item.suggestion && (
+                          <p className="text-xs text-indigo-600 font-medium pt-1 border-t border-slate-100">
+                            💡 <strong>Fix:</strong> {item.suggestion}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Recommended Best Practices */}
+              {technicalData.bestPractices?.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-slate-800">
+                    Recommended Best Practices
+                  </h4>
+                  <div className="space-y-2">
+                    {technicalData.bestPractices.map((bp, i) => (
+                      <div
+                        key={i}
+                        className="text-xs text-slate-700 flex items-start gap-2 bg-indigo-50/40 p-3 rounded-2xl border border-indigo-100/60"
+                      >
+                        <span className="text-indigo-600 font-bold">✓</span>
+                        <span>{typeof bp === "string" ? bp : bp.suggestion || bp.issue}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       );
     }
 
-    if (activeTab === TAB_KEYS.BUGS) {
-      return renderIssuesList(
-        selectedReview.bugs,
-        "No bugs detected in this review.",
-        "bg-rose-100 text-rose-800"
-      );
-    }
-
-    if (activeTab === TAB_KEYS.PERFORMANCE) {
-      return renderIssuesList(
-        selectedReview.performanceIssues,
-        "No performance bottlenecks found.",
-        "bg-amber-100 text-amber-800"
-      );
-    }
-
-    if (activeTab === TAB_KEYS.SECURITY) {
-      return renderIssuesList(
-        selectedReview.securityIssues,
-        "No security vulnerabilities detected.",
-        "bg-purple-100 text-purple-800"
-      );
-    }
-
-    if (activeTab === TAB_KEYS.BEST_PRACTICES) {
-      return renderIssuesList(
-        selectedReview.bestPractices,
-        "Code adheres well to core best practices.",
-        "bg-sky-100 text-sky-800"
-      );
-    }
-
-    if (activeTab === TAB_KEYS.IMPROVED_CODE) {
+    // 2. Business & Strategy Tab
+    if (activeTab === "business") {
       return (
-        <div className="space-y-3">
+        <div className="space-y-6">
+          {!businessData.applicable ? (
+            <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-600 text-xs">
+              ℹ️ This submission was processed as a technical script. High-level strategic impacts are summarized in the overview.
+            </div>
+          ) : (
+            <>
+              {/* Market Clarity Score */}
+              <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200/80 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-sky-800">
+                    Market & Value Proposition Clarity
+                  </p>
+                  <p className="text-sm font-bold text-slate-900 mt-0.5">
+                    {businessData.marketClarity || "High Viability"}
+                  </p>
+                </div>
+                <span className="text-2xl font-bold font-serif text-sky-700">
+                  {businessData.score}/100
+                </span>
+              </div>
+
+              {/* Suggestions */}
+              {businessData.suggestions?.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-slate-800">
+                    Value & Persuasion Improvements
+                  </h4>
+                  <div className="space-y-2">
+                    {businessData.suggestions.map((sug, i) => (
+                      <div
+                        key={i}
+                        className="p-3.5 bg-white border border-slate-200/80 rounded-2xl text-xs text-slate-700 shadow-xs"
+                      >
+                        💡 {sug}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Items */}
+              {businessData.actionItems?.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="text-sm font-bold text-slate-800">
+                    Priority Strategic Action Items
+                  </h4>
+                  <div className="space-y-2">
+                    {businessData.actionItems.map((act, i) => (
+                      <div
+                        key={i}
+                        className="p-3.5 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl text-xs text-emerald-950 font-medium flex items-center gap-2"
+                      >
+                        <span>🚀</span>
+                        <span>{act}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      );
+    }
+
+    // 3. Polished Version Tab
+    if (activeTab === "improved") {
+      const codeOrContent = selectedReview.improvedContent || selectedReview.improvedCode;
+
+      return (
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">
-              Refactored & Optimized Code
+            <h4 className="text-sm font-bold text-slate-800">
+              AI Upgraded & Polished Output
             </h4>
-            {selectedReview.improvedCode && (
+            {codeOrContent && (
               <button
-                onClick={() => navigator.clipboard.writeText(selectedReview.improvedCode)}
-                className="px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded-lg text-[11px] font-semibold text-slate-700 transition cursor-pointer"
+                type="button"
+                onClick={() => handleCopy(codeOrContent)}
+                className="px-3 py-1.5 rounded-xl bg-indigo-50 border border-indigo-200 text-xs font-bold text-indigo-600 hover:bg-indigo-100 transition cursor-pointer flex items-center gap-1.5"
               >
-                Copy Code
+                {copied ? "✓ Copied!" : "📋 Copy Version"}
               </button>
             )}
           </div>
 
-          {selectedReview.improvedCode ? (
-            <pre className="p-5 rounded-2xl bg-slate-900 text-emerald-400 font-mono text-xs overflow-x-auto border border-slate-800 leading-relaxed max-h-[480px]">
-              <code>{selectedReview.improvedCode}</code>
+          {codeOrContent ? (
+            <pre className="p-5 rounded-2xl bg-slate-900 text-slate-100 font-mono text-xs overflow-x-auto max-h-[500px] leading-relaxed border border-slate-800">
+              {codeOrContent}
             </pre>
           ) : (
-            <p className="text-sm text-slate-500 italic p-4">No improved version generated.</p>
+            <p className="text-xs text-slate-400 py-6 text-center">
+              No alternate draft provided for this submission.
+            </p>
           )}
         </div>
       );
     }
-
-    return null;
   };
 
   return (
-    <FeatureLayout
-      badgeText="Developer Tooling"
-      title="AI Code Reviewer & Auditor"
-      subtitle="Powered by Gemini 2.5 Flash • Catch Bugs, Security Hazards & Performance Bottlenecks"
-      onBack={() => navigate("/dashboard")}
-      loading={loading}
-      initialFetching={initialFetching}
-      error={error}
-      setError={setError}
-      isCreatingNew={isCreatingNew}
-      setIsCreatingNew={setIsCreatingNew}
-      hasItems={reviews.length > 0}
-      pagination={pagination}
-      onPageChange={(newPage) => setPage(newPage)}
-      renderForm={renderForm}
-      renderHero={renderHero}
-      renderSidebar={renderSidebar}
-      tabs={tabs}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      renderTabContent={renderTabContent}
-    />
+    <>
+      <FeatureLayout
+        title="Work & Asset Analyzer"
+        subtitle="AI Multi-Perspective Analysis for Code, Essays, Business Proposals & Strategy Plans"
+        onBack={() => navigate(-1)}
+        error={error}
+        setError={setError}
+        initialFetching={initialFetching}
+        isCreatingNew={isCreatingNew}
+        setIsCreatingNew={setIsCreatingNew}
+        renderForm={renderForm}
+        renderHero={renderHero}
+        renderSidebar={renderSidebar}
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        renderTabContent={renderTabContent}
+        hasItems={reviews.length > 0}
+      />
+
+      {/* Reusable Delete Confirmation Modal */}
+      {deleteModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl space-y-4 border border-slate-100">
+            <div className="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl font-bold">
+              🗑️
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-slate-800">
+                Delete Asset Review?
+              </h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Are you sure you want to delete{" "}
+                <span className="font-semibold text-slate-700">
+                  "{deleteModal.title}"
+                </span>
+                ? This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition disabled:opacity-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold shadow-xs transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

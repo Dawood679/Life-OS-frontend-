@@ -79,6 +79,14 @@ export default function App() {
           }
         />
         <Route
+          path="/learning/action-plan"
+          element={
+            <ProtectedRoute>
+              <ProjectGenerator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/learning/project-generator"
           element={
             <ProtectedRoute>
@@ -91,6 +99,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <NotesSummarizer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/work-review"
+          element={
+            <ProtectedRoute>
+              <CodeReviewer />
             </ProtectedRoute>
           }
         />

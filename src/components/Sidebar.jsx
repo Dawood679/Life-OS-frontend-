@@ -19,6 +19,8 @@ export default function Sidebar() {
     setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const [lifeScoreData, setLifeScoreData] = useState(null);
+
   useEffect(() => {
     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
     fetch(`${BACKEND_URL}/auth/me`, {
@@ -29,6 +31,18 @@ export default function Sidebar() {
         if (data.user) setRole(data.user.role);
       })
       .catch(() => navigate('/login'));
+
+    // Fetch Today's Life Score & Streak
+    fetch(`${BACKEND_URL}/life-score/today`, {
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setLifeScoreData(data.data);
+        }
+      })
+      .catch(() => {});
   }, [navigate]);
 
   const learningSubLinks = [
@@ -36,9 +50,8 @@ export default function Sidebar() {
     { path: '/learning/study-plan', label: 'Study Planner' },
     { path: '/learning/quiz', label: 'Quiz Center' },
     { path: '/learning/chat', label: 'AI Study Chat' },
-    { path: '/learning/code-review', label: 'Code Reviewer' },
+    { path: '/learning/work-review', label: 'Work & Asset Analyzer' },
     { path: '/learning/notes-summarizer', label: 'Notes Summarizer' },
-    { path: '/learning/job-match', label: 'Job Matcher' },
     { path: '/todos', label: 'Todo List' },
   ];
 
@@ -51,9 +64,9 @@ export default function Sidebar() {
   ];
 
   const careerSubLinks = [
-    { path: '/career/job-match', label: 'Job Matcher' },
-    { path: '/career/resume', label: 'Resume Optimizer' },
-    { path: '/learning/project-generator', label: 'Project Generator' },
+    { path: '/learning/job-match', label: 'Job Matcher' },
+    { path: '/career/resume', label: 'Profile & Pitch Analyzer' },
+    { path: '/learning/action-plan', label: 'Action Plan Generator' },
   ];
 
   const financeSubLinks = [
@@ -282,7 +295,33 @@ export default function Sidebar() {
       </div>
 
       {/* BOTTOM SECTION: Notifications, Profile & Logout */}
-      <div className="pt-4 border-t border-ink-100 space-y-2">
+      <div className="pt-3 border-t border-ink-100 space-y-2">
+        {/* Live Life Score Mini Card */}
+        <Link
+          to="/dashboard"
+          className="block p-2.5 rounded-2xl bg-gradient-to-br from-indigo-50/90 via-sky-50/50 to-white border border-indigo-100/80 shadow-xs hover:border-indigo-300 transition-all duration-200 group"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="text-[11px] font-bold text-ink-800 tracking-tight">Life Score</span>
+            </div>
+            <span className="text-xs font-extrabold text-brand-indigo font-mono">
+              {lifeScoreData ? `${lifeScoreData.totalScore}/100` : '--/100'}
+            </span>
+          </div>
+          <div className="mt-2 w-full bg-indigo-100/60 rounded-full h-1.5 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-brand-indigo via-sky-500 to-emerald-400 h-full rounded-full transition-all duration-500"
+              style={{ width: `${Math.max(5, lifeScoreData?.totalScore || 20)}%` }}
+            ></div>
+          </div>
+          <div className="mt-1.5 flex items-center justify-between text-[10px] text-ink-500 font-medium">
+            <span>🔥 {lifeScoreData?.streak?.current || 0} Day Streak</span>
+            <span className="text-brand-indigo group-hover:underline font-bold">Details ➔</span>
+          </div>
+        </Link>
+
         {/* Mount the In-Nav Notification Dropdown */}
         <NotificationDropdown />
 

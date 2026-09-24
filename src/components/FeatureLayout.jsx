@@ -16,9 +16,9 @@ export default function FeatureLayout({
   showDeleteModal = false,
   setShowDeleteModal,
 
-  // Pagination Props (NEW)
-  pagination = null, // Expects: { page, totalPages, total, hasNextPage, hasPrevPage }
-  onPageChange, // Function: (newPage) => void
+  // Pagination Props
+  pagination = null,
+  onPageChange,
 
   // State flags
   loading = false,
@@ -37,6 +37,7 @@ export default function FeatureLayout({
   activeTab,
   setActiveTab,
   renderTabContent,
+  children
 }) {
   // INITIAL FETCHING STATE
   if (initialFetching) {
@@ -163,146 +164,152 @@ export default function FeatureLayout({
           </div>
         )}
 
-        {/* INPUT FORM (Empty state or Create New state) */}
-        {(!hasItems || isCreatingNew) &&
-          !loading &&
-          (typeof renderForm === "function" ? renderForm() : renderForm)}
+        {/* DIRECT CHILDREN RENDERING */}
+        {children ? (
+          <div className="space-y-6">{children}</div>
+        ) : (
+          <>
+            {/* INPUT FORM (Empty state or Create New state) */}
+            {(!hasItems || isCreatingNew) &&
+              !loading &&
+              (typeof renderForm === "function" ? renderForm() : renderForm)}
 
-        {/* LOADING STATE */}
-        {loading && (
-          <div className="bg-white/80 backdrop-blur-md rounded-3xl p-12 border border-slate-200 text-center space-y-6 shadow-xl">
-            <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-500 animate-spin"></div>
-              <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl">
-                ⚡
-              </div>
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-slate-800">
-                Processing Request...
-              </h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                LifeOS AI is generating your requested blueprint...
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* MAIN DISPLAY GRID */}
-        {hasItems && !loading && !isCreatingNew && (
-          <div className="space-y-6">
-            {/* HERO BANNER */}
-            {renderHero &&
-              (typeof renderHero === "function" ? renderHero() : renderHero)}
-
-            {/* 2-COLUMN GRID */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* LEFT SIDEBAR + PAGINATION */}
-              {renderSidebar && (
-                <div className="lg:col-span-4 space-y-4">
-                  {typeof renderSidebar === "function"
-                    ? renderSidebar()
-                    : renderSidebar}
-
-                  {/* REUSABLE PAGINATION BAR */}
-                  {pagination && pagination.totalPages > 1 && (
-                    <nav
-                      aria-label="Pagination Navigation"
-                      className="flex items-center justify-between gap-3 bg-white/80 backdrop-blur-md border border-slate-200/90 rounded-2xl p-2.5 shadow-xs"
-                    >
-                      {/* PREVIOUS BUTTON */}
-                      <button
-                        type="button"
-                        disabled={!pagination.hasPrevPage}
-                        onClick={() => onPageChange?.(pagination.page - 1)}
-                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 active:scale-95 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-700 disabled:hover:border-slate-200/80 disabled:active:scale-100 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed shrink-0"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15 19l-7-7 7-7"
-                          />
-                        </svg>
-                        Prev
-                      </button>
-
-                      {/* PAGE INDICATOR */}
-                      <span className="text-xs font-bold text-slate-500">
-                        Page {pagination.page} of {pagination.totalPages}
-                      </span>
-
-                      {/* NEXT BUTTON */}
-                      <button
-                        type="button"
-                        disabled={!pagination.hasNextPage}
-                        onClick={() => onPageChange?.(pagination.page + 1)}
-                        className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 active:scale-95 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-700 disabled:hover:border-slate-200/80 disabled:active:scale-100 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed shrink-0"
-                      >
-                        Next
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M9 5l7 7-7 7"
-                          />
-                        </svg>
-                      </button>
-                    </nav>
-                  )}
-                </div>
-              )}
-
-              {/* RIGHT CONTENT WITH TABS */}
-              <div
-                className={`${
-                  renderSidebar ? "lg:col-span-8" : "lg:col-span-12"
-                } bg-sky-50/10 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 md:p-8 shadow-xs space-y-6`}
-              >
-                {/* TAB HEADERS */}
-                {tabs.length > 0 && (
-                  <div className="flex border-b border-slate-200/80 gap-2 overflow-x-auto">
-                    {tabs.map((tab) => (
-                      <button
-                        key={tab.key}
-                        type="button"
-                        onClick={() => setActiveTab?.(tab.key)}
-                        className={`pb-3 px-4 text-base font-bold transition border-b-2 cursor-pointer whitespace-nowrap ${
-                          activeTab === tab.key
-                            ? "border-orange-500 text-orange-600"
-                            : "border-transparent text-slate-400 hover:text-slate-600"
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
+            {/* LOADING STATE */}
+            {loading && (
+              <div className="bg-white/80 backdrop-blur-md rounded-3xl p-12 border border-slate-200 text-center space-y-6 shadow-xl">
+                <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full border-4 border-indigo-100 border-t-indigo-500 animate-spin"></div>
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-xl">
+                    ⚡
                   </div>
-                )}
-
-                {/* TAB CONTENT */}
-                {renderTabContent &&
-                  (typeof renderTabContent === "function"
-                    ? renderTabContent()
-                    : renderTabContent)}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-800">
+                    Processing Request...
+                  </h3>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                    LifeOS AI is generating your requested blueprint...
+                  </p>
+                </div>
               </div>
-            </div>
-          </div>
+            )}
+
+            {/* MAIN DISPLAY GRID */}
+            {hasItems && !loading && !isCreatingNew && (
+              <div className="space-y-6">
+                {/* HERO BANNER */}
+                {renderHero &&
+                  (typeof renderHero === "function"
+                    ? renderHero()
+                    : renderHero)}
+
+                {/* 2-COLUMN GRID */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* LEFT SIDEBAR + PAGINATION */}
+                  {renderSidebar && (
+                    <div className="lg:col-span-4 space-y-4">
+                      {typeof renderSidebar === "function"
+                        ? renderSidebar()
+                        : renderSidebar}
+
+                      {/* REUSABLE PAGINATION BAR */}
+                      {pagination && pagination.totalPages > 1 && (
+                        <nav
+                          aria-label="Pagination Navigation"
+                          className="flex items-center justify-between gap-3 bg-white/80 backdrop-blur-md border border-slate-200/90 rounded-2xl p-2.5 shadow-xs"
+                        >
+                          <button
+                            type="button"
+                            disabled={!pagination.hasPrevPage}
+                            onClick={() => onPageChange?.(pagination.page - 1)}
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 active:scale-95 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-700 disabled:hover:border-slate-200/80 disabled:active:scale-100 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 19l-7-7 7-7"
+                              />
+                            </svg>
+                            Prev
+                          </button>
+
+                          <span className="text-xs font-bold text-slate-500">
+                            Page {pagination.page} of {pagination.totalPages}
+                          </span>
+
+                          <button
+                            type="button"
+                            disabled={!pagination.hasNextPage}
+                            onClick={() => onPageChange?.(pagination.page + 1)}
+                            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200/80 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 active:scale-95 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-700 disabled:hover:border-slate-200/80 disabled:active:scale-100 transition-all duration-200 cursor-pointer disabled:cursor-not-allowed shrink-0"
+                          >
+                            Next
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </button>
+                        </nav>
+                      )}
+                    </div>
+                  )}
+
+                  {/* RIGHT CONTENT WITH TABS */}
+                  <div
+                    className={`${
+                      renderSidebar ? "lg:col-span-8" : "lg:col-span-12"
+                    } bg-sky-50/10 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 md:p-8 shadow-xs space-y-6`}
+                  >
+                    {/* TAB HEADERS */}
+                    {tabs.length > 0 && (
+                      <div className="flex border-b border-slate-200/80 gap-2 overflow-x-auto">
+                        {tabs.map((tab) => (
+                          <button
+                            key={tab.key}
+                            type="button"
+                            onClick={() => setActiveTab?.(tab.key)}
+                            className={`pb-3 px-4 text-base font-bold transition border-b-2 cursor-pointer whitespace-nowrap ${
+                              activeTab === tab.key
+                                ? "border-orange-500 text-orange-600"
+                                : "border-transparent text-slate-400 hover:text-slate-600"
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* TAB CONTENT */}
+                    {renderTabContent &&
+                      (typeof renderTabContent === "function"
+                        ? renderTabContent()
+                        : renderTabContent)}
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* SEPARATE REUSABLE DELETE MODAL */}
+      {/* REUSABLE DELETE MODAL */}
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal?.(false)}
