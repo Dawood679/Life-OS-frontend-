@@ -33,10 +33,12 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
-  RotateCcw
+  RotateCcw,
+  Crown
 } from "lucide-react";
 import WeeklyReportModal from "./WeeklyReportModal";
 import ThemeToggle from "./ui/ThemeToggle";
+import { useUpgradeModalStore } from "../store/upgradeModalStore";
 
 export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, onOpenOnboarding }) {
   const navigate = useNavigate();
@@ -347,6 +349,13 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         fetchBriefingAndAgenda();
         if (onDataRefresh) onDataRefresh();
       } else {
+        if (data.code === 'FEATURE_LOCKED' || data.code === 'QUOTA_EXCEEDED') {
+          useUpgradeModalStore.getState().openUpgradeModal(
+            'smart_rescheduler',
+            data.upgradeTitle || 'Activate AI Human Executive Assistant',
+            data.upgradeDescription || data.message
+          );
+        }
         toast.error(data.message || "Failed to activate recovery mode.");
       }
     } catch {
@@ -648,9 +657,34 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
 
       {/* HERO HEADLINE & MONTHLY FOCUS */}
       <div className="mt-5 space-y-2 relative z-10">
-        <h2 className="text-2xl sm:text-3xl font-serif font-black text-slate-900 dark:text-white tracking-tight">
-          {getTimeAwareGreeting()}
-        </h2>
+        <div className="flex items-center gap-3 flex-wrap">
+          <h2 className="text-2xl sm:text-3xl font-serif font-black text-slate-900 dark:text-white tracking-tight">
+            {getTimeAwareGreeting()}
+          </h2>
+
+          {/* Dynamic User Pro / Pro Yearly / Monthly Badge */}
+          {user?.subscription?.plan === 'pro' || user?.subscription?.plan === 'lifetime' ? (
+            user?.subscription?.billingCycle === 'yearly' || user?.subscription?.plan === 'lifetime' ? (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 shadow-md ring-1 ring-amber-300">
+                <Crown className="w-3.5 h-3.5 fill-slate-950" />
+                <span>PRO YEARLY (365d ACTIVE)</span>
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-gradient-to-r from-brand-indigo via-sky-500 to-sky-400 text-white shadow-md ring-1 ring-sky-300/40">
+                <Zap className="w-3.5 h-3.5 fill-white" />
+                <span>PRO MONTHLY (ACTIVE)</span>
+              </div>
+            )
+          ) : (
+            <a
+              href="/#pricing"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/80 text-brand-indigo dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:scale-105 transition-all shadow-2xs"
+            >
+              <Zap className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+              <span>Starter Plan • Upgrade to Pro ➔</span>
+            </a>
+          )}
+        </div>
 
         {/* Monthly Focus Pill */}
         {user?.focusGoal ? (
