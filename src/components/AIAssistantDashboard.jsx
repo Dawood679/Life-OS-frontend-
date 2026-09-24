@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import WeeklyReportModal from "./WeeklyReportModal";
 import ThemeToggle from "./ui/ThemeToggle";
+import { useUpgradeModalStore } from "../store/upgradeModalStore";
 
 export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, onOpenOnboarding }) {
   const navigate = useNavigate();
@@ -348,6 +349,13 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         fetchBriefingAndAgenda();
         if (onDataRefresh) onDataRefresh();
       } else {
+        if (data.code === 'FEATURE_LOCKED' || data.code === 'QUOTA_EXCEEDED') {
+          useUpgradeModalStore.getState().openUpgradeModal(
+            'smart_rescheduler',
+            data.upgradeTitle || 'Activate AI Human Executive Assistant',
+            data.upgradeDescription || data.message
+          );
+        }
         toast.error(data.message || "Failed to activate recovery mode.");
       }
     } catch {

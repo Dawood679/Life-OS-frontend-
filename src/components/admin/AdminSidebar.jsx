@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, ArrowLeft, ShieldCheck, LogOut, X, Sparkles, Zap, Sliders, BarChart3 } from 'lucide-react';
+import { LayoutDashboard, Users, ArrowLeft, ShieldCheck, LogOut, X, Sparkles, Zap, Sliders, BarChart3, CreditCard } from 'lucide-react';
 import Button from '../ui/Button';
 import ThemeToggle from '../ui/ThemeToggle';
 
@@ -27,6 +27,12 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
       label: 'Overview & KPIs',
       icon: LayoutDashboard,
       badge: 'Live',
+    },
+    {
+      path: '/admin/payments',
+      label: 'Revenue & Payments',
+      icon: CreditCard,
+      badge: 'Stripe',
     },
     {
       path: '/admin/users',

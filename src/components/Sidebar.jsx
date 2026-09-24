@@ -4,6 +4,7 @@ import Button from '../components/ui/Button';
 import NotificationDropdown from './ui/NotificationDropdown';
 import ThemeToggle from './ui/ThemeToggle';
 import SidebarFeatureTooltip from './ui/SidebarFeatureTooltip';
+import { useUpgradeModalStore } from '../store/upgradeModalStore';
 import { X, Flame, LogOut, Settings, ShieldCheck, Crown, Zap } from 'lucide-react';
 
 export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
@@ -116,7 +117,6 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
     { path: '/career/job-match', label: 'Job Match Matrix' },
     { path: '/career/interview', label: 'Interview Studio' },
     { path: '/career/project-generator', label: 'Project Generator' },
-    { path: '/career/code-reviewer', label: 'Code Reviewer' },
   ];
 
   const financeSubLinks = [
@@ -184,14 +184,15 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
               </span>
             )
           ) : (
-            <Link
-              to="/#pricing"
-              className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-brand-indigo dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:scale-105 transition flex items-center gap-0.5"
+            <button
+              type="button"
+              onClick={() => useUpgradeModalStore.getState().openUpgradeModal('general')}
+              className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-brand-indigo dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:scale-105 transition flex items-center gap-0.5 cursor-pointer shadow-2xs"
               title="Upgrade to Pro"
             >
               <Zap className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
               <span>Starter</span>
-            </Link>
+            </button>
           )}
 
           {/* Close Button on Mobile Drawer */}
