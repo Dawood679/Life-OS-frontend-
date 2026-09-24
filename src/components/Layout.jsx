@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Sidebar from './Sidebar';
+import NotificationDropdown from './ui/NotificationDropdown';
+import GlobalCopilot from './GlobalCopilot';
 import { Menu, Sparkles } from 'lucide-react';
 
 export default function Layout({ children }) {
@@ -9,7 +11,7 @@ export default function Layout({ children }) {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
       {/* MOBILE TOP NAVIGATION BAR (Visible only on < 1024px) */}
-      <header className="lg:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center justify-between shadow-2xs">
+      <header className="lg:hidden sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 px-4 py-2.5 flex items-center justify-between shadow-2xs">
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setIsMobileOpen(true)}
@@ -29,10 +31,12 @@ export default function Layout({ children }) {
           </Link>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
+          <NotificationDropdown compact={true} />
+
           <Link
             to="/dashboard"
-            className="px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold flex items-center gap-1"
+            className="px-2.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold flex items-center gap-1"
           >
             <Sparkles className="w-3 h-3 text-indigo-600" />
             <span>Chief of Staff</span>
@@ -47,6 +51,9 @@ export default function Layout({ children }) {
       <main className="flex-1 w-full max-w-full min-w-0 p-3.5 sm:p-6 lg:p-8 overflow-y-auto">
         {children}
       </main>
+
+      {/* OMNIPRESENT GLOBAL AI COPILOT & VOICE ASSISTANT */}
+      <GlobalCopilot />
     </div>
   );
 }

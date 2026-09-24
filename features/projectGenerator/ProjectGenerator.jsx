@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import FeatureLayout from "../../src/components/FeatureLayout";
 
 const GOAL_TEMPLATES = [
@@ -24,6 +25,8 @@ export default function ProjectGenerator() {
   const [error, setError] = useState("");
   const [isCreatingNew, setIsCreatingNew] = useState(false);
   const [togglingStep, setTogglingStep] = useState(null);
+  const [bridgingStep, setBridgingStep] = useState(null);
+  const [bridgedSteps, setBridgedSteps] = useState({});
 
   // Tabs: Milestones, Resources
   const [activeTab, setActiveTab] = useState("milestones");
@@ -179,6 +182,37 @@ export default function ProjectGenerator() {
       console.error("Error toggling milestone:", err);
     } finally {
       setTogglingStep(null);
+    }
+  };
+
+  // Schedule Milestone to Today's Action Priorities
+  const handleBridgeToTodo = async (stepNumber) => {
+    if (!selectedProject?._id) return;
+    try {
+      setBridgingStep(stepNumber);
+      const res = await fetch(
+        `${BACKEND_URL}/project-generator/${selectedProject._id}/milestone/${stepNumber}/bridge-todo`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        }
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setBridgedSteps((prev) => ({ ...prev, [stepNumber]: true }));
+        if (data.alreadyExists) {
+          toast("This milestone is already on your active Agenda! 📅", { icon: "ℹ️" });
+        } else {
+          toast.success("Scheduled directly to your Today's Agenda! 📅");
+        }
+      } else {
+        toast.error(data.message || "Failed to schedule milestone");
+      }
+    } catch {
+      toast.error("Network error scheduling milestone");
+    } finally {
+      setBridgingStep(null);
     }
   };
 
@@ -339,6 +373,23 @@ export default function ProjectGenerator() {
             <p className="text-xs text-sky-100 max-w-2xl line-clamp-2 leading-relaxed">
               {selectedProject.description}
             </p>
+
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/learning/work-review", {
+                    state: {
+                      title: selectedProject.planTitle || selectedProject.projectTitle,
+                      codeToReview: `// Architecture Review: ${selectedProject.planTitle || selectedProject.projectTitle}\n// Category: ${selectedProject.category || 'General'}\n// Estimated: ${selectedProject.estimatedDuration || '4-6 weeks'}\n\n/* Milestones Breakdown */\n${selectedProject.milestones?.map(m => `Phase ${m.stepNumber}: ${m.title} - ${m.description} (Deliverable: ${m.deliverable})`).join('\n')}`
+                    }
+                  })
+                }
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold backdrop-blur-sm border border-white/20 transition cursor-pointer active:scale-95"
+              >
+                <span>✦ Review Architecture in Work Analyzer ➔</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
@@ -534,25 +585,44 @@ export default function ProjectGenerator() {
                     </div>
                   </div>
 
-                  {/* Toggle Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleToggleMilestone(m.stepNumber)}
-                    disabled={togglingStep === m.stepNumber}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
-                      m.isCompleted
-                        ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200"
-                        : "bg-white text-slate-700 border border-slate-300 hover:border-indigo-600 hover:text-indigo-600 shadow-2xs"
-                    }`}
-                  >
-                    {togglingStep === m.stepNumber ? (
-                      "..."
-                    ) : m.isCompleted ? (
-                      "✓ Completed"
+                  <div className="flex items-center gap-2 shrink-0">
+                    {/* Schedule to Agenda Bridge */}
+                    {bridgedSteps[m.stepNumber] ? (
+                      <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold transition flex items-center gap-1 cursor-default">
+                        ✓ In Agenda
+                      </span>
                     ) : (
-                      "Mark Complete"
+                      <button
+                        type="button"
+                        onClick={() => handleBridgeToTodo(m.stepNumber)}
+                        disabled={bridgingStep === m.stepNumber}
+                        className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold transition flex items-center gap-1 cursor-pointer disabled:opacity-50 active:scale-95"
+                        title="Schedule this milestone directly to Today's Agenda"
+                      >
+                        📅 {bridgingStep === m.stepNumber ? "Scheduling..." : "+ Agenda"}
+                      </button>
                     )}
-                  </button>
+
+                    {/* Toggle Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleToggleMilestone(m.stepNumber)}
+                      disabled={togglingStep === m.stepNumber}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer ${
+                        m.isCompleted
+                          ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200 border border-emerald-200"
+                          : "bg-white text-slate-700 border border-slate-300 hover:border-indigo-600 hover:text-indigo-600 shadow-2xs"
+                      }`}
+                    >
+                      {togglingStep === m.stepNumber ? (
+                        "..."
+                      ) : m.isCompleted ? (
+                        "✓ Completed"
+                      ) : (
+                        "Mark Complete"
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 {/* Deliverable Badge */}
