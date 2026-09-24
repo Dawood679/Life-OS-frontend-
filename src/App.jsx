@@ -137,7 +137,39 @@ export default function App() {
           }
         />
         <Route
+          path="/career/job-match"
+          element={
+            <ProtectedRoute>
+              <JobMatch />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/job-match"
+          element={
+            <ProtectedRoute>
+              <JobMatch />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/todos"
+          element={
+            <ProtectedRoute>
+              <Todos />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-todo"
+          element={
+            <ProtectedRoute>
+              <Todos />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/todos"
           element={
             <ProtectedRoute>
               <Todos />
@@ -218,6 +250,22 @@ export default function App() {
           }
         />
         <Route
+          path="/wellness/tracker"
+          element={
+            <ProtectedRoute>
+              <WellnessTracker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wellness"
+          element={
+            <ProtectedRoute>
+              <WellnessTracker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/health/prescriptions"
           element={
             <ProtectedRoute>
@@ -235,6 +283,14 @@ export default function App() {
         />
         <Route
           path="/health/history"
+          element={
+            <ProtectedRoute>
+              <MedicalHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/health/medical-history"
           element={
             <ProtectedRoute>
               <MedicalHistory />

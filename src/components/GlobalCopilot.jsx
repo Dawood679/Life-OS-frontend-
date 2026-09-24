@@ -234,6 +234,17 @@ export default function GlobalCopilot() {
           speakText(data.reply);
         }
 
+        // Show Instant Toast Notifications for user actions
+        if (data.todo) {
+          toast.success(`📅 Task added: "${data.todo.title}"`);
+        } else if (data.totalWaterMl !== undefined) {
+          toast.success(`💧 Water logged! Total: ${data.totalWaterMl}ml`);
+        } else if (data.type === "STUDY_QUIZ") {
+          toast("🧠 Active recall quiz ready!", { icon: "📚" });
+        } else if (data.type === "PROPOSAL") {
+          toast("⚠️ Confirmation required to delete task", { icon: "🗑️" });
+        }
+
         // Handle Automatic Deep-Link Navigation if requested
         if (data.type === "DEEP_LINK" && data.target) {
           setTimeout(() => {

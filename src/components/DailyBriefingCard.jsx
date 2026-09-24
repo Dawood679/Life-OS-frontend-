@@ -114,20 +114,53 @@ export default function DailyBriefingCard() {
 
     window.speechSynthesis.cancel();
 
-    const voiceScript = `${briefing.greeting}. ${briefing.executiveSummary}. ${
-      briefing.learningFocus ? briefing.learningFocus : ""
-    }. ${briefing.healthWellnessAdvice ? briefing.healthWellnessAdvice : ""}`;
+    const hour = new Date().getHours();
+    let currentGreeting = "Good morning";
+    if (hour >= 12 && hour < 17) currentGreeting = "Good afternoon";
+    else if (hour >= 17 && hour < 22) currentGreeting = "Good evening";
+    else if (hour >= 22 || hour < 4) currentGreeting = "Welcome back";
+
+    const quote = briefing.motivationalQuote || "Small daily improvements over time lead to stunning results. Keep building momentum!";
+    let voiceScript = briefing.spokenAudioScript || "";
+    if (voiceScript) {
+      voiceScript = voiceScript.replace(
+        /^(Good morning|Good afternoon|Good evening|Welcome back|Welcome to your LifeOS agenda|Welcome)/i,
+        currentGreeting
+      );
+      if (!voiceScript.includes("Remember:")) {
+        voiceScript += ` Remember: ${quote}`;
+      }
+    } else {
+      voiceScript = `${briefing.greeting || currentGreeting}. Your Life Score is ${
+        briefing.statsSnapshot?.compositeScore || 0
+      } out of 100. ${briefing.executiveSummary}. ${
+        briefing.healthWellnessAdvice ? briefing.healthWellnessAdvice : ""
+      } Remember: ${quote}`;
+    }
 
     const utterance = new SpeechSynthesisUtterance(voiceScript);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
+    utterance.rate = 0.98;
+    utterance.pitch = 1.05;
 
-    // Pick natural English voice if available
+    // Pick natural Executive Female voice if available
     const voices = window.speechSynthesis.getVoices();
-    const naturalVoice = voices.find(
-      (v) => v.lang.startsWith("en") && (v.name.includes("Google") || v.name.includes("Natural") || v.name.includes("Samantha"))
-    );
-    if (naturalVoice) utterance.voice = naturalVoice;
+    const femaleVoice =
+      voices.find(
+        (v) =>
+          v.lang.startsWith("en") &&
+          (v.name.includes("Zira") ||
+            v.name.includes("Jenny") ||
+            v.name.includes("Aria") ||
+            v.name.includes("Sonia") ||
+            v.name.includes("Samantha") ||
+            v.name.includes("Google US English") ||
+            v.name.includes("Victoria") ||
+            v.name.includes("Karen") ||
+            v.name.toLowerCase().includes("female") ||
+            v.name.includes("Natural"))
+      ) || voices.find((v) => v.lang.startsWith("en"));
+
+    if (femaleVoice) utterance.voice = femaleVoice;
 
     utterance.onend = () => setSpeechState("idle");
     utterance.onerror = () => setSpeechState("idle");
