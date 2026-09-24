@@ -378,8 +378,10 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           onClick={handleLogout}
           className="w-full py-1.5 text-xs font-bold shadow-2xs rounded-xl flex items-center justify-center gap-1.5"
         >
+          <div className='flex gap-2'>
           <LogOut className="w-3.5 h-3.5" />
-          <span>Logout</span>
+          <div>Logout</div>
+          </div>
         </Button>
       </div>
     </div>

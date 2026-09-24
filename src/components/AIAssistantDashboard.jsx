@@ -29,7 +29,11 @@ import {
   ListTodo,
   CalendarDays,
   Settings,
-  Edit3
+  Edit3,
+  Shield,
+  ShieldAlert,
+  ShieldCheck,
+  RotateCcw
 } from "lucide-react";
 
 export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, onOpenOnboarding }) {
@@ -50,6 +54,12 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
   const [allJobApps, setAllJobApps] = useState([]);
   const [allStudyPlans, setAllStudyPlans] = useState([]);
 
+  // Smart Rescheduler & Burnout Guard State (Sprint 3.2)
+  const [reschedulerProposal, setReschedulerProposal] = useState(null);
+  const [isReschedulerDismissed, setIsReschedulerDismissed] = useState(false);
+  const [isApplyingRecovery, setIsApplyingRecovery] = useState(false);
+  const [isUndoingRecovery, setIsUndoingRecovery] = useState(false);
+
   // Inline Quick Add Task State
   const [quickTaskTitle, setQuickTaskTitle] = useState("");
   const [quickTaskPriority, setQuickTaskPriority] = useState("medium");
@@ -60,9 +70,6 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
   // Local Optimistic Agenda Tasks
   const [agendaTasks, setAgendaTasks] = useState([]);
   const [floatingPoints, setFloatingPoints] = useState(null); // e.g. { id, pts: '+2' }
-
-  // Quick Hydration Log State
-  const [isLoggingWater, setIsLoggingWater] = useState(false);
 
   const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
   const API_URL = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
@@ -133,7 +140,7 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
   const fetchBriefingAndAgenda = async () => {
     try {
       setLoading(true);
-      const [briefingRes, todosRes, jobAppsRes, studyPlansRes] = await Promise.all([
+      const [briefingRes, todosRes, jobAppsRes, studyPlansRes, reschedulerRes] = await Promise.all([
         fetch(`${API_URL}/daily-briefing/today`, {
           headers: { "x-user-timezone": userTimezone },
           credentials: "include",
@@ -141,12 +148,17 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
         fetch(`${API_URL}/to-dos`, { credentials: "include" }),
         fetch(`${API_URL}/job-applications`, { credentials: "include" }),
         fetch(`${API_URL}/study-plan`, { credentials: "include" }),
+        fetch(`${API_URL}/rescheduler/proposal`, {
+          headers: { "x-user-timezone": userTimezone },
+          credentials: "include",
+        }),
       ]);
 
       const briefingData = await briefingRes.json();
       const todosData = await todosRes.json();
       const jobAppsData = await jobAppsRes.json();
       const studyPlansData = await studyPlansRes.json();
+      const reschedulerData = await reschedulerRes.json();
 
       if (briefingData.success && briefingData.data) {
         setBriefing(briefingData.data);
@@ -170,6 +182,10 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
 
       if (Array.isArray(studyPlansData.studyPlans)) {
         setAllStudyPlans(studyPlansData.studyPlans);
+      }
+
+      if (reschedulerData.success && reschedulerData.data) {
+        setReschedulerProposal(reschedulerData.data);
       }
     } catch (err) {
       console.warn("Failed to load assistant data:", err);
@@ -302,36 +318,63 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
     }
   };
 
-  // 4. Quick Hydration Boost (Thin wrapper over /api/wellness/log)
-  const handleQuickLogWater = async (amountMl = 250) => {
+  // 4. Burnout Guard: 1-Click Recovery Application
+  const handleApplyRecovery = async () => {
     try {
-      setIsLoggingWater(true);
-      const todayDate = new Date().toISOString().split("T")[0];
-      const currentWater = briefing?.statsSnapshot?.waterConsumedMl || 0;
-
-      const res = await fetch(`${API_URL}/wellness/log`, {
+      setIsApplyingRecovery(true);
+      const res = await fetch(`${API_URL}/rescheduler/apply`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-timezone": userTimezone,
+        },
         credentials: "include",
-        body: JSON.stringify({
-          date: todayDate,
-          water: { consumedMl: currentWater + amountMl },
-        }),
       });
 
+      const data = await res.json();
       if (res.ok) {
-        toast.success(`+${amountMl}ml logged! Optimal energy unlocked 💧`);
+        toast.success(data.message || "Recovery mode activated! Non-urgent tasks moved to tomorrow.");
         fetchBriefingAndAgenda();
         if (onDataRefresh) onDataRefresh();
+      } else {
+        toast.error(data.message || "Failed to activate recovery mode.");
       }
     } catch {
-      toast.error("Failed to log water.");
+      toast.error("Network error applying recovery rescheduling.");
     } finally {
-      setIsLoggingWater(false);
+      setIsApplyingRecovery(false);
     }
   };
 
-  // 5. Compute Day-by-Day 7-Day Horizon Schedule
+  // 5. Burnout Guard: 1-Click Undo Recovery Rollback
+  const handleUndoRecovery = async () => {
+    try {
+      setIsUndoingRecovery(true);
+      const res = await fetch(`${API_URL}/rescheduler/undo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-timezone": userTimezone,
+        },
+        credentials: "include",
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success(data.message || "Schedule restored back to today!");
+        fetchBriefingAndAgenda();
+        if (onDataRefresh) onDataRefresh();
+      } else {
+        toast.error(data.message || "Failed to undo recovery rescheduling.");
+      }
+    } catch {
+      toast.error("Network error undoing recovery rescheduling.");
+    } finally {
+      setIsUndoingRecovery(false);
+    }
+  };
+
+  // 6. Compute Day-by-Day 7-Day Horizon Schedule
   const sevenDayHorizon = useMemo(() => {
     const days = [];
     const now = new Date();
@@ -405,7 +448,9 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
     // Construct live, non-redundant Chief of Staff speech script
     const todayAgendaTitles = agendaTasks.map((t) => t.title).slice(0, 3).join(", ");
     let tasksNarration = "";
-    if (agendaTasks.length > 0) {
+    if (reschedulerProposal?.isRecoveryActive) {
+      tasksNarration = "Recovery mode is active today. Rest up and focus only on essential priorities.";
+    } else if (agendaTasks.length > 0) {
       tasksNarration = `On your active agenda today, you have ${agendaTasks.length} task${agendaTasks.length > 1 ? "s" : ""}: ${todayAgendaTitles}.`;
     } else {
       tasksNarration = "All your priority tasks for today are currently complete.";
@@ -632,6 +677,77 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
           {briefing.executiveSummary}
         </p>
       </div>
+
+      {/* 🛡️ SPRINT 3.2: PROACTIVE HUMAN EA BURNOUT GUARD PROPOSAL CARD */}
+      {reschedulerProposal?.triggered && !reschedulerProposal?.isRecoveryActive && !isReschedulerDismissed && (
+        <div className="mt-5 p-4 rounded-2xl bg-gradient-to-r from-amber-50/95 via-sky-50/90 to-indigo-50/80 border border-amber-200/90 shadow-2xs space-y-3 relative z-10 animate-fadeIn">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <div className="p-2 rounded-xl bg-amber-100/90 text-amber-700 shrink-0 mt-0.5">
+                <ShieldAlert className="w-4 h-4" />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-amber-900 uppercase tracking-wider">
+                    Chief of Staff • Recovery Proposal
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-200/70 text-amber-900 border border-amber-300/80">
+                    Health Deficit Detected
+                  </span>
+                </div>
+                <p className="text-xs text-slate-700 leading-relaxed font-medium">
+                  {user?.name || "Explorer"}, I noticed you logged {reschedulerProposal?.evaluation?.reason || "low energy"}. Would you like me to lighten today's load by deferring {reschedulerProposal?.deferrableTasks?.length || 0} non-urgent tasks to tomorrow so you can recharge?
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 pt-1 flex-wrap">
+            <button
+              onClick={handleApplyRecovery}
+              disabled={isApplyingRecovery}
+              className="px-4 py-2 bg-gradient-to-r from-brand-indigo via-indigo-600 to-sky-600 hover:opacity-95 text-white text-xs font-bold rounded-xl transition cursor-pointer shadow-xs flex items-center gap-1.5 active:scale-95 disabled:opacity-50"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>{isApplyingRecovery ? "Lightening Schedule..." : "Yes, lighten today"}</span>
+            </button>
+
+            <button
+              onClick={() => setIsReschedulerDismissed(true)}
+              className="px-3.5 py-2 bg-white hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold border border-slate-200 transition cursor-pointer"
+            >
+              Keep schedule as is
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 🛡️ SPRINT 3.2: ACTIVE RECOVERY MODE STATUS BAR WITH UNDO */}
+      {reschedulerProposal?.isRecoveryActive && (
+        <div className="mt-5 p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs relative z-10 animate-fadeIn">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <div className="text-xs">
+              <span className="font-bold text-emerald-950">🛡️ Recovery Mode Active:</span>
+              <span className="text-emerald-800 ml-1.5 font-medium">Non-urgent tasks deferred to tomorrow • Streak is protected</span>
+            </div>
+          </div>
+
+          {reschedulerProposal?.canUndo && (
+            <button
+              onClick={handleUndoRecovery}
+              disabled={isUndoingRecovery}
+              className="px-3 py-1.5 bg-white hover:bg-emerald-100/60 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1 self-start sm:self-auto shrink-0 shadow-2xs"
+              title="Restore deferred tasks back to today"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>{isUndoingRecovery ? "Restoring..." : "Undo Deferral"}</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* 🌟 NEW USER STARTER QUEST (Instant Day-1 Hook) */}
       {isStarterUser && (
@@ -970,7 +1086,7 @@ export default function AIAssistantDashboard({ user, lifeScore, onDataRefresh, o
           <span className="font-medium">
             {isActionCompletedToday
               ? `💡 Focus Intelligence: “${briefing.learningFocus || briefing.motivationalQuote || "Consistency breeds excellence."}”`
-              : "🔒 Complete 1 action or water log today to reveal your custom Chief of Staff intelligence"}
+              : "🔒 Complete 1 action or concrete sleep record today to reveal your custom Chief of Staff intelligence"}
           </span>
         </div>
 
