@@ -32,6 +32,8 @@ import MedicineTracker from "../features/health/MedicineTracker";
 import MedicalHistory from "../features/health/MedicalHistory";
 import InterviewStudio from "../features/interview/InterviewStudio";
 import JobTracker from "../features/jobTracker/JobTracker";
+import FinancialOverview from "../features/finance/FinancialOverview";
+import BudgetTracker from "../features/finance/BudgetTracker";
 
 export default function App() {
   return (
@@ -304,6 +306,38 @@ export default function App() {
           element={
             <ProtectedRoute>
               <MedicalHistory />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/finance/analytics"
+          element={
+            <ProtectedRoute>
+              <FinancialOverview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/finance/overview"
+          element={
+            <ProtectedRoute>
+              <FinancialOverview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/finance"
+          element={
+            <ProtectedRoute>
+              <FinancialOverview />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/finance/budget"
+          element={
+            <ProtectedRoute>
+              <BudgetTracker />
             </ProtectedRoute>
           }
         />
