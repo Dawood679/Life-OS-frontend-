@@ -146,9 +146,15 @@ export default function Footer() {
             © {new Date().getFullYear()} LifeOS Universal Intelligence. Built with ❤️ for peak human potential.
           </div>
           <div className="flex items-center gap-6">
-            <span className="hover:text-slate-300 transition-colors cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-slate-300 transition-colors cursor-pointer">Terms of Service</span>
-            <span className="hover:text-slate-300 transition-colors cursor-pointer">Security</span>
+            <Link to="/privacy" className="hover:text-brand-sky transition-colors cursor-pointer">
+              Privacy Policy
+            </Link>
+            <Link to="/terms" className="hover:text-brand-sky transition-colors cursor-pointer">
+              Terms of Service
+            </Link>
+            <Link to="/security" className="hover:text-brand-sky transition-colors cursor-pointer">
+              Security
+            </Link>
           </div>
         </div>
       </div>
