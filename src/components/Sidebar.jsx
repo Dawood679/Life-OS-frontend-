@@ -104,7 +104,6 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
     { path: '/learning/roadmap', label: 'Roadmap Generator' },
     { path: '/learning/study-plan', label: 'Study Planner' },
     { path: '/learning/quiz', label: 'Quiz Center' },
-    { path: '/learning/chat', label: 'AI Study Chat' },
     { path: '/learning/work-review', label: 'Work & Asset Analyzer' },
     { path: '/learning/notes-summarizer', label: 'Notes Summarizer' },
     { path: '/todos', label: 'Todo List' },
@@ -120,7 +119,6 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const careerSubLinks = [
     { path: '/career/resume-analyzer', label: 'Resume Analyzer' },
     { path: '/career/job-tracker', label: 'Application Tracker' },
-    { path: '/career/job-match', label: 'Job Match Matrix' },
     { path: '/career/interview', label: 'Interview Studio' },
     { path: '/career/project-generator', label: 'Project Generator' },
   ];
