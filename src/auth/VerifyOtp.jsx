@@ -91,10 +91,13 @@ export default function VerifyOtp() {
     setLoading(true);
 
     try {
+      const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
+      const normalizedBackend = rawUrl.endsWith('/api') ? rawUrl : rawUrl.endsWith('/') ? `${rawUrl}api` : `${rawUrl}/api`;
+
       const endpoint =
         type === "login"
-          ? `${BACKEND_URL}/auth/verify-login-otp`
-          : `${BACKEND_URL}/auth/verify-forgot-otp`;
+          ? `${normalizedBackend}/auth/verify-login-otp`
+          : `${normalizedBackend}/auth/verify-forgot-otp`;
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -111,8 +114,8 @@ export default function VerifyOtp() {
       }
 
       if (type === "login") {
-        setUser(data.user);
-        navigate("/dashboard");
+        setUser(data.user, data.token);
+        navigate("/dashboard", { replace: true });
       } else {
         navigate("/reset-password", {
           state: { email },
@@ -126,46 +129,46 @@ export default function VerifyOtp() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-page-gradient p-4 font-sans">
+    <div className="min-h-screen w-full flex items-center justify-center bg-slate-100 dark:bg-[#07090e] bg-page-gradient p-4 relative overflow-hidden font-sans">
+      {/* Ambient Lighting Orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/15 dark:bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-sky-500/15 dark:bg-sky-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
       {/* Outer Card Wrapper */}
-      <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden w-[90vw] max-w-6xl min-h-[82vh] grid grid-cols-1 md:grid-cols-2 border border-white/60">
+      <div className="relative z-10 w-full max-w-5xl min-h-[600px] bg-white/95 dark:bg-[#0c1222]/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden grid grid-cols-1 md:grid-cols-2">
         
         {/* LEFT SECTION: Brand Hero & AI Visual System */}
-        <div className="bg-surface-blue/50 p-8 hidden md:flex md:flex-col md:justify-between md:items-center text-center border-r border-surface-blue-border relative overflow-hidden">
-          {/* Ambient Lighting Orbs */}
-          <div className="absolute top-12 left-10 w-52 h-52 bg-brand-sky/20 rounded-full blur-3xl pointer-events-none"></div>
-          <div className="absolute bottom-12 right-10 w-64 h-64 bg-brand-indigo/20 rounded-full blur-3xl pointer-events-none"></div>
-
+        <div className="bg-gradient-to-br from-indigo-50/70 via-slate-50/50 to-sky-50/70 dark:from-indigo-950/40 dark:via-[#0c1222]/60 dark:to-sky-950/40 p-8 hidden md:flex md:flex-col md:justify-between border-r border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden">
           {/* Top Brand Tag */}
           <div className="w-full flex items-center justify-between relative z-10">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-brand-gradient flex items-center justify-center text-white font-bold text-sm shadow-md">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/20">
                 ✦
               </div>
-              <span className="font-serif font-bold text-ink-900 text-lg tracking-tight">
-                life<span className="text-brand-indigo">OS</span>
+              <span className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
+                life<span className="text-indigo-600 dark:text-indigo-400">OS</span>
               </span>
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-ink-200 text-[11px] font-semibold text-ink-600 shadow-sm backdrop-blur-sm">
-              <span className="w-2 h-2 rounded-full bg-success-text animate-pulse"></span>
-              AI Core Online
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-300 shadow-sm backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              2FA Shield
             </span>
           </div>
 
           {/* Centerpiece: AI Orbital System */}
           <div className="w-full my-auto flex flex-col items-center justify-center relative z-10 py-6">
-            <div className="relative w-72 h-72 flex items-center justify-center">
+            <div className="relative w-64 h-64 flex items-center justify-center">
               {/* Outer Orbit Line */}
-              <div className="absolute inset-0 rounded-full border border-dashed border-brand-indigo/30 animate-[spin_40s_linear_infinite]"></div>
+              <div className="absolute inset-0 rounded-full border border-dashed border-indigo-400/30 dark:border-indigo-500/30 animate-[spin_40s_linear_infinite]"></div>
 
               {/* Inner Glow Ring */}
-              <div className="absolute inset-8 rounded-full border border-brand-sky/30 bg-gradient-to-tr from-brand-sky/10 to-brand-indigo/10"></div>
+              <div className="absolute inset-6 rounded-full border border-sky-400/30 dark:border-sky-500/20 bg-gradient-to-tr from-sky-500/10 to-indigo-500/10"></div>
 
               {/* Central AI Core Shield */}
-              <div className="w-28 h-28 bg-brand-gradient rounded-3xl shadow-xl flex flex-col items-center justify-center text-white transform -rotate-3 transition-transform hover:rotate-0 duration-300">
+              <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-sky-500 rounded-3xl shadow-xl shadow-indigo-500/25 flex flex-col items-center justify-center text-white transform -rotate-3 transition-transform hover:rotate-0 duration-300">
                 <svg
-                  className="w-10 h-10 drop-shadow-md mb-1"
+                  className="w-9 h-9 drop-shadow-md mb-1"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -173,49 +176,31 @@ export default function VerifyOtp() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    strokeWidth="1.5"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                    strokeWidth="1.75"
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                   />
                 </svg>
                 <span className="text-[10px] font-bold tracking-widest uppercase opacity-90">
-                  AI Core
+                  Secured
                 </span>
               </div>
 
               {/* Orbiting Satellites */}
-              <div className="absolute top-2 left-2 bg-white/90 backdrop-blur-md border border-ink-200 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2 animate-bounce [animation-duration:4s]">
-                <span className="w-6 h-6 rounded-lg bg-success-bg text-success-text flex items-center justify-center text-xs font-bold">
-                  ♥
+              <div className="absolute top-1 left-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2 animate-bounce [animation-duration:4s]">
+                <span className="w-5 h-5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">
+                  ✓
                 </span>
-                <span className="text-xs font-semibold text-ink-700">
-                  Health
-                </span>
-              </div>
-
-              <div className="absolute top-4 right-2 bg-white/90 backdrop-blur-md border border-ink-200 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-surface-blue text-brand-sky flex items-center justify-center text-xs font-bold">
-                  $
-                </span>
-                <span className="text-xs font-semibold text-ink-700">
-                  Finance
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Encrypted
                 </span>
               </div>
 
-              <div className="absolute bottom-4 left-2 bg-white/90 backdrop-blur-md border border-ink-200 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2">
-                <span className="w-6 h-6 rounded-lg bg-surface-orange text-ink-700 flex items-center justify-center text-xs font-bold">
-                  🧠
-                </span>
-                <span className="text-xs font-semibold text-ink-700">
-                  Learning
-                </span>
-              </div>
-
-              <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-md border border-ink-200 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2 animate-bounce [animation-duration:3.5s]">
-                <span className="w-6 h-6 rounded-lg bg-surface-blue text-brand-indigo flex items-center justify-center text-xs font-bold">
+              <div className="absolute bottom-1 right-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2 animate-bounce [animation-duration:3.5s]">
+                <span className="w-5 h-5 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">
                   🔒
                 </span>
-                <span className="text-xs font-semibold text-ink-700">
-                  2FA Verified
+                <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">
+                  Verified
                 </span>
               </div>
             </div>
@@ -223,24 +208,23 @@ export default function VerifyOtp() {
 
           {/* Bottom Narrative Copy */}
           <div className="text-center w-full my-2 relative z-10">
-            <h3 className="text-xl font-bold text-ink-900 leading-tight">
-              One AI Assistant for Your Entire Life
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
+              One Unified Intelligence for Your Life
             </h3>
-            <p className="text-xs text-ink-500 mt-2 leading-relaxed max-w-sm mx-auto">
-              Securing your personal hub for health tracking, financial
-              insights, and continuous learning.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed max-w-xs mx-auto">
+              Securing your personal hub for health tracking, financial insights, and continuous learning.
             </p>
           </div>
         </div>
 
         {/* RIGHT SECTION: Verification Form */}
-        <div className="bg-surface-pink/30 flex flex-col justify-center p-6 md:p-12 overflow-y-auto">
+        <div className="flex flex-col justify-center p-6 md:p-10 overflow-y-auto">
           <div className="max-w-md mx-auto w-full">
             {/* Header / Security Badge */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-surface-blue text-brand-indigo border border-surface-blue-border mb-4 shadow-sm">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 mb-3 shadow-sm">
                 <svg
-                  className="w-7 h-7"
+                  className="w-6 h-6"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -254,28 +238,27 @@ export default function VerifyOtp() {
                 </svg>
               </div>
 
-              <h2 className="text-3xl md:text-4xl font-serif font-bold text-ink-900">
-                Authenticate Access
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+                Two-Step Verification
               </h2>
-              <p className="text-xs text-ink-500 mt-2 leading-relaxed">
-                LifeOS sent a 6-digit security key to
-                <br />
-                <span className="font-semibold text-ink-700">{email}</span>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                LifeOS sent a 6-digit passcode to<br />
+                <span className="font-semibold text-slate-700 dark:text-slate-200">{email}</span>
               </p>
             </div>
 
             {/* Error Banner */}
             {error && (
-              <p className="text-danger-text text-xs mb-6 text-center bg-danger-bg p-3 rounded-lg border border-danger-border font-medium">
+              <div className="text-red-600 dark:text-red-400 text-xs mb-5 text-center bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-medium">
                 {error}
-              </p>
+              </div>
             )}
 
             {/* OTP Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-[11px] font-semibold uppercase tracking-wider text-ink-400 text-center mb-3">
-                  Passcode
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center mb-3">
+                  Enter 6-Digit Passcode
                 </label>
                 <OtpInput
                   otp={otp}
@@ -286,13 +269,11 @@ export default function VerifyOtp() {
                 />
               </div>
 
-              {/* Submit CTA using Reusable Button */}
+              {/* Submit CTA */}
               <Button
                 type="submit"
-                variant="primary"
                 loading={loading}
                 loadingText="Authenticating..."
-                className="py-3 rounded-xl"
                 rightIcon={
                   <svg
                     className="w-4 h-4 transition-transform group-hover:translate-x-1"
@@ -318,7 +299,7 @@ export default function VerifyOtp() {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="text-xs text-brand-link hover:text-brand-link-hover font-medium hover:underline inline-flex items-center gap-1.5 transition"
+                className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 font-medium hover:underline inline-flex items-center gap-1.5 transition-colors"
               >
                 <svg
                   className="w-3.5 h-3.5"
