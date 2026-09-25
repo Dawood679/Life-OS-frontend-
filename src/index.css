@@ -109,6 +109,10 @@ html.light body {
    VIBRANT & ULTRA-PREMIUM DARK MODE GLOBAL CARD & SURFACE RULES
    Prevents any washed-out / muddy grayish opacity blending
    ========================================================= */
+/* =========================================================
+   VIBRANT & ULTRA-PREMIUM DARK MODE GLOBAL CARD & SURFACE RULES
+   Prevents any washed-out / muddy grayish opacity blending
+   ========================================================= */
 html.dark [class*="bg-white/"],
 html.dark .bg-white {
   background-color: #0f172a !important;
@@ -142,6 +146,43 @@ html.dark .text-slate-400 {
   color: #94a3b8 !important;
 }
 
+/* Ink Palette Dark Mode Harmony */
+html.dark .text-ink-900 { color: #f8fafc !important; }
+html.dark .text-ink-800 { color: #f1f5f9 !important; }
+html.dark .text-ink-700 { color: #e2e8f0 !important; }
+html.dark .text-ink-600 { color: #cbd5e1 !important; }
+html.dark .text-ink-500 { color: #94a3b8 !important; }
+html.dark .text-ink-400 { color: #64748b !important; }
+html.dark .text-ink-300 { color: #475569 !important; }
+html.dark .text-ink-200 { color: #334155 !important; }
+
+html.dark .border-ink-200,
+html.dark .border-ink-100 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Surface Overrides in Dark Mode */
+html.dark .bg-surface-pink,
+html.dark [class*="bg-surface-pink"] {
+  background-color: #0c1222 !important;
+}
+
+html.dark .bg-surface-blue,
+html.dark [class*="bg-surface-blue"] {
+  background-color: #10182c !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+html.dark .bg-surface-orange,
+html.dark [class*="bg-surface-orange"] {
+  background-color: #131b2e !important;
+}
+
+/* Dark mode Auth Page Gradient */
+html.dark .bg-page-gradient {
+  background-image: radial-gradient(circle at 50% 0%, #171c38 0%, #090d16 65%, #05070c 100%) !important;
+}
+
 html.dark [class*="bg-sky-50"] {
   background-color: rgba(14, 165, 233, 0.12) !important;
 }
@@ -171,9 +212,9 @@ html.dark [class*="bg-orange-50"] {
 html.dark input:not([type="checkbox"]):not([type="radio"]),
 html.dark select,
 html.dark textarea {
-  background-color: #141e33 !important;
+  background-color: #131b2e !important;
   color: #f8fafc !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
 }
 
 html.dark input::placeholder,

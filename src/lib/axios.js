@@ -9,6 +9,18 @@ const axiosInstance = axios.create({
   }
 });
 
+// Request interceptor to attach JWT token from localStorage if present
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Response interceptor to catch Quota Exceeded and Feature Locked events
 axiosInstance.interceptors.response.use(
   (response) => response,
