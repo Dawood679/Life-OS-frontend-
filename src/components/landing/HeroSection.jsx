@@ -85,51 +85,6 @@ export default function HeroSection() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Top Floating Announcement & Interactive AI Audio Capsule */}
-        <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-          <div
-            className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-semibold backdrop-blur-xl border transition-all duration-300 hover:scale-105 shadow-sm ${
-              isDark
-                ? "bg-white/[0.04] border-white/10 text-slate-300 shadow-indigo-950/40"
-                : "bg-white/80 border-slate-200 text-slate-700 shadow-indigo-100"
-            }`}
-          >
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-sky opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-sky"></span>
-            </span>
-            <span className="text-brand-indigo font-bold">LifeOS 2.5 Active</span>
-            <span className="text-slate-400">·</span>
-            <span>0–100 Life Score Engine</span>
-            <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-spin" style={{ animationDuration: "8s" }} />
-          </div>
-
-          {/* Interactive Voice Briefing Pill */}
-          <button
-            onClick={() => setIsPlayingAudio(!isPlayingAudio)}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border transition-all duration-200 cursor-pointer ${
-              isPlayingAudio
-                ? "bg-brand-sky/20 border-brand-sky text-brand-sky shadow-[0_0_15px_rgba(14,165,233,0.3)]"
-                : isDark
-                ? "bg-slate-800/80 border-slate-700 text-slate-300 hover:text-white hover:border-brand-sky/50"
-                : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200 hover:text-brand-indigo"
-            }`}
-          >
-            {isPlayingAudio ? (
-              <Pause className="w-3.5 h-3.5 text-brand-sky" />
-            ) : (
-              <Volume2 className="w-3.5 h-3.5 text-brand-sky" />
-            )}
-            <span>{isPlayingAudio ? "AI Morning Briefing Playing..." : "Listen to Daily AI Briefing"}</span>
-            {/* Animated Equalizer Wave */}
-            <div className="flex items-center gap-0.5 ml-1">
-              <span className={`w-0.5 bg-brand-sky rounded-full transition-all ${isPlayingAudio ? "h-3 animate-pulse" : "h-1"}`} />
-              <span className={`w-0.5 bg-brand-sky rounded-full transition-all ${isPlayingAudio ? "h-4 animate-bounce" : "h-1.5"}`} />
-              <span className={`w-0.5 bg-brand-sky rounded-full transition-all ${isPlayingAudio ? "h-2.5 animate-pulse" : "h-1"}`} />
-            </div>
-          </button>
-        </div>
-
         {/* Main Hero Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Column: Animated Dynamic Headline, Subtitle, CTAs */}
@@ -187,7 +142,7 @@ export default function HeroSection() {
             <div className="mt-8 pt-6 border-t border-slate-700/20 dark:border-white/10 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs font-semibold text-slate-400">
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500">
                 <CheckCircle className="w-3.5 h-3.5" />
-                <span>100% Free Forever Tier</span>
+                <span>Easier your life</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-brand-sky/10 border border-brand-sky/20 text-brand-sky">
                 <Brain className="w-3.5 h-3.5" />
@@ -208,12 +163,12 @@ export default function HeroSection() {
                 isDark ? "bg-[#0e131f]/90 border-slate-700/80 text-white" : "bg-white/90 border-slate-200 text-slate-900"
               }`}
             >
-              <div className="w-8 h-8 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center font-black">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center font-black">
                 <Flame className="w-4 h-4" />
               </div>
               <div className="flex flex-col text-left">
                 <span className="text-[10px] uppercase font-bold text-slate-400">Consistency Streak</span>
-                <span className="text-xs font-black text-amber-500">🔥 14 Days Active (+4.5 Score)</span>
+                <span className="text-xs font-black text-purple-400">🔥 14 Days Active (+4.5 Score)</span>
               </div>
             </div>
 
@@ -257,8 +212,8 @@ export default function HeroSection() {
               value: "9,240+",
               sub: "80%+ Quiz Mastery required",
               icon: Award,
-              color: "text-amber-400",
-              borderGlow: "hover:border-amber-400/50",
+              color: "text-purple-400",
+              borderGlow: "hover:border-purple-400/50",
             },
             {
               label: "Mock Interview Sessions",
