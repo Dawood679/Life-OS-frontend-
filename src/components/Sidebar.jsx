@@ -4,13 +4,14 @@ import Button from '../components/ui/Button';
 import NotificationDropdown from './ui/NotificationDropdown';
 import ThemeToggle from './ui/ThemeToggle';
 import SidebarFeatureTooltip from './ui/SidebarFeatureTooltip';
-import { SIDEBAR_FEATURE_DATA } from '../data/sidebarFeatureData';
-import { X, Flame, LogOut, Settings, ShieldCheck } from 'lucide-react';
+import { useUpgradeModalStore } from '../store/upgradeModalStore';
+import { X, Flame, LogOut, Settings, ShieldCheck, Crown, Zap } from 'lucide-react';
 
 export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
+  const [subscription, setSubscription] = useState(null);
   const [hoveredFeature, setHoveredFeature] = useState(null);
   const hoverTimeoutRef = useRef(null);
 
@@ -56,18 +57,27 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   };
 
   useEffect(() => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const rawUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const BACKEND_URL = rawUrl.endsWith('/api') ? rawUrl : rawUrl.endsWith('/') ? `${rawUrl}api` : `${rawUrl}/api`;
+    const token = localStorage.getItem('token');
+    const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
     fetch(`${BACKEND_URL}/auth/me`, {
+      headers: authHeaders,
       credentials: 'include',
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.user) setRole(data.user.role);
+        if (data.user) {
+          setRole(data.user.role);
+          setSubscription(data.user.subscription);
+        }
       })
-      .catch(() => navigate('/login'));
+      .catch(() => {});
 
     // Fetch Today's Life Score & Streak
     fetch(`${BACKEND_URL}/life-score/today`, {
+      headers: authHeaders,
       credentials: 'include',
     })
       .then((res) => res.json())
@@ -101,32 +111,42 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   ];
 
   const healthSubLinks = [
-    { path: '/health/wellness', label: 'Wellness Tracker' },
-    { path: '/health/prescriptions', label: 'Prescription Scanner' },
-    { path: '/health/medicines', label: 'Medicine & Reminders' },
-    { path: '/health/history', label: 'Medical History' },
+    { path: '/health/prescription-scanner', label: 'Prescription Scanner' },
+    { path: '/health/medicine-tracker', label: 'Medicine Schedule' },
+    { path: '/health/medical-history', label: 'Medical Records' },
+    { path: '/wellness', label: 'Vitality & Mood Hub' },
   ];
 
   const careerSubLinks = [
-    { path: '/career/applications', label: 'Application Tracker' },
-    { path: '/career/mock-interview', label: 'AI Mock Interview' },
-    { path: '/learning/job-match', label: 'Job Matcher' },
-    { path: '/career/resume', label: 'Profile & Pitch Analyzer' },
-    { path: '/learning/action-plan', label: 'Action Plan Generator' },
+    { path: '/career/resume-analyzer', label: 'Resume Analyzer' },
+    { path: '/career/job-tracker', label: 'Application Tracker' },
+    { path: '/career/job-match', label: 'Job Match Matrix' },
+    { path: '/career/interview', label: 'Interview Studio' },
+    { path: '/career/project-generator', label: 'Project Generator' },
   ];
 
   const financeSubLinks = [
-    { path: '/finance/analytics', label: 'Financial Overview' },
+    { path: '/finance', label: 'Financial Overview' },
     { path: '/finance/budget', label: 'Budget Tracker' },
   ];
 
+  // Logout Handler
   const handleLogout = async () => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
-    await fetch(`${BACKEND_URL}/auth/logout`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    navigate('/login');
+    const rawUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const BACKEND_URL = rawUrl.endsWith('/api') ? rawUrl : rawUrl.endsWith('/') ? `${rawUrl}api` : `${rawUrl}/api`;
+    const token = localStorage.getItem('token');
+    try {
+      await fetch(`${BACKEND_URL}/auth/logout`, {
+        method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        credentials: 'include',
+      });
+    } catch {
+      // ignore
+    } finally {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
   };
 
   const isActive = (path) => location.pathname === path;
@@ -151,16 +171,39 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
         </div>
 
         <div className="flex items-center gap-1.5">
-          {role && (
-            <span
-              className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                role === 'admin'
-                  ? 'bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-300 border-purple-200 dark:border-purple-800'
-                  : 'bg-indigo-50 dark:bg-indigo-950 text-brand-indigo dark:text-indigo-300 border-indigo-200 dark:border-indigo-800'
-              }`}
-            >
-              {role}
+          {/* PRO / YEARLY / MONTHLY / STARTER / ADMIN BADGE */}
+          {role === 'admin' ? (
+            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-300 border-purple-200 dark:border-purple-800">
+              Admin
             </span>
+          ) : subscription?.plan === 'pro' || subscription?.plan === 'lifetime' ? (
+            subscription?.billingCycle === 'yearly' || subscription?.plan === 'lifetime' ? (
+              <span
+                className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 text-slate-950 shadow-xs flex items-center gap-1 border border-amber-300"
+                title="LifeOS Pro Yearly Pass Member"
+              >
+                <Crown className="w-2.5 h-2.5 fill-slate-950" />
+                <span>PRO YEARLY</span>
+              </span>
+            ) : (
+              <span
+                className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-brand-indigo via-sky-500 to-sky-400 text-white shadow-xs flex items-center gap-1 border border-sky-300/40"
+                title="LifeOS Pro Monthly Member"
+              >
+                <Zap className="w-2.5 h-2.5 fill-white" />
+                <span>PRO MONTHLY</span>
+              </span>
+            )
+          ) : (
+            <button
+              type="button"
+              onClick={() => useUpgradeModalStore.getState().openUpgradeModal('general')}
+              className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-brand-indigo dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:scale-105 transition flex items-center gap-0.5 cursor-pointer shadow-2xs"
+              title="Upgrade to Pro"
+            >
+              <Zap className="w-2.5 h-2.5 text-amber-500 fill-amber-500" />
+              <span>Starter</span>
+            </button>
           )}
 
           {/* Close Button on Mobile Drawer */}

@@ -79,68 +79,67 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-page-gradient p-4 font-sans">
+    <div className="min-h-screen w-full flex items-center justify-center bg-slate-100 dark:bg-[#07090e] bg-page-gradient p-4 relative overflow-hidden font-sans">
+      {/* Ambient Light Orbs */}
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/15 dark:bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-sky-500/15 dark:bg-sky-600/20 rounded-full blur-3xl pointer-events-none"></div>
 
       {/* Main Container */}
-      <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden w-[90vw] max-w-6xl min-h-[82vh] grid grid-cols-1 md:grid-cols-2 border border-white/60">
+      <div className="relative z-10 w-full max-w-5xl min-h-[600px] bg-white/95 dark:bg-[#0c1222]/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-slate-200/60 dark:border-slate-800/60 overflow-hidden grid grid-cols-1 md:grid-cols-2">
 
         {/* LEFT SECTION: Vault Key Visualization */}
-        <div className="bg-gradient-to-b from-surface-blue/80 via-surface-pink/40 to-brand-indigo/10 p-6 hidden md:flex md:flex-col md:justify-between md:items-center text-center border-r border-ink-100 relative overflow-hidden">
-
-          {/* Ambient Light Orbs */}
-          <div className="absolute top-10 left-10 w-40 h-40 bg-brand-sky/30 rounded-full blur-2xl pointer-events-none"></div>
-          <div className="absolute bottom-10 right-10 w-48 h-48 bg-brand-indigo/30 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="bg-gradient-to-br from-indigo-50/70 via-slate-50/50 to-sky-50/70 dark:from-indigo-950/40 dark:via-[#0c1222]/60 dark:to-sky-950/40 p-8 hidden md:flex md:flex-col md:justify-between border-r border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden">
 
           {/* Top Brand Header */}
           <div className="w-full flex items-center justify-between relative z-10">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-brand-gradient flex items-center justify-center text-white font-bold text-xs shadow-sm">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-500 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-indigo-500/20">
                 ✦
               </div>
-              <span className="font-serif font-bold text-ink-900 text-base tracking-tight">
-                life<span className="text-brand-indigo">OS</span>
+              <span className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
+                life<span className="text-indigo-600 dark:text-indigo-400">OS</span>
               </span>
             </div>
 
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/80 border border-ink-200/80 text-[10px] font-semibold text-ink-600 shadow-sm backdrop-blur-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-indigo animate-pulse"></span>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-300 shadow-sm backdrop-blur-sm">
+              <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
               Vault Refresh
             </span>
           </div>
 
           {/* Key Exchange Illustration Area */}
-          <div className="w-full my-auto flex flex-col items-center justify-center relative z-10 py-4">
-            <div className="relative w-56 h-56 flex items-center justify-center">
+          <div className="w-full my-auto flex flex-col items-center justify-center relative z-10 py-6">
+            <div className="relative w-64 h-64 flex items-center justify-center">
 
-              <div className="absolute inset-0 rounded-full border border-dashed border-brand-indigo/30 animate-[spin_35s_linear_infinite]"></div>
-              <div className="absolute inset-6 rounded-full border border-brand-sky/30 bg-gradient-to-tr from-brand-sky/10 to-brand-indigo/20"></div>
+              <div className="absolute inset-0 rounded-full border border-dashed border-indigo-400/30 dark:border-indigo-500/30 animate-[spin_35s_linear_infinite]"></div>
+              <div className="absolute inset-6 rounded-full border border-sky-400/30 dark:border-sky-500/20 bg-gradient-to-tr from-sky-500/10 to-indigo-500/10"></div>
 
               {/* Central Shield Badge */}
-              <div className="w-24 h-24 bg-brand-gradient rounded-2xl shadow-lg flex flex-col items-center justify-center text-white transform -rotate-3 transition-transform hover:rotate-0 duration-300">
-                <svg className="w-8 h-8 drop-shadow-md mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-sky-500 rounded-3xl shadow-xl shadow-indigo-500/25 flex flex-col items-center justify-center text-white transform -rotate-3 transition-transform hover:rotate-0 duration-300">
+                <svg className="w-9 h-9 drop-shadow-md mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
-                <span className="text-[9px] font-bold tracking-wider uppercase opacity-90">New Key</span>
+                <span className="text-[10px] font-bold tracking-wider uppercase opacity-90">New Key</span>
               </div>
 
               {/* Floating Security Badges */}
-              <div className="absolute top-1 left-1 bg-white/90 backdrop-blur-md border border-ink-200/80 shadow-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-md bg-success-bg text-success-text flex items-center justify-center text-[10px] font-bold">
+              <div className="absolute top-1 left-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2">
+                <span className="w-5 h-5 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold">
                   ✓
                 </span>
                 <div className="text-left">
-                  <p className="text-[8px] text-ink-400 font-medium leading-none">Security</p>
-                  <p className="text-[11px] font-semibold text-ink-700 mt-0.5">SHA-256 Vault</p>
+                  <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium leading-none">Security</p>
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-0.5">SHA-256 Vault</p>
                 </div>
               </div>
 
-              <div className="absolute bottom-1 right-1 bg-white/90 backdrop-blur-md border border-ink-200/80 shadow-sm px-2.5 py-1.5 rounded-lg flex items-center gap-1.5">
-                <span className="w-5 h-5 rounded-md bg-brand-indigo/10 text-brand-indigo flex items-center justify-center text-[10px] font-bold">
+              <div className="absolute bottom-1 right-1 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200 dark:border-slate-700 shadow-md px-3 py-1.5 rounded-xl flex items-center gap-2">
+                <span className="w-5 h-5 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs font-bold">
                   ⚡
                 </span>
                 <div className="text-left">
-                  <p className="text-[8px] text-ink-400 font-medium leading-none">AI Assistant</p>
-                  <p className="text-[11px] font-semibold text-ink-700 mt-0.5">Instant Sync</p>
+                  <p className="text-[9px] text-slate-400 dark:text-slate-500 font-medium leading-none">Instant</p>
+                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-0.5">Sync Ready</p>
                 </div>
               </div>
 
@@ -148,11 +147,11 @@ export default function ResetPassword() {
           </div>
 
           {/* Descriptive Title */}
-          <div className="text-center w-full my-1 relative z-10">
-            <h3 className="text-lg font-bold text-ink-900 leading-tight">
+          <div className="text-center w-full my-2 relative z-10">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">
               Create a Strong New Password
             </h3>
-            <p className="text-xs text-ink-500 mt-1 leading-relaxed max-w-xs mx-auto">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed max-w-xs mx-auto">
               Your new password automatically protects all connected modules across Health, Finance, and Learning.
             </p>
           </div>
@@ -160,42 +159,42 @@ export default function ResetPassword() {
         </div>
 
         {/* RIGHT SECTION: Reset Form Pane */}
-        <div className="bg-surface-pink/30 flex flex-col justify-center p-5 md:p-8 overflow-y-auto">
-          <div className="max-w-sm mx-auto w-full">
+        <div className="flex flex-col justify-center p-6 md:p-10 overflow-y-auto">
+          <div className="max-w-md mx-auto w-full">
 
             {/* Header Block */}
-            <div className="text-center mb-5">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-brand-indigo/10 text-brand-indigo border border-brand-indigo/20 mb-2 shadow-sm">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 mb-3 shadow-sm">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z" />
                 </svg>
               </div>
 
-              <h2 className="text-2xl md:text-3xl font-serif font-bold text-ink-900">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Reset Password
               </h2>
-              <p className="text-xs text-ink-500 mt-1 leading-relaxed">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
                 Updating security credentials for<br />
-                <span className="font-semibold text-ink-700">{email || "your account"}</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-200">{email || "your account"}</span>
               </p>
             </div>
 
             {/* Error Banner */}
             {error && (
-              <p className="text-danger-text text-xs mb-4 text-center bg-danger-bg p-2.5 rounded-lg border border-danger-border">
+              <div className="text-red-600 dark:text-red-400 text-xs mb-5 text-center bg-red-500/10 p-3 rounded-xl border border-red-500/30 font-medium">
                 {error}
-              </p>
+              </div>
             )}
 
             {/* Success Banner */}
             {success && (
-              <p className="text-success-text text-xs mb-4 text-center bg-success-bg p-2.5 rounded-lg border border-success-border font-medium">
+              <div className="text-emerald-700 dark:text-emerald-300 text-xs mb-5 text-center bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/30 font-medium">
                 {success}
-              </p>
+              </div>
             )}
 
-            {/* Form using Reusable Inputs and Button */}
-            <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-3.5">
 
               {/* New Password Field */}
               <Input
@@ -212,13 +211,13 @@ export default function ResetPassword() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="text-ink-400 hover:text-ink-600 focus:outline-none"
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       {showPassword ? (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.015 10.015 0 014.122-.863c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" />
                       ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       )}
                     </svg>
                   </button>
@@ -240,13 +239,13 @@ export default function ResetPassword() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="text-ink-400 hover:text-ink-600 focus:outline-none"
+                    className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 focus:outline-none transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       {showConfirmPassword ? (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.015 10.015 0 014.122-.863c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21M3 3l18 18" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24M1 1l22 22" />
                       ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       )}
                     </svg>
                   </button>
@@ -254,29 +253,29 @@ export default function ResetPassword() {
               />
 
               {/* Requirement Micro-Badges */}
-              <div className="bg-white/60 p-2.5 rounded-xl border border-ink-200/60 space-y-1 my-1">
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-400">
+              <div className="bg-slate-50/80 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200/80 dark:border-slate-700/80 space-y-1.5 my-1">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
                   Password Requirements
                 </p>
                 <div className="flex flex-wrap gap-2 text-[11px]">
-                  <span className={`inline-flex items-center gap-1 font-medium ${hasMinLength ? "text-success-text" : "text-ink-400"}`}>
+                  <span className={`inline-flex items-center gap-1 font-medium ${hasMinLength ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
                     {hasMinLength ? "✓" : "○"} At least 8 chars
                   </span>
-                  <span className={`inline-flex items-center gap-1 font-medium ${hasNumber ? "text-success-text" : "text-ink-400"}`}>
+                  <span className={`inline-flex items-center gap-1 font-medium ${hasNumber ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
                     {hasNumber ? "✓" : "○"} One number
                   </span>
-                  <span className={`inline-flex items-center gap-1 font-medium ${passwordsMatch ? "text-success-text" : "text-ink-400"}`}>
+                  <span className={`inline-flex items-center gap-1 font-medium ${passwordsMatch ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500"}`}>
                     {passwordsMatch ? "✓" : "○"} Passwords match
                   </span>
                 </div>
               </div>
 
-              {/* Submit CTA Button */}
+              {/* Submit Button */}
               <Button
                 type="submit"
                 loading={loading}
                 loadingText="Updating Password..."
-                className="mt-2 py-2 text-sm"
+                className="mt-2"
                 rightIcon={
                   <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -288,10 +287,10 @@ export default function ResetPassword() {
             </form>
 
             {/* Back to Login Link */}
-            <div className="text-center mt-4">
+            <div className="text-center mt-5">
               <Link
                 to="/login"
-                className="text-xs text-brand-link font-medium hover:text-brand-link-hover hover:underline inline-flex items-center gap-1.5 transition"
+                className="text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:text-indigo-500 dark:hover:text-indigo-300 hover:underline inline-flex items-center gap-1.5 transition-colors"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster } from "react-hot-toast"; // <-- Import Toaster here
+import UpgradeModal from "./components/UpgradeModal";
 
 import LandingPage from "./pages/LandingPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -16,6 +17,7 @@ import VerifyOtp from "./auth/VerifyOtp";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminPayments from "./pages/admin/AdminPayments";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAiAnalytics from "./pages/admin/AdminAiAnalytics";
 import AdminProductAnalytics from "./pages/admin/AdminProductAnalytics";
@@ -44,6 +46,9 @@ import BudgetTracker from "../features/finance/BudgetTracker";
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Global Upgrade Modal for Freemium limits */}
+      <UpgradeModal />
+
       {/* Add Toaster globally here */}
       <Toaster
         position="top-center"
@@ -203,10 +208,66 @@ export default function App() {
           }
         />
         <Route
+          path="/career/resume-analyzer"
+          element={
+            <ProtectedRoute>
+              <ResumeAnalyzer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resume-analyzer"
+          element={
+            <ProtectedRoute>
+              <ResumeAnalyzer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/learning/resume"
+          element={
+            <ProtectedRoute>
+              <ResumeAnalyzer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/career/interview"
+          element={
+            <ProtectedRoute>
+              <InterviewStudio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/interview"
+          element={
+            <ProtectedRoute>
+              <InterviewStudio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/career/mock-interview"
           element={
             <ProtectedRoute>
               <InterviewStudio />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/career/project-generator"
+          element={
+            <ProtectedRoute>
+              <ProjectGenerator />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/career/code-reviewer"
+          element={
+            <ProtectedRoute>
+              <CodeReviewer />
             </ProtectedRoute>
           }
         />
@@ -292,7 +353,23 @@ export default function App() {
           }
         />
         <Route
+          path="/health/prescription-scanner"
+          element={
+            <ProtectedRoute>
+              <PrescriptionScanner />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/health/medicines"
+          element={
+            <ProtectedRoute>
+              <MedicineTracker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/health/medicine-tracker"
           element={
             <ProtectedRoute>
               <MedicineTracker />
@@ -362,6 +439,14 @@ export default function App() {
           element={
             <AdminRoute>
               <AdminDashboard />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/payments"
+          element={
+            <AdminRoute>
+              <AdminPayments />
             </AdminRoute>
           }
         />

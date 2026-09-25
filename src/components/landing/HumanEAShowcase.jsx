@@ -24,7 +24,7 @@ export default function HumanEAShowcase() {
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div
           className={`absolute top-1/3 left-10 w-[500px] h-[400px] rounded-full blur-[140px] opacity-25 ${
-            isDark ? "bg-amber-500/20" : "bg-amber-100/60"
+            isDark ? "bg-brand-indigo/25" : "bg-indigo-100/60"
           }`}
         />
       </div>
@@ -35,11 +35,11 @@ export default function HumanEAShowcase() {
           <div
             className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold border mb-4 backdrop-blur-md ${
               isDark
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-                : "bg-amber-50 border-amber-200 text-amber-700"
+                ? "bg-brand-indigo/15 border-brand-indigo/35 text-brand-sky"
+                : "bg-indigo-50 border-indigo-200 text-brand-indigo"
             }`}
           >
-            <Brain className="w-3.5 h-3.5" />
+            <Brain className="w-3.5 h-3.5 text-brand-sky" />
             <span>PROACTIVE "HUMAN EA" INTELLIGENCE</span>
           </div>
 
@@ -50,7 +50,7 @@ export default function HumanEAShowcase() {
           >
             An AI That Protects You From Burnout.
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-red-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-indigo via-purple-400 to-brand-sky">
               Propose, Don't Impose.
             </span>
           </h2>
@@ -76,20 +76,20 @@ export default function HumanEAShowcase() {
           <div
             className={`p-5 rounded-2xl border mb-6 transition-all ${
               isDark
-                ? "bg-amber-500/10 border-amber-500/30 text-amber-200"
-                : "bg-amber-50 border-amber-200 text-amber-900"
+                ? "bg-indigo-500/10 border-indigo-500/30 text-indigo-100"
+                : "bg-indigo-50/90 border-indigo-200 text-indigo-950"
             }`}
           >
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-indigo-500/20 text-brand-sky flex items-center justify-center shrink-0">
                 <Moon className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+                  <span className="text-xs font-bold uppercase tracking-wider text-brand-sky">
                     Health Deficit Evaluator Triggered
                   </span>
-                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-400">
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded bg-brand-indigo/20 text-brand-sky">
                     Sleep: 4.8h Logged
                   </span>
                 </div>
@@ -105,7 +105,7 @@ export default function HumanEAShowcase() {
                   {!snoozed ? (
                     <button
                       onClick={() => setSnoozed(true)}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:opacity-95 shadow-md shadow-amber-500/30 transition-all cursor-pointer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-brand-indigo via-indigo-600 to-brand-sky hover:opacity-95 shadow-md shadow-brand-indigo/30 transition-all cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Approve Batch-Snooze (Protect Streak)</span>
@@ -128,8 +128,8 @@ export default function HumanEAShowcase() {
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
               <span>Today's Live Agenda State:</span>
-              <span className="flex items-center gap-1 text-amber-400 font-bold">
-                <Flame className="w-4 h-4" /> 14-Day Streak Safe
+              <span className="flex items-center gap-1 text-brand-sky font-bold">
+                <Flame className="w-4 h-4 text-purple-400" /> 14-Day Streak Safe
               </span>
             </div>
 
@@ -155,7 +155,7 @@ export default function HumanEAShowcase() {
                 <div className="flex items-center gap-2.5">
                   <span
                     className={`w-2 h-2 rounded-full ${
-                      task.priority === "HIGH" ? "bg-red-500" : "bg-amber-400"
+                      task.priority === "HIGH" ? "bg-red-500" : "bg-brand-sky"
                     }`}
                   />
                   <span className={`text-xs font-bold ${isDark ? "text-slate-200" : "text-slate-800"}`}>
@@ -174,7 +174,7 @@ export default function HumanEAShowcase() {
                     {task.priority}
                   </span>
                   {task.snoozed && snoozed && (
-                    <span className="text-[10px] font-bold text-amber-400 uppercase bg-amber-500/10 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-brand-sky uppercase bg-brand-indigo/15 px-2 py-0.5 rounded border border-brand-indigo/25">
                       Deferred to Tomorrow
                     </span>
                   )}
@@ -189,7 +189,7 @@ export default function HumanEAShowcase() {
             </span>
             <Link
               to="/register"
-              className="text-xs font-bold text-amber-400 hover:underline inline-flex items-center gap-1"
+              className="text-xs font-bold text-brand-sky hover:text-brand-sky-light hover:underline inline-flex items-center gap-1"
             >
               <span>Explore AI EA in LifeOS</span>
               <ArrowRight className="w-3.5 h-3.5" />
