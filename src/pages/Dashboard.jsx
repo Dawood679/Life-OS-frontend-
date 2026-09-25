@@ -34,7 +34,37 @@ export default function Dashboard() {
   const [editData, setEditData] = useState({});
 
   useEffect(() => {
-    fetchDashboardData();
+    const params = new URLSearchParams(window.location.search);
+    const paymentStatus = params.get('payment');
+    const sessionId = params.get('session_id');
+
+    if (paymentStatus === 'success') {
+      const verifyPayment = async () => {
+        try {
+          if (sessionId) {
+            const res = await fetch(`${API_URL}/payments/verify-session?session_id=${sessionId}`, {
+              credentials: 'include'
+            });
+            const data = await res.json();
+            if (data.success) {
+              const isYearly = data.subscription?.billingCycle === 'yearly' || data.subscription?.plan === 'pro_yearly';
+              toast.success(`🎉 ${isYearly ? 'Pro Yearly Pass (365 Days)' : 'Pro Monthly'} Activated! Welcome to VIP!`, { duration: 5000 });
+            }
+          } else {
+            toast.success("🎉 Payment successful! Welcome to LifeOS Pro VIP!", { duration: 5000 });
+          }
+        } catch (err) {
+          console.error("Payment verification error:", err);
+        } finally {
+          // Clean up URL query parameters without reloading
+          window.history.replaceState({}, document.title, window.location.pathname);
+          fetchDashboardData();
+        }
+      };
+      verifyPayment();
+    } else {
+      fetchDashboardData();
+    }
 
     const handleRefreshEvent = () => {
       fetchDashboardData();
