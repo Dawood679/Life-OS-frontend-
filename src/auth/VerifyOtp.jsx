@@ -112,7 +112,7 @@ export default function VerifyOtp() {
 
       if (type === "login") {
         setUser(data.user);
-        navigate("/dashboard");
+        window.location.href = "/dashboard";
       } else {
         navigate("/reset-password", {
           state: { email },

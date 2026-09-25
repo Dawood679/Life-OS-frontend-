@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useUpgradeModalStore } from "../../src/store/upgradeModalStore";
+import useAuthStore from "../../src/lib/authStore";
 
 const SUGGESTED_ROLES = [
   "Frontend React Developer",
@@ -15,6 +17,10 @@ const SUGGESTED_ROLES = [
 export default function InterviewStudio() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  const { user } = useAuthStore();
+  const isPro = user?.subscription?.status === 'active' && 
+                ['pro', 'pro_monthly', 'pro_yearly', 'lifetime'].includes(user?.subscription?.plan);
 
   const rawUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
   const BACKEND_URL = rawUrl.endsWith("/api") ? rawUrl : `${rawUrl}/api`;
@@ -238,6 +244,13 @@ export default function InterviewStudio() {
           ...prev.filter((s) => s._id !== data.session._id),
         ]);
       } else {
+        if (data.code === 'QUOTA_EXCEEDED') {
+          useUpgradeModalStore.getState().openUpgradeModal(
+            'mock_interview',
+            data.upgradeTitle || 'Unlock Unlimited AI Mock Interviews',
+            data.upgradeDescription || data.message
+          );
+        }
         setError(data.message || "Failed to start interview.");
       }
     } catch {
@@ -421,6 +434,29 @@ export default function InterviewStudio() {
         <p className="text-xs text-slate-500">
           Tailor target role, experience level, and round format. LifeOS AI acts as a senior interviewer with turn-by-turn evaluation.
         </p>
+
+        {/* Quota & Plan Status Banner */}
+        <div className="pt-2">
+          {isPro ? (
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span>👑 VIP Pro Member</span>
+              <span className="text-emerald-500">•</span>
+              <span>Unlimited Voice & Text Interviews Active</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl text-xs bg-amber-50 text-amber-900 border border-amber-200 shadow-sm">
+              <span className="font-semibold">⚡ Starter Plan:</span>
+              <span>1 Free Interview / Month ({user?.usageQuota?.mockInterviewsUsed || 0}/1 used)</span>
+              <button
+                type="button"
+                onClick={() => useUpgradeModalStore.getState().openUpgradeModal('mock_interview')}
+                className="ml-1 text-[11px] font-bold text-indigo-600 hover:text-indigo-800 underline cursor-pointer"
+              >
+                Upgrade to Pro ➔
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Suggested Role Chips */}

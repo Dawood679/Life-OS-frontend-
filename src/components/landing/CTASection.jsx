@@ -83,7 +83,7 @@ export default function CTASection() {
               <span>Private & Encrypted Local Storage</span>
             </div>
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" />
+              <Zap className="w-4 h-4 text-brand-indigo" />
               <span>Instant Setup in 30 Seconds</span>
             </div>
           </div>
