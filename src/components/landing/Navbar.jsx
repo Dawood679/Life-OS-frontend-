@@ -8,11 +8,9 @@ import {
   ArrowRight,
   Menu,
   X,
-  Compass,
-  Layers,
-  Zap,
-  Activity,
-  Award,
+  Home,
+  CreditCard,
+  Info,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -29,11 +27,9 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { label: "Ecosystem", href: "#ecosystem", icon: Compass },
-    { label: "Bento Features", href: "#features", icon: Layers },
-    { label: "Magic Pipeline", href: "#pipeline", icon: Zap },
-    { label: "Live Sandbox", href: "#sandbox", icon: Activity },
-    { label: "Life Score", href: "#lifescore", icon: Award },
+    { label: "Home", href: "#hero", icon: Home },
+    { label: "Pricing", href: "#pricing", icon: CreditCard },
+    { label: "About", href: "#about", icon: Info },
   ];
 
   return (

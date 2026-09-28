@@ -17,7 +17,7 @@ export default function AdminSidebar({ isMobileOpen, setIsMobileOpen }) {
     } catch {
       // ignore
     }
-    navigate('/login');
+    window.location.href = '/login';
   };
 
   const navLinks = [

@@ -54,6 +54,7 @@ export default function HeroSection() {
 
   return (
     <section
+      id="hero"
       onMouseMove={handleMouseMove}
       className="relative pt-24 pb-20 md:pt-28 md:pb-24 overflow-hidden select-none"
     >

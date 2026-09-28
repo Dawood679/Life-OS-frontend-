@@ -6,6 +6,8 @@ import BentoGrid from "../components/landing/BentoGrid";
 import MagicPipeline from "../components/landing/MagicPipeline";
 import InteractiveSandbox from "../components/landing/InteractiveSandbox";
 import HumanEAShowcase from "../components/landing/HumanEAShowcase";
+import AboutSection from "../components/landing/AboutSection";
+import PricingSection from "../components/landing/PricingSection";
 import CTASection from "../components/landing/CTASection";
 import Footer from "../components/landing/Footer";
 
@@ -44,7 +46,13 @@ export default function LandingPage() {
           <HumanEAShowcase />
         </div>
 
-        {/* 6. High-Converting Call to Action Card */}
+        {/* 6. About LifeOS & Founder Mission */}
+        <AboutSection />
+
+        {/* 7. Transparent Pricing with Stripe Checkout */}
+        <PricingSection />
+
+        {/* 8. High-Converting Call to Action Card */}
         <CTASection />
       </main>
 
@@ -53,3 +61,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
