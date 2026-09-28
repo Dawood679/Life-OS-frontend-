@@ -119,7 +119,7 @@ export default function InteractiveSandbox() {
         <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
           {[
             { id: "balanced", label: "Balanced Mode", icon: Sliders, color: "text-brand-sky" },
-            { id: "career", label: "Career Sprint Mode", icon: Briefcase, color: "text-amber-400" },
+            { id: "career", label: "Career Sprint Mode", icon: Briefcase, color: "text-purple-400" },
             { id: "student", label: "Student Exam Mode", icon: BookOpen, color: "text-brand-indigo" },
           ].map((mode) => (
             <button

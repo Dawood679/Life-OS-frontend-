@@ -323,17 +323,17 @@ export default function BentoGrid() {
           <div
             className={`md:col-span-3 lg:col-span-4 rounded-3xl p-6 sm:p-7 border backdrop-blur-xl transition-all duration-300 hover:scale-[1.01] flex flex-col justify-between group ${
               isDark
-                ? "bg-[#0e131f]/80 border-slate-800 hover:border-amber-500/50 shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
-                : "bg-white/85 border-slate-200/90 hover:border-amber-500/30 shadow-[0_20px_45px_rgba(99,102,241,0.08)]"
+                ? "bg-[#0e131f]/80 border-slate-800 hover:border-purple-500/50 shadow-[0_20px_50px_rgba(0,0,0,0.4)]"
+                : "bg-white/85 border-slate-200/90 hover:border-purple-500/30 shadow-[0_20px_45px_rgba(99,102,241,0.08)]"
             }`}
           >
             <div>
               <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-10 h-10 rounded-2xl bg-amber-500/15 text-amber-500 flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-2xl bg-purple-500/15 text-purple-400 flex items-center justify-center font-bold">
                   <Award className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-500">
+                  <span className="text-xs font-bold uppercase tracking-wider text-purple-400">
                     Credentialing
                   </span>
                   <h3
@@ -354,7 +354,7 @@ export default function BentoGrid() {
                 Earn permanent cryptographic-style badges by scoring 80%+ on timed diagnostic AI quizzes.
               </p>
 
-              {/* Golden Badge Showcase Chips */}
+              {/* Verified Badge Showcase Chips */}
               <div className="space-y-2">
                 {[
                   { name: "React 19 Architecture", score: "94%", date: "Verified" },
@@ -364,15 +364,15 @@ export default function BentoGrid() {
                     key={idx}
                     className={`flex items-center justify-between p-2.5 rounded-xl border ${
                       isDark
-                        ? "bg-amber-500/5 border-amber-500/20 text-amber-300"
-                        : "bg-amber-50 border-amber-200 text-amber-900"
+                        ? "bg-purple-500/10 border-purple-500/25 text-purple-200"
+                        : "bg-purple-50/80 border-purple-200 text-purple-900"
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-4 h-4 text-amber-400" />
+                      <ShieldCheck className="w-4 h-4 text-purple-400" />
                       <span className="text-xs font-bold">{badge.name}</span>
                     </div>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-400">
+                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300">
                       {badge.score}
                     </span>
                   </div>
@@ -384,7 +384,7 @@ export default function BentoGrid() {
               <span className="text-xs text-slate-400">Auto-injects to Resume</span>
               <Link
                 to="/register"
-                className="text-xs font-bold text-amber-500 hover:underline inline-flex items-center gap-1"
+                className="text-xs font-bold text-brand-sky hover:text-brand-sky-light hover:underline inline-flex items-center gap-1"
               >
                 <span>Take Diagnostic Quiz</span>
                 <ArrowRight className="w-3.5 h-3.5" />

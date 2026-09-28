@@ -40,7 +40,7 @@ export default function AboutSection() {
     },
     {
       icon: HeartPulse,
-      color: "from-rose-500 to-amber-400",
+      color: "from-purple-500 to-brand-sky",
       title: "Health & Vitality Guardian",
       description:
         "Prescription OCR parsing, circadian hydration alerts, mood & sleep tracking that actively shields you from burnout.",

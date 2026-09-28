@@ -69,13 +69,13 @@ export default function MagicPipeline() {
       badge: "Step 4: Permanent Ledger",
       title: "Verified Skill Ledger",
       description:
-        "A verifiable golden badge is written to your permanent profile and automatically tailored into your resume bullet points.",
+        "A verifiable certified badge is written to your permanent profile and automatically tailored into your resume bullet points.",
       outputLabel: "Ledger Update:",
       outputVal: "Verified Badge #9241: Redis Architect",
       icon: Award,
-      color: "from-amber-500 to-orange-600",
-      accent: "text-amber-400",
-      borderGlow: "border-amber-500/40",
+      color: "from-purple-600 to-indigo-600",
+      accent: "text-purple-400",
+      borderGlow: "border-purple-500/40",
       actionText: "Practice in AI Mock Interview ➔",
     },
     {

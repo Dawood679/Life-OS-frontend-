@@ -30,13 +30,14 @@ export default function UpgradeModal() {
       setLoadingPlan(planId);
 
       const res = await axiosInstance.post('/payments/create-checkout-session', {
+        plan: planId,
         planId: planId // 'pro_monthly' or 'pro_yearly'
       });
 
       if (res.data?.url) {
         window.location.href = res.data.url;
-      } else if (res.data?.simulated) {
-        toast.success(res.data.message || 'VIP Subscription Activated (Dev Mode)!');
+      } else if (res.data?.simulated || res.data?.mode === 'simulation') {
+        toast.success(res.data.message || 'VIP Subscription Activated!');
         closeUpgradeModal();
         window.location.reload();
       } else {

@@ -218,17 +218,17 @@ export default function LifeScoreOrb() {
         <div
           className={`hidden sm:flex absolute top-1/2 -right-6 md:-right-10 -translate-y-1/2 z-30 items-center gap-2 px-3.5 py-2 rounded-2xl border backdrop-blur-xl shadow-lg transition-transform duration-300 animate-float ${
             isDark
-              ? "bg-[#0e131f]/90 border-amber-500/40 text-white"
-              : "bg-white/95 border-slate-200 text-slate-900 shadow-amber-100"
+              ? "bg-[#0e131f]/90 border-purple-500/40 text-white"
+              : "bg-white/95 border-slate-200 text-slate-900 shadow-purple-100"
           }`}
           style={{ animationDelay: "3.5s" }}
         >
-          <div className="w-7 h-7 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center font-bold text-xs">
+          <div className="w-7 h-7 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center font-bold text-xs">
             <ShieldCheck className="w-4 h-4" />
           </div>
           <div className="flex flex-col text-left">
             <span className="text-[10px] uppercase font-bold text-slate-400">Verified Ledger</span>
-            <span className="text-xs font-bold text-amber-500">React Architect (88%)</span>
+            <span className="text-xs font-bold text-purple-400">React Architect (88%)</span>
           </div>
         </div>
       </div>
@@ -255,10 +255,10 @@ export default function LifeScoreOrb() {
 
         <div
           className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border backdrop-blur-md text-xs font-semibold ${
-            isDark ? "bg-[#0e131f]/80 border-amber-500/30 text-slate-200" : "bg-white/90 border-slate-200 text-slate-800 shadow-sm"
+            isDark ? "bg-[#0e131f]/80 border-purple-500/30 text-slate-200" : "bg-white/90 border-slate-200 text-slate-800 shadow-sm"
           }`}
         >
-          <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
+          <ShieldCheck className="w-3.5 h-3.5 text-purple-400" />
           <span>Verified Badge · React Architect</span>
         </div>
       </div>

@@ -111,7 +111,7 @@ export default function PricingSection() {
     {
       id: "yearly",
       title: "Yearly Payment",
-      badge: "1-Year Full Pass • Best Value",
+      badge: "Best Value • 1-Year Pass",
       price: "$180",
       period: "one-time / 1 year access",
       subtext: "Pay $180 once • Full 365 days access • No auto-renewal surprises",
@@ -173,11 +173,11 @@ export default function PricingSection() {
         </div>
 
         {/* 3 Pricing Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch max-w-7xl mx-auto">
           {cards.map((card) => (
             <div
               key={card.id}
-              className={`relative rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 ${
+              className={`relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 ${
                 card.isBestValue
                   ? isDark
                     ? "bg-gradient-to-b from-[#131726] to-[#0d101c] border-2 border-brand-indigo shadow-[0_0_50px_rgba(99,102,241,0.25)] lg:-translate-y-2"
@@ -189,17 +189,18 @@ export default function PricingSection() {
             >
               {/* Badge Ribbon */}
               {card.badge && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20 w-max pointer-events-none">
                   <span
-                    className={`px-3.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider shadow-md ${
+                    className={`inline-flex items-center justify-center gap-1.5 px-3.5 py-1 rounded-full text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider shadow-lg whitespace-nowrap ${
                       card.isBestValue
-                        ? "bg-gradient-to-r from-brand-indigo via-brand-sky to-brand-sky-light text-white"
+                        ? "bg-gradient-to-r from-brand-indigo via-brand-sky to-brand-sky-light text-white ring-2 ring-brand-indigo/30"
                         : isDark
                         ? "bg-slate-800 text-slate-300 border border-white/10"
                         : "bg-slate-100 text-slate-700 border border-slate-200"
                     }`}
                   >
-                    {card.badge}
+                    {card.isBestValue && <Crown className="w-3.5 h-3.5 text-white fill-white/80 shrink-0" />}
+                    <span>{card.badge}</span>
                   </span>
                 </div>
               )}
@@ -215,7 +216,7 @@ export default function PricingSection() {
                     {card.title}
                   </h3>
                   {card.isBestValue ? (
-                    <Crown className="w-5 h-5 text-amber-400" />
+                    <Crown className="w-5 h-5 text-brand-sky fill-brand-sky/20" />
                   ) : (
                     <Sparkles className="w-5 h-5 text-brand-sky opacity-80" />
                   )}
