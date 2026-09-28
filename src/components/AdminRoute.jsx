@@ -11,10 +11,17 @@ export default function AdminRoute({ children }) {
   });
 
   useEffect(() => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const rawUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const BACKEND_URL = rawUrl.endsWith('/api') ? rawUrl : rawUrl.endsWith('/') ? `${rawUrl}api` : `${rawUrl}/api`;
+    const token = localStorage.getItem('token');
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
     fetch(`${BACKEND_URL}/auth/me`, {
       method: 'GET',
+      headers,
       credentials: 'include',
     })
       .then((res) => {

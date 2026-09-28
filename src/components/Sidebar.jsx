@@ -57,8 +57,13 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
   };
 
   useEffect(() => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const rawUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const BACKEND_URL = rawUrl.endsWith('/api') ? rawUrl : rawUrl.endsWith('/') ? `${rawUrl}api` : `${rawUrl}/api`;
+    const token = localStorage.getItem('token');
+    const authHeaders = token ? { 'Authorization': `Bearer ${token}` } : {};
+
     fetch(`${BACKEND_URL}/auth/me`, {
+      headers: authHeaders,
       credentials: 'include',
     })
       .then((res) => res.json())
@@ -68,10 +73,11 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
           setSubscription(data.user.subscription);
         }
       })
-      .catch(() => navigate('/login'));
+      .catch(() => {});
 
     // Fetch Today's Life Score & Streak
     fetch(`${BACKEND_URL}/life-score/today`, {
+      headers: authHeaders,
       credentials: 'include',
     })
       .then((res) => res.json())
@@ -126,16 +132,21 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }) {
 
   // Logout Handler
   const handleLogout = async () => {
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const rawUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000/api';
+    const BACKEND_URL = rawUrl.endsWith('/api') ? rawUrl : rawUrl.endsWith('/') ? `${rawUrl}api` : `${rawUrl}/api`;
+    const token = localStorage.getItem('token');
     try {
       await fetch(`${BACKEND_URL}/auth/logout`, {
         method: 'POST',
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         credentials: 'include',
       });
     } catch {
       // ignore
+    } finally {
+      localStorage.removeItem('token');
+      window.location.href = '/login';
     }
-    window.location.href = '/login';
   };
 
   const isActive = (path) => location.pathname === path;

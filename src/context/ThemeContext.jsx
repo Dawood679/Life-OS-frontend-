@@ -1,21 +1,21 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext({
-  theme: "dark",
+  theme: "light",
   toggleTheme: () => {},
   setTheme: () => {},
-  isDark: true,
+  isDark: false,
 });
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    // Check localStorage first, default to dark for ultra-premium aesthetic
+    // Check localStorage first
     const savedTheme = localStorage.getItem("lifeos_theme");
     if (savedTheme === "light" || savedTheme === "dark") {
       return savedTheme;
     }
-    // Fallback to dark
-    return "dark";
+    // Default fallback for new users: light mode
+    return "light";
   });
 
   useEffect(() => {
