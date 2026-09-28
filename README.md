@@ -8,12 +8,12 @@ Modern, responsive glassmorphic web interface for **LifeOS**, built with React 1
 
 * **Framework**: React 19 (Functional Components, Custom Hooks)
 * **Build Tooling**: Vite
-* **Styling**: TailwindCSS (v4) with custom glassmorphism design tokens & dark/light palettes
-* **State Management**: Zustand
-* **Routing**: React Router DOM (v7)
+* **Styling**: TailwindCSS (v4) with custom glassmorphism design tokens, subtle segmented dividers, Light Mode default & full Dark Mode support
+* **State Management**: Zustand (Persisted token & session auth)
+* **Routing**: React Router DOM (v7) with SPA routing rewrite configuration (`vercel.json`)
 * **Icons**: Lucide React
 * **Feedback**: React Hot Toast
-* **Auth**: Google Identity Services (GIS SDK client — zero external npm dependencies)
+* **Auth**: Google Identity Services (GIS SDK client — zero external npm dependencies), 2-Step OTP 2FA verification (`VerifyOtp.jsx`, `ForgotPassword.jsx`, `ResetPassword.jsx`)
 * **Payments**: Stripe Hosted Checkout (`/api/payments/create-checkout-session`)
 * **Speech Integration**: Browser Web Speech API (`webkitSpeechRecognition` & `speechSynthesis`)
 
@@ -25,12 +25,13 @@ Create a `.env` file in `Life-OS-frontend-/`:
 
 ```env
 VITE_BACKEND_URL=http://localhost:5000/api
+# Or production backend: https://your-backend.vercel.app/api
 VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id.apps.googleusercontent.com
 ```
 
 ### Google OAuth Configuration Notice
 When setting up your Google Cloud Console OAuth 2.0 Client ID:
-* Add `http://localhost:5173` and `http://localhost` to **Authorized JavaScript origins**.
+* Add `http://localhost:5173`, `http://localhost`, and your production domain (e.g. `https://your-frontend.vercel.app`) to **Authorized JavaScript origins**.
 * No Authorized Redirect URIs are needed because LifeOS uses the client-side Google Identity Services popup token flow (`googleAuth.js`).
 
 ---
@@ -39,6 +40,7 @@ When setting up your Google Cloud Console OAuth 2.0 Client ID:
 
 ```
 src/
+├── auth/                     # Auth views (Login, Register, VerifyOtp, ForgotPassword, ResetPassword, VerifyEmail)
 ├── components/
 │   ├── landing/              # Hero, About, BentoGrid, 3-Card PricingSection, CTA, Footer
 │   ├── AIAssistantDashboard.jsx # Central hub with Life Score, Daily Briefing & Pro Tier Indicator
@@ -48,14 +50,16 @@ src/
 │   ├── JobApplicationTracker.jsx # 5-Stage Kanban & 16-Col Excel view
 │   ├── RoadmapGenerator.jsx  # 90-Day Career Transformation Engine
 │   └── ...
+├── context/
+│   └── ThemeContext.jsx      # Light mode default with localStorage syncing (lifeos_theme)
 ├── lib/
-│   ├── axios.js              # Central Axios instance with credentials
+│   ├── axios.js              # Central Axios instance with Bearer token interceptor
 │   └── googleAuth.js         # Zero-dependency Google Identity Services (GIS) token client
 ├── store/
-│   ├── authStore.js          # Zustand user authentication & session state
+│   ├── authStore.js          # Zustand user authentication, Bearer token & session state
 │   └── ...
 ├── App.jsx                   # Route provider & protected layouts
-└── main.jsx                  # Application root
+└── main.jsx                  # Application root with ThemeProvider
 ```
 
 ---
