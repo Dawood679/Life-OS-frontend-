@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useUpgradeModalStore } from "../../src/store/upgradeModalStore";
+import useAuthStore from "../../src/lib/authStore";
 import {
   Compass,
   Plus,
@@ -25,11 +27,15 @@ import {
   ChevronRight,
   Zap,
   Target,
-  RotateCw
+  RotateCw,
+  Lock
 } from "lucide-react";
 
 export default function RoadmapGenerator() {
   const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const isPro = user?.subscription?.status === 'active' && 
+                ['pro', 'pro_monthly', 'pro_yearly', 'lifetime'].includes(user?.subscription?.plan);
 
   // State Management
   const [goal, setGoal] = useState("");
@@ -118,6 +124,13 @@ export default function RoadmapGenerator() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (data.code === 'QUOTA_EXCEEDED') {
+          useUpgradeModalStore.getState().openUpgradeModal(
+            'roadmap',
+            data.upgradeTitle || 'Unlock Multi-Goal Roadmaps & Phase 2/3',
+            data.upgradeDescription || data.message
+          );
+        }
         setError(data.message || "Failed to generate roadmap.");
         return;
       }

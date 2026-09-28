@@ -139,6 +139,15 @@ export const SIDEBAR_FEATURE_DATA = {
     highlights: ['ATS score breakdown', 'Bullet-point punchiness rating', 'Keyword enhancement tips'],
     pillar: 'Career (25%)',
   },
+  '/career/resume-analyzer': {
+    title: 'Resume & Pitch Analyzer',
+    category: 'CareerOS',
+    color: 'sky',
+    tag: 'ATS Optimization',
+    description: 'Evaluates resumes and elevator pitches against industry benchmarks for impact, tone, and keyword alignment.',
+    highlights: ['ATS score breakdown', 'Bullet-point punchiness rating', 'Keyword enhancement tips'],
+    pillar: 'Career (25%)',
+  },
   '/learning/action-plan': {
     title: 'Action Plan Generator',
     category: 'CareerOS',

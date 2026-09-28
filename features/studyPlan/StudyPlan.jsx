@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import FeatureLayout from "../../src/components/FeatureLayout";
+import { useUpgradeModalStore } from "../../src/store/upgradeModalStore";
+import useAuthStore from "../../src/lib/authStore";
 
 const LEVEL_OPTIONS = [
   { value: "beginner", label: "Beginner (Fundamentals)" },
@@ -174,8 +176,16 @@ export default function StudyPlan() {
         setSubject("");
         setIsCreatingNew(false);
         setSelectedPlan(data.studyPlan);
+        setPlans((prev) => [data.studyPlan, ...prev.filter(p => p._id !== data.studyPlan._id)]);
         fetchPlans(1);
       } else {
+        if (data.code === 'QUOTA_EXCEEDED') {
+          useUpgradeModalStore.getState().openUpgradeModal(
+            'study_plan',
+            data.upgradeTitle || 'Master Any Subject Without Limits',
+            data.upgradeDescription || data.message
+          );
+        }
         setError(data.message || "Failed to generate study plan.");
       }
     } catch {
@@ -510,15 +520,26 @@ export default function StudyPlan() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
-            <div className="text-right bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/20">
+          <div className="flex items-center gap-2.5 shrink-0 flex-wrap sm:flex-nowrap">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedPlan(null);
+                setIsCreatingNew(true);
+              }}
+              className="px-3.5 py-2.5 rounded-2xl bg-white/20 hover:bg-white/30 text-white border border-white/25 text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-2xs"
+            >
+              <span>+ New Plan</span>
+            </button>
+
+            <div className="text-right bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20">
               <p className="text-[10px] uppercase font-bold text-sky-200 tracking-wider">
                 Earned Points
               </p>
-              <p className="text-2xl font-extrabold text-white font-serif">
+              <p className="text-xl font-extrabold text-white font-serif">
                 {earnedPoints}
                 <span className="text-xs text-sky-200 font-sans ml-1">
-                  / {totalPoints} pts ({progressPct}%)
+                  / {totalPoints} pts
                 </span>
               </p>
             </div>
@@ -528,10 +549,10 @@ export default function StudyPlan() {
               onClick={(e) =>
                 openDeleteModal(selectedPlan._id, selectedPlan.planTitle, e)
               }
-              className="p-3 rounded-2xl bg-white/10 hover:bg-rose-500/30 text-white border border-white/20 transition cursor-pointer"
+              className="p-2.5 rounded-2xl bg-white/10 hover:bg-rose-500/30 text-white border border-white/20 transition cursor-pointer"
               title="Delete Plan"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -562,7 +583,19 @@ export default function StudyPlan() {
 
   // SECTION 3: SIDEBAR (renderSidebar)
   const renderSidebar = () => (
-    <div className="space-y-2 max-h-[550px] overflow-y-auto pr-1">
+    <div className="space-y-3">
+      <button
+        type="button"
+        onClick={() => {
+          setSelectedPlan(null);
+          setIsCreatingNew(true);
+        }}
+        className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-sky-500 hover:opacity-95 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer shadow-md shadow-indigo-500/20 active:scale-[0.98]"
+      >
+        <span>✦ Generate New Study Plan</span>
+      </button>
+
+      <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
       {plans.map((item) => {
         const isSelected = selectedPlan?._id === item._id;
         const itemTasks = item.tasks || [];
@@ -626,6 +659,7 @@ export default function StudyPlan() {
           </div>
         );
       })}
+      </div>
     </div>
   );
 
